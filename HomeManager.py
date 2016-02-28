@@ -1,8 +1,10 @@
-from flask import Flask, request
+from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from lib.db import Database
 
 app = Flask(__name__)
 api = Api(app)
+db = Database()
 
 
 class SensorResource(Resource):
