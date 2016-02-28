@@ -37,7 +37,7 @@ class SensorResource(Resource):
 
 class SensorListResource(Resource):
     def get(self):
-        return {a: b for a, b in enumerate(range(0, 100))}
+        return [sensor._asdict() for sensor in Sensors.get_all_sensors(db)]
 
 
 class ReadingResource(Resource):

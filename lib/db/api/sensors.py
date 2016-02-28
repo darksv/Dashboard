@@ -1,10 +1,20 @@
 from collections import namedtuple
 from operator import attrgetter
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import select, insert
 from lib.db import Database, SENSORS
 
 Sensor = namedtuple('Sensor', map(attrgetter('key'), SENSORS.c))
+
+
+def get_all_sensors(db: Database) -> List[Sensor]:
+    """
+    Get all sensors.
+    """
+    query = select(SENSORS.c).select_from(SENSORS)
+    result = db.conn.execute(query)
+
+    return [Sensor(*row) for row in result]
 
 
 def get_sensor_by_internal_id(db: Database, internal_id: str) -> Optional[Sensor]:
