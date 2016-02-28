@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, Column, Integer, String
+from sqlalchemy import MetaData, Table, Column, Integer, String, ForeignKey, Float, DateTime
 from sqlalchemy import create_engine
 
 meta = MetaData()
@@ -8,6 +8,13 @@ SENSORS = Table('sensors', meta,
     Column('internal_id', String(50), unique=True),
     Column('type', Integer, nullable=False),
     Column('title', String(100), nullable=False, default='')
+)
+
+READINGS = Table('readings', meta,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('sensor_id', Integer, ForeignKey('sensors.id'), nullable=False),
+    Column('value', Float, nullable=False),
+    Column('timestamp', DateTime, nullable=False)
 )
 
 
