@@ -13,6 +13,11 @@ class SensorResource(Resource):
         return {'sensor': sensor_id}
 
 
+class SensorListResource(Resource):
+    def get(self):
+        return {a: b for a, b in enumerate(range(0, 100))}
+
+
 class ReadingResource(Resource):
     def put(self):
         parser = reqparse.RequestParser()
@@ -22,6 +27,7 @@ class ReadingResource(Resource):
         return parser.parse_args()
 
 
+api.add_resource(SensorListResource, '/api/sensors')
 api.add_resource(SensorResource, '/api/sensor/<sensor_id>')
 api.add_resource(ReadingResource, '/api/reading')
 
