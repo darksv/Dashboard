@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from lib.db import Database
-from lib.db.api import sensors as Sensors
+from lib.db.api import sensors as Sensors, readings as Readings
 
 app = Flask(__name__)
 api = Api(app)
@@ -38,10 +38,15 @@ class SensorListResource(Resource):
 class ReadingResource(Resource):
     def put(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('sensor', type=str)
+        parser.add_argument('sensor_id', type=int)
         parser.add_argument('value', type=float)
+        args = parser.parse_args()
 
-        return parser.parse_args()
+        reading = Readings.create_reading(db, sensor_id=args['sensor_id'], value=args['value'])
+        data = reading._asdict()
+        data['timestamp'] = reading.timestamp.timestamp()
+
+        return data
 
 api.add_resource(SensorRegisterResource, '/sensor/register')
 api.add_resource(SensorResource, '/sensor/<int:sensor_id>')
