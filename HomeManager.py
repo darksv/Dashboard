@@ -25,7 +25,11 @@ class SensorRegisterResource(Resource):
 
 class SensorResource(Resource):
     def get(self, sensor_id):
-        return {'sensor': sensor_id}
+        sensor = Sensors.get_sensor(db, sensor_id)
+        if sensor is None:
+            return {}
+
+        return sensor._asdict()
 
     def put(self, sensor_id):
         return {'sensor': sensor_id}
