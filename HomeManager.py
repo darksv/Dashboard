@@ -1,5 +1,5 @@
 import sys
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from lib.db import Database
 from lib.db.api import sensors as Sensors, readings as Readings
@@ -42,14 +42,11 @@ class SensorListResource(Resource):
 
 class ReadingResource(Resource):
     def put(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('internal_id', type=str)
-        parser.add_argument('sensor_id', type=int)
-        parser.add_argument('value', type=float)
-        args = parser.parse_args()
+        args = request.get_json()
 
-        sensor_id = args['sensor_id']
-        if sensor_id is None:
+        if 'sensor_id' in args:
+            sensor_id = args['sensor_id']
+        else:
             internal_id = args['internal_id']
 
             sensor = Sensors.get_sensor_by_internal_id(db, internal_id)
@@ -64,10 +61,10 @@ class ReadingResource(Resource):
 
         return data
 
-api.add_resource(SensorRegisterResource, '/sensor/register')
-api.add_resource(SensorResource, '/sensor/<int:sensor_id>')
+# api.add_resource(SensorRegisterResource, '/sensors/register')
 api.add_resource(SensorListResource, '/sensors')
-api.add_resource(ReadingResource, '/reading')
+api.add_resource(SensorResource, '/sensors/<int:sensor_id>')
+api.add_resource(ReadingResource, '/readings')
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
