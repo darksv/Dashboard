@@ -6,7 +6,7 @@ from lib.db.api import sensors as Sensors, readings as Readings
 
 app = Flask(__name__)
 api = Api(app)
-db = Database('mysql+pymysql://XXX:bUZ2so3KmBn43GqaIo1W@mysql8.mydevil.net/XXX')
+db = Database('')
 
 
 class SensorRegisterResource(Resource):
