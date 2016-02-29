@@ -29,7 +29,17 @@ class SensorResource(Resource):
         if sensor is None:
             return {}
 
-        return sensor._asdict()
+        reading = Readings.get_last_reading(db, sensor.id)
+        if reading is not None:
+            reading_data = reading._asdict()
+            reading_data['timestamp'] = reading.timestamp.timestamp()
+        else:
+            reading_data = None
+
+        data = sensor._asdict()
+        data['reading'] = reading_data
+
+        return dict(success=True, data=data, message=None)
 
     def put(self, sensor_id):
         return {'sensor': sensor_id}
