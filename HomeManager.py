@@ -44,9 +44,8 @@ class ReadingResource(Resource):
     def put(self):
         args = request.get_json()
 
-        if 'sensor_id' in args:
-            sensor_id = args['sensor_id']
-        else:
+        sensor_id = args.get('sensor_id', None)
+        if sensor_id is None:
             internal_id = args['internal_id']
 
             sensor = Sensors.get_sensor_by_internal_id(db, internal_id)
