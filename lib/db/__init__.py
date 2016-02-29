@@ -32,3 +32,5 @@ class Database:
     @property
     def conn(self):
         return self._connection
+
+DB = Database('')
