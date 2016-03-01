@@ -1,8 +1,8 @@
 import sys
 from flask import Flask
 from flask_restful import Api
-from lib.resources.sensor import SensorResource
-from lib.resources.reading import ReadingResource
+from app.resources.sensor import SensorResource
+from app.resources.reading import ReadingResource
 
 app = Flask(__name__)
 

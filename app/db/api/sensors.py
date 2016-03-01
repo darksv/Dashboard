@@ -2,7 +2,7 @@ from collections import namedtuple
 from operator import attrgetter
 from typing import Optional, List
 from sqlalchemy import select, insert
-from lib.db import Database, SENSORS
+from app.db import Database, SENSORS
 
 Sensor = namedtuple('Sensor', map(attrgetter('key'), SENSORS.c))
 

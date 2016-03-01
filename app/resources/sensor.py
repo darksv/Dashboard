@@ -1,6 +1,6 @@
-from lib.db import DB
-from lib.db.api import readings as Readings, sensors as Sensors
-from lib.util import localize_datetime
+from app.db import DB
+from app.db.api import readings as Readings, sensors as Sensors
+from app.util import localize_datetime
 from flask_restful import Resource
 
 

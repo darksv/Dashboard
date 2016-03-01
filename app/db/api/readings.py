@@ -3,7 +3,7 @@ from datetime import datetime
 from operator import attrgetter
 from typing import Optional
 from sqlalchemy import select, insert
-from lib.db import Database, READINGS
+from app.db import Database, READINGS
 
 Reading = namedtuple('Reading', map(attrgetter('key'), READINGS.c))
 
