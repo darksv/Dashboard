@@ -1,5 +1,6 @@
 from lib.db import DB
 from lib.db.api import readings as Readings, sensors as Sensors
+from lib.util import localize_datetime
 from flask import request
 from flask_restful import Resource
 
@@ -20,6 +21,6 @@ class ReadingResource(Resource):
 
         reading = Readings.create_reading(DB, sensor_id=sensor_id, value=args['value'])
         data = reading._asdict()
-        data['timestamp'] = reading.timestamp.timestamp()
+        data['timestamp'] = localize_datetime(reading.timestamp).isoformat()
 
         return data
