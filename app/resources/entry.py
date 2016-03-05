@@ -1,11 +1,11 @@
 from app.db import DB
-from app.db.api import readings as Readings, sensors as Sensors
+from app.db.api import entries as Entries, sensors as Sensors
 from app.util import localize_datetime
 from flask import request
 from flask_restful import Resource
 
 
-class ReadingResource(Resource):
+class EntryResource(Resource):
     def put(self):
         args = request.get_json()
 
@@ -19,8 +19,8 @@ class ReadingResource(Resource):
 
             sensor_id = sensor.id
 
-        reading = Readings.create_reading(DB, sensor_id=sensor_id, value=args['value'])
-        data = reading._asdict()
-        data['timestamp'] = localize_datetime(reading.timestamp).isoformat()
+        entry = Entries.create_entry(DB, sensor_id=sensor_id, value=args['value'])
+        data = entry._asdict()
+        data['timestamp'] = localize_datetime(entry.timestamp).isoformat()
 
         return data

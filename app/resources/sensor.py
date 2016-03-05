@@ -1,5 +1,5 @@
 from app.db import DB
-from app.db.api import readings as Readings, sensors as Sensors
+from app.db.api import entries as Readings, sensors as Sensors
 from app.util import localize_datetime
 from flask_restful import Resource
 
@@ -21,7 +21,7 @@ class SensorResource(Resource):
 
             sensor_data = sensor._asdict()
 
-            reading = Readings.get_last_reading(DB, sensor.id)
+            reading = Readings.get_last_entry(DB, sensor.id)
             if reading is not None:
                 last_update = localize_datetime(reading.timestamp).isoformat()
                 last_value = reading.value
