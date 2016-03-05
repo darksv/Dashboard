@@ -11,7 +11,7 @@ api = Api(app)
 api.add_resource(SensorResource, '/sensors')
 api.add_resource(SensorResource, '/sensors/<int:sensor_id>', endpoint='sensors')
 api.add_resource(SensorStatsResource, '/sensors/<int:sensor_id>/stats/<string:period>')
-api.add_resource(EntryResource, '/readings')
+api.add_resource(EntryResource, '/updates')
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
