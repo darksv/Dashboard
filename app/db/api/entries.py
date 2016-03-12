@@ -8,21 +8,6 @@ from app.db import Database, ENTRIES
 Entry = namedtuple('Entry', map(attrgetter('key'), ENTRIES.c))
 
 
-def get_entry(db: Database, entry_id: int) -> Optional[Entry]:
-    """
-    Get entry by its ID.
-    """
-    query = select(ENTRIES.c).select_from(ENTRIES).where(ENTRIES.c.id == entry_id)
-    result = db.conn.execute(query)
-
-    row = result.fetchone()
-
-    if row is None:
-        return None
-
-    return Entry(*row)
-
-
 def get_last_entry(db: Database, sensor_id: int) -> Optional[Entry]:
     """
     Get last sensor's entry.
@@ -48,6 +33,7 @@ def create_entry(db: Database, sensor_id: int, value: float) -> Optional[Entry]:
     query = insert(ENTRIES).values(sensor_id=sensor_id, value=value, timestamp=datetime.now())
     result = db.conn.execute(query)
 
-    sensor_id = result.lastrowid
+    if result.lastrowid is not None:
+        return get_last_entry(db, sensor_id)
 
-    return get_entry(db, sensor_id)
+    return None

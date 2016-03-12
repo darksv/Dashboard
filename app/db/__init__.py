@@ -12,7 +12,6 @@ SENSORS = Table('sensors', meta,
 )
 
 ENTRIES = Table('entries', meta,
-    Column('id', Integer, primary_key=True, autoincrement=True),
     Column('sensor_id', Integer, ForeignKey('sensors.id'), nullable=False),
     Column('value', Float, nullable=False),
     Column('timestamp', DateTime(timezone=True), nullable=False)
