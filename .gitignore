@@ -139,3 +139,6 @@ crashlytics-build.properties
 fabric.properties
 
 .idea/
+
+#ignore config
+config.py

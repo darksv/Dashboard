@@ -1,1 +1,2 @@
 DEVELOPMENT = True
+HOST = 'xxx'

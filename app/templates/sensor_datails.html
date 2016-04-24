@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-9 col-sm-offset-3 col-md-8 col-md-offset-2 main">
+            <h1 class="page-header">Panel zarządzania</h1>
+
+            <h2 class="sub-header">Czujnik {{ sensor['name'] }}</h2>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6">Opis</div>
+                        <div class="col-md-6">{{ sensor['description'] }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">Pomiar</div>
+                        <div class="col-md-6">{{ sensor['value'] }}℃</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">Ostatnia aktualizacja</div>
+                        <div class="col-md-6">{{ sensor['updated'] }}</div>
+                    </div>
+                </div>
+                <div class="col-md4">
+
+                </div>
+            </div>
+
+            <h2 class="sub-header">Wykresy</h2>
+            <div id="chart_daily" class="col-md-12"></div>
+            <div id="chart_monthly" class="col-md-12"></div>
+            <div id="chart_yearly" class="col-md-12"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
