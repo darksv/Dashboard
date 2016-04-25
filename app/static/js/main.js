@@ -5,6 +5,13 @@ function createChart(container, title)
             type: 'spline',
             renderTo: container
         },
+        plotOptions: {
+            line: {
+                marker: {
+                    enabled: false
+                }
+            }
+        },
         title: {
             text: title,
             x: -20
@@ -47,15 +54,31 @@ function updateChart(chart, type, sensorId)
         }
 
         chart.xAxis[0].setCategories(labels);
-        chart.addSeries({data: series});
+        chart.addSeries({
+            data: series,
+            marker: {
+                enabled: false,
+                states: {
+                    hover: {
+                        enabled: false
+                    }
+                }
+            }
+        });
 
         chart.redraw();
     });
 }
 
 $(function () {
+    const chartTitles = {
+        daily: 'Ostatnie 24 godziny',
+        monthly: 'Ostatni miesiąc'
+    };
+
     $('[data-chart]').each(function() {
-        var chart = createChart(this, $(this).data('chart'));
-        updateChart(chart, $(this).data('chart'), $(this).data('sensor-id'));
+        var chartType = $(this).data('chart');
+        var chart = createChart(this, chartTitles[chartType]);
+        updateChart(chart, chartType, $(this).data('sensor-id'));
     });
 });
