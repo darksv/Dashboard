@@ -11,7 +11,7 @@ def get_daily_stats(db: Database, sensor_id: int, hours: int=24) -> List:
     query = select([func.hour(ENTRIES.c.timestamp), func.avg(ENTRIES.c.value)])\
         .select_from(ENTRIES)\
         .where(and_(ENTRIES.c.sensor_id == sensor_id, ENTRIES.c.timestamp >= datetime.now() - timedelta(hours=hours)))\
-        .group_by(func.hour(ENTRIES.c.timestamp))\
+        .group_by(func.hour(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
         .order_by(ENTRIES.c.timestamp.asc())\
         .limit(hours)
     result = db.conn.execute(query)
