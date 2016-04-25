@@ -1,15 +1,16 @@
-function createChart(container, title, labels, values)
+function createChart(container, title)
 {
-    $(container).highcharts({
+    var options = {
         chart: {
-            type: 'spline'
+            type: 'spline',
+            renderTo: container
         },
         title: {
             text: title,
             x: -20
         },
         xAxis: {
-            categories: labels
+            categories: []
         },
         yAxis: {
             title: {
@@ -25,27 +26,36 @@ function createChart(container, title, labels, values)
             valueSuffix: '°C',
             enabled: false
         },
-        series: [{
-            data: values
-        }],
         legend: {
             enabled: false
         }
+    };
+
+    return new Highcharts.Chart(options);
+}
+
+function updateChart(chart, type, sensorId)
+{
+    $.getJSON('/api/sensors/' + sensorId + '/stats/' + type, function(data) {
+        var labels = [];
+        var series = [];
+
+        for (var i = 0; i < data.data.length; i++)
+        {
+            labels.push(data.data[i][0]);
+            series.push(data.data[i][1]);
+        }
+
+        chart.xAxis[0].setCategories(labels);
+        chart.addSeries({data: series});
+
+        chart.redraw();
     });
 }
 
-function randomValues(min, max, count)
-{
-    var r = [];
-    for (var i = 0; i < count; i++)
-    {
-        r.push(min + Math.random() * (max - min));
-    }
-    return r;
-}
-
 $(function () {
-    createChart('#chart_daily', 'Dzienny', hours, hours_values);
-    createChart('#chart_yearly', 'Roczny', months, randomValues(-50, 50, 12));
-    createChart('#chart_monthly', 'Miesięczny', days, randomValues(-20, 10, 30));
+    $('[data-chart]').each(function() {
+        var chart = createChart(this, $(this).data('chart'));
+        updateChart(chart, $(this).data('chart'), $(this).data('sensor-id'));
+    });
 });

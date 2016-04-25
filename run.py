@@ -2,7 +2,7 @@ import config
 import requests
 import collections
 import json
-from flask import render_template, send_from_directory
+from flask import render_template, send_from_directory, jsonify
 from app import app
 
 
@@ -26,6 +26,12 @@ def hello_world():
     result = requests.get('http://test.hsdxd.usermd.net/sensors')
 
     return render_template('index.html', title='Dashboard', sensors=result.json()['data'])
+
+
+@app.route('/api/<path:path>')
+def api_redirect(path: str):
+    result = requests.get('http://test.hsdxd.usermd.net/' + path).json()
+    return jsonify(result)
 
 
 @app.route('/sensor/<int:sensor_id>')
