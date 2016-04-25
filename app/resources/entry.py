@@ -22,5 +22,4 @@ class EntryResource(Resource):
         entry = Entries.create_entry(DB, sensor_id=sensor_id, value=args['value'])
         data = entry._asdict()
         data['timestamp'] = localize_datetime(entry.timestamp).isoformat()
-
         return data
