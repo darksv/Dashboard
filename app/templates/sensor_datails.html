@@ -22,7 +22,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">Ostatnia aktualizacja</div>
-                        <div class="col-md-6">{{ sensor['value_updated'] }}</div>
+                        <div class="col-md-6">{{ sensor['value_updated'].strftime('%H:%M:%S') }}</div>
                     </div>
                 </div>
                 <div class="col-md4">
