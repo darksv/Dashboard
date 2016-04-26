@@ -1,8 +1,8 @@
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import Optional, Union
-from sqlalchemy import select, insert, update, func
+from typing import Optional, Union, List
+from sqlalchemy import select, insert, update, func, and_
 from app.db import Database, CHANNELS, ENTRIES
 
 Channel = namedtuple('Channel', map(attrgetter('key'), CHANNELS.c))
@@ -28,6 +28,17 @@ def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
         return None
 
     return Channel(*row)
+
+
+def get_all_channels(db: Database) -> List[Channel]:
+    """
+    Get all channels.
+    """
+
+    query = select(CHANNELS.c).select_from(CHANNELS)
+    result = db.conn.execute(query)
+
+    return [Channel(*row) for row in result]
 
 
 def create_channel(db: Database, channel_uuid: str, channel_type: int=0, channel_name: str='') -> Optional[Channel]:
@@ -86,3 +97,33 @@ def update_channel(db: Database, channel_id: Union[int, str], value: float) -> b
     db.conn.execute(query)
 
     return True
+
+
+def get_daily_channel_stats(db: Database, channel_id: int, hours: int=24) -> List:
+    """
+    Get sensor's stats for last n hours.
+    """
+    query = select([func.hour(ENTRIES.c.timestamp), func.avg(ENTRIES.c.value)])\
+        .select_from(ENTRIES)\
+        .where(and_(ENTRIES.c.channel_id == channel_id, ENTRIES.c.timestamp >= datetime.now() - timedelta(hours=hours)))\
+        .group_by(func.hour(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
+        .order_by(ENTRIES.c.timestamp.asc())\
+        .limit(hours)
+    result = db.conn.execute(query)
+
+    return [['{0:02}:00'.format(hour), round(temp, 2)] for hour, temp in result]
+
+
+def get_monthly_channel_stats(db: Database, channel_id: int, days: int=30) -> List:
+    """
+    Get sensor's stats for last n days.
+    """
+    query = select([func.date_format(ENTRIES.c.timestamp, '%e.%m'), func.avg(ENTRIES.c.value)])\
+        .select_from(ENTRIES)\
+        .where(and_(ENTRIES.c.sensor_id == channel_id, ENTRIES.c.timestamp >= datetime.now() - timedelta(days=days)))\
+        .group_by(func.day(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
+        .order_by(ENTRIES.c.timestamp.asc())\
+        .limit(days)
+    result = db.conn.execute(query)
+
+    return [[day, round(temp, 2)] for day, temp in result]
