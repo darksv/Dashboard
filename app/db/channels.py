@@ -83,8 +83,8 @@ def update_channel(db: Database, channel_id: Union[int, str], value: float) -> b
         # add entry to channel history
         query = insert(ENTRIES).values(
             channel_id=channel.id,
-            value=value,
-            timestamp=now
+            value=channel.value,
+            timestamp=channel.value_updated
         )
 
         db.conn.execute(query)
