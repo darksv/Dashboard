@@ -99,6 +99,27 @@ def update_channel(db: Database, channel_id: Union[int, str], value: float) -> b
     return True
 
 
+def get_recent_channel_stats(db: Database, channel_id: int, count: int=100) -> List:
+    """
+    Get recent sensor's stats.
+    """
+    subquery = select([ENTRIES.c.timestamp, ENTRIES.c.value]) \
+        .select_from(ENTRIES) \
+        .where(ENTRIES.c.channel_id == channel_id) \
+        .order_by(ENTRIES.c.timestamp.desc()) \
+        .limit(count) \
+        .alias()
+
+    query = select(subquery.c) \
+        .select_from(subquery) \
+        .order_by(subquery.c.timestamp.asc()) \
+        .limit(count)
+
+    result = db.conn.execute(query)
+
+    return [(timestamp, value) for timestamp, value in result]
+
+
 def get_daily_channel_stats(db: Database, channel_id: int, hours: int=24) -> List:
     """
     Get sensor's stats for last n hours.
