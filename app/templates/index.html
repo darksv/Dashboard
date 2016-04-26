@@ -27,7 +27,7 @@
                             <td>{{ sensor['id'] }}</td>
                             <td>{{ sensor['name'] }}</td>
                             <td>{{ sensor['value'] }}℃</td>
-                            <td>{{ sensor['updated'] }}</td>
+                            <td>{{ sensor['value_updated'] }}</td>
                             <td><a href="{{ url_for('sensor_details', sensor_id=sensor['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
                         </tr>
                     {% endfor %}
