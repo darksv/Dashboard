@@ -23,7 +23,7 @@ if config.DEVELOPMENT:
 
 @app.route('/')
 def hello_world():
-    result = requests.get('http://test.hsdxd.usermd.net/sensors')
+    result = requests.get('http://test.hsdxd.usermd.net/channels')
 
     return render_template('index.html', title='Dashboard', sensors=result.json()['data'])
 
@@ -36,7 +36,7 @@ def api_redirect(path: str):
 
 @app.route('/sensor/<int:sensor_id>')
 def sensor_details(sensor_id: int):
-    sensor_data = requests.get('http://test.hsdxd.usermd.net/sensors/{0}'.format(sensor_id)).json()['data']
+    sensor_data = requests.get('http://test.hsdxd.usermd.net/channels/{0}'.format(sensor_id)).json()['data']
 
     return render_template('sensor_datails.html', title='Czujniczeq' + str(sensor_id), sensor=sensor_data)
 

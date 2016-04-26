@@ -43,7 +43,7 @@ function createChart(container, title)
 
 function updateChart(chart, type, sensorId)
 {
-    $.getJSON('/api/sensors/' + sensorId + '/stats/' + type, function(data) {
+    $.getJSON('/api/channels/' + sensorId + '/stats/' + type, function(data) {
         var labels = [];
         var series = [];
 
