@@ -1,4 +1,3 @@
-from datetime import datetime
 from app.db import DB
 from app.db.channels import get_or_create_channel, update_channel
 from flask import request
