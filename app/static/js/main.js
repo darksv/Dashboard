@@ -1,3 +1,9 @@
+Highcharts.setOptions({
+    global: {
+        useUTC: false
+    }
+});
+
 function createChart(container, title)
 {
     var options = {
@@ -30,8 +36,7 @@ function createChart(container, title)
             }]
         },
         tooltip: {
-            valueSuffix: '°C',
-            enabled: false
+            valueSuffix: '°C'
         },
         legend: {
             enabled: false
@@ -84,7 +89,8 @@ function createRealtimeChart(container, channelId)
             }]
         },
         tooltip: {
-            enabled: false
+            enabled: true,
+            valueSuffix: '°C'
         },
         legend: {
             enabled: false
@@ -105,6 +111,7 @@ function createRealtimeChart(container, channelId)
             points.push([(new Date(entry[0])).getTime(), entry[1]]);
         }
 
+        options.series[0].name = 'Temperatura';
         options.series[0].data = points;
         new Highcharts.Chart(options);
     });
