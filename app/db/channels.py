@@ -30,6 +30,16 @@ def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
     return Channel(*row)
 
 
+def get_device_channels(db: Database, device_id: int) -> List[Channel]:
+    """
+    Get device channels.
+    """
+    query = select(CHANNELS.c).select_from(CHANNELS).where(CHANNELS.c.device_id == device_id)
+    result = db.conn.execute(query)
+
+    return [Channel(*row) for row in result]
+
+
 def get_all_channels(db: Database) -> List[Channel]:
     """
     Get all channels.
