@@ -9,8 +9,10 @@
                 <strong>Informacja!</strong> Wszystko działa tak jak należy.
             </div>
 
-            <h2 class="sub-header">Aktywne czujniki</h2>
-            <div class="table-responsive">
+            <h2 class="sub-header">Urządzenia</h2>
+            {% for device in devices %}
+            <div class="panel panel-default">
+                <div class="panel-heading">{{ device['name'] }}</div>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -22,18 +24,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for sensor in sensors %}
+                    {% for channel in device['channels'] %}
                         <tr>
-                            <td>{{ sensor['id'] }}</td>
-                            <td>{{ sensor['name'] }}</td>
-                            <td>{{ sensor['value'] }}℃</td>
-                            <td>{{ sensor['value_updated'].strftime('%H:%M:%S') }}</td>
-                            <td><a href="{{ url_for('sensor_details', sensor_id=sensor['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
+                            <td>{{ channel['id'] }}</td>
+                            <td>{{ channel['name'] }}</td>
+                            <td>{{ channel['value'] }}℃</td>
+                            <td>{{ channel['value_updated'].strftime('%H:%M:%S') }}</td>
+                            <td><a href="{{ url_for('sensor_details', sensor_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% endfor %}
+
         </div>
     </div>
 </div>

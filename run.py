@@ -23,13 +23,14 @@ if config.DEVELOPMENT:
 
 
 @app.route('/')
-def hello_world():
-    channels = requests.get('http://test.hsdxd.usermd.net/channels').json()['data']
+def devices_list():
+    devices = requests.get('http://test.hsdxd.usermd.net/devices').json()['data']
 
-    for channel in channels:
-        convert_in_dict(channel, 'value_updated', iso8601.parse_date)
+    for device in devices:
+        for channel in device['channels']:
+            convert_in_dict(channel, 'value_updated', iso8601.parse_date)
 
-    return render_template('index.html', title='Dashboard', sensors=channels)
+    return render_template('index.html', title='Dashboard', devices=devices)
 
 
 @app.route('/api/<path:path>')
