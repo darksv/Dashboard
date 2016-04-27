@@ -41,12 +41,12 @@ def get_all_channels(db: Database) -> List[Channel]:
     return [Channel(*row) for row in result]
 
 
-def create_channel(db: Database, channel_uuid: str, channel_type: int=0, channel_name: str='') -> Optional[Channel]:
+def create_channel(db: Database, device_id: int, channel_uuid: str, channel_type: int=0, channel_name: str='') -> Optional[Channel]:
     """
     Create new channel.
     """
     query = insert(CHANNELS).values(
-        device_id=1,
+        device_id=device_id,
         uuid=func.unhex(channel_uuid),
         type=channel_type,
         name=channel_name
@@ -58,7 +58,7 @@ def create_channel(db: Database, channel_uuid: str, channel_type: int=0, channel
     return get_channel(db, channel_id=channel_id)
 
 
-def get_or_create_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
+def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: int=None) -> Optional[Channel]:
     """
     Get channel by ID or create.
     """
@@ -66,7 +66,7 @@ def get_or_create_channel(db: Database, channel_id: Union[int, str]) -> Optional
     if channel is not None:
         return channel
 
-    return create_channel(db, channel_id)
+    return create_channel(db, device_id, channel_id)
 
 
 def update_channel(db: Database, channel_id: Union[int, str], value: float) -> bool:
