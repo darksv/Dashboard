@@ -1,5 +1,6 @@
 from sqlalchemy import MetaData, Table, Binary, Column, Integer, String, SmallInteger, Text, ForeignKey, Float, DateTime
 from sqlalchemy import create_engine
+import config
 
 meta = MetaData()
 
@@ -48,4 +49,4 @@ class Database:
     def conn(self):
         return self._connection
 
-DB = Database('')
+DB = Database(config.DATABASE_URL)
