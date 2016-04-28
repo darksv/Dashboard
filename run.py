@@ -47,12 +47,12 @@ def device_details(device_id: int):
     return render_template('device_details.html', title='Urządzenie #' + str(device_id), device=device_data)
 
 
-@app.route('/sensor/<int:sensor_id>')
-def sensor_details(sensor_id: int):
-    sensor_data = requests.get('http://test.hsdxd.usermd.net/channels/{0}'.format(sensor_id)).json()['data']
-    convert_in_dict(sensor_data, 'value_updated', iso8601.parse_date)
+@app.route('/channel/<int:channel_id>')
+def channel_details(channel_id: int):
+    channel_data = requests.get('http://test.hsdxd.usermd.net/channels/{0}'.format(channel_id)).json()['data']
+    convert_in_dict(channel_data, 'value_updated', iso8601.parse_date)
 
-    return render_template('sensor_datails.html', title='Czujniczeq' + str(sensor_id), sensor=sensor_data)
+    return render_template('channel_details.html', title='Kanał #' + str(channel_id), channel=channel_data)
 
 if __name__ == '__main__':
     app.run(debug=config.DEVELOPMENT, host=config.HOST)

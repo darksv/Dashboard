@@ -155,17 +155,17 @@ $(function () {
 
     $('[data-chart]').each(function() {
         var chartType = $(this).data('chart');
-        var sensorId = $(this).data('sensor-id')
+        var channelId = $(this).data('channel-id')
         var chart = null;
 
         if (chartType == 'realtime')
         {
-            chart = createRealtimeChart(this, sensorId);
+            chart = createRealtimeChart(this, channelId);
         }
         else
         {
             chart = createChart(this, chartTitles[chartType]);
-            updateChart(chart, chartType, sensorId);
+            updateChart(chart, chartType, channelId);
         }
     });
 });

@@ -18,7 +18,7 @@
                 </div>
             </div>
 
-            <h2 class="sub-header">Czujniki</h2>
+            <h2 class="sub-header">Kanały</h2>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -36,7 +36,7 @@
                         <td>{{ channel['name'] }}</td>
                         <td>{{ channel['value'] }}℃</td>
                         <td>{{ channel['value_updated'] }}</td>
-                        <td><a href="{{ url_for('sensor_details', sensor_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
+                        <td><a href="{{ url_for('channel_details', channel_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
                     </tr>
                 {% endfor %}
                 </tbody>
