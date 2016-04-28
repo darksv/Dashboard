@@ -23,6 +23,7 @@ if config.DEVELOPMENT:
 
 
 @app.route('/')
+@app.route('/devices')
 def devices_list():
     devices = requests.get('http://test.hsdxd.usermd.net/devices').json()['data']
 
@@ -30,7 +31,7 @@ def devices_list():
         for channel in device['channels']:
             convert_in_dict(channel, 'value_updated', iso8601.parse_date)
 
-    return render_template('index.html', title='Dashboard', devices=devices)
+    return render_template('devices.html', title='Dashboard', devices=devices)
 
 
 @app.route('/api/<path:path>')
