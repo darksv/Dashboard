@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-9 col-sm-offset-3 col-md-8 col-md-offset-2 main">
+            <h1 class="page-header">Panel zarządzania</h1>
+
+            <h2 class="sub-header">Urządzenie {{ device['name'] }}</h2>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6">Unikalny identyfikator</div>
+                        <div class="col-md-6">{{ device['uuid'] }}</div>
+                    </div>
+                </div>
+                <div class="col-md4">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

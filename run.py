@@ -39,6 +39,13 @@ def api_redirect(path: str):
     return jsonify(result)
 
 
+@app.route('/device/<int:device_id>')
+def device_details(device_id: int):
+    device_data = requests.get('http://test.hsdxd.usermd.net/devices/{0}'.format(device_id)).json()['data']
+
+    return render_template('device_details.html', title='Urządzenie #' + str(device_id), device=device_data)
+
+
 @app.route('/sensor/<int:sensor_id>')
 def sensor_details(sensor_id: int):
     sensor_data = requests.get('http://test.hsdxd.usermd.net/channels/{0}'.format(sensor_id)).json()['data']
