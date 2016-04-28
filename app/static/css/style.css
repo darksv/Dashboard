@@ -1,9 +1,22 @@
-#temperature_value {
-    width: 100%;
+body {
+    margin: 1em;
+}
+
+.temperature_indicator {
+    margin: auto;
+    width: 400px;
     height: 100%;
     text-align: center;
     font-size: 4em;
     display: block;
+}
+
+.temperature_indicator span {
+    vertical-align: middle;
+}
+
+.temperature_indicator span.glyphicon {
+    font-size: 0.8em;
 }
 
 .temperature:after {
