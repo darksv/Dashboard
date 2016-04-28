@@ -151,7 +151,7 @@ def get_monthly_channel_stats(db: Database, channel_id: int, days: int=30) -> Li
     """
     query = select([func.date_format(ENTRIES.c.timestamp, '%e.%m'), func.avg(ENTRIES.c.value)])\
         .select_from(ENTRIES)\
-        .where(and_(ENTRIES.c.sensor_id == channel_id, ENTRIES.c.timestamp >= datetime.now() - timedelta(days=days)))\
+        .where(and_(ENTRIES.c.channel_id == channel_id, ENTRIES.c.timestamp >= datetime.now() - timedelta(days=days)))\
         .group_by(func.day(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
         .order_by(ENTRIES.c.timestamp.asc())\
         .limit(days)
