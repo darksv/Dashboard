@@ -12,7 +12,7 @@
             <h2 class="sub-header">Urządzenia</h2>
             {% for device in devices %}
             <div class="panel panel-default">
-                <div class="panel-heading">{{ device['name'] }}</div>
+                <div class="panel-heading"><a href="{{ url_for('device_details', device_id=device['id']) }}">{{ device['name'] }}</a></div>
                 <table class="table table-striped">
                     <thead>
                         <tr>
