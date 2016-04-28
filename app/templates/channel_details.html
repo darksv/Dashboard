@@ -8,33 +8,37 @@
             <h2 class="sub-header">Informacje o kanale</h2>
             <div class="row">
                 <div class="col-md-8">
-                     <div class="row">
-                        <div class="col-md-6">Nazwa</div>
-                        <div class="col-md-6">{{ channel['name'] }}</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">Unikalny identyfikator</div>
-                        <div class="col-md-6">{{ channel['uuid'] }}</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">Typ</div>
-                        <div class="col-md-6">{{ ['temperatura'][channel['type']] }}</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">Opis</div>
-                        <div class="col-md-6">{{ channel['description'] }}</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">Pomiar</div>
-                        <div class="col-md-6">{{ channel['value'] }}℃</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">Ostatnia aktualizacja</div>
-                        <div class="col-md-6">{{ channel['value_updated'] | datetime}}</div>
-                    </div>
+                    <ul class="list-group info">
+                        <li class="list-group-item row">
+                            <div class="col-md-4">Identyfikator</div>
+                            <div class="col-md-8">{{ channel['uuid'] }}</div>
+                        </li>
+                        <li class="list-group-item row">
+                            <div class="col-md-4">Nazwa</div>
+                            <div class="col-md-8">{{ channel['name'] }}</div>
+                        </li>
+                        <li class="list-group-item row">
+                            <div class="col-md-4">Typ</div>
+                            <div class="col-md-8">{{ ['temperatura'][channel['type']] }}</div>
+                        </li>
+                        {% if channel['description'] %}
+                        <li class="list-group-item row">
+                            <div class="col-md-4">Opis</div>
+                            <div class="col-md-8">{{ channel['description'] }}</div>
+                        </li>
+                        {% endif %}
+                        <li class="list-group-item row hidden-md hidden-lg">
+                            <div class="col-md-4">Pomiar</div>
+                            <div class="col-md-8 temperature">{{ channel['value'] }}</div>
+                        </li>
+                        <li class="list-group-item row hidden-md hidden-lg">
+                            <div class="col-md-4">Ostatnia aktualizacja</div>
+                            <div class="col-md-8">{{ channel['value_updated'] }}</div>
+                        </li>
+                    </ul>
                 </div>
-                <div class="col-md4">
-
+                <div class="col-md-4 hidden-sm hidden-xs">
+                    <span id="temperature_value" class="label label-info temperature" title="{{ channel['value_updated'] }}">{{ channel['value'] }}</span>
                 </div>
             </div>
 

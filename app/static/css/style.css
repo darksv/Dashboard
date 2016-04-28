@@ -1,0 +1,15 @@
+#temperature_value {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 4em;
+    display: block;
+}
+
+.temperature:after {
+    content: "℃";
+}
+
+.info li :first-child {
+    font-weight: bold;
+}

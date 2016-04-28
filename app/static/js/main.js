@@ -63,6 +63,10 @@ function createRealtimeChart(container, channelId)
                                 y = data.value,
                                 lastTimestamp = series.data[series.data.length - 1].x;
 
+                            var valueLabel = $('#temperature_value');
+                            valueLabel.text(y);
+                            valueLabel.attr('title', data.value_updated);
+
                             if (lastTimestamp != x)
                                 series.addPoint([x, y], true, true);
                         });
