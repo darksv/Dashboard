@@ -17,6 +17,30 @@
 
                 </div>
             </div>
+
+            <h2 class="sub-header">Czujniki</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nazwa</th>
+                        <th>Pomiar</th>
+                        <th>Ostatnia aktualizacja</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for channel in device['channels'] %}
+                    <tr>
+                        <td>{{ channel['id'] }}</td>
+                        <td>{{ channel['name'] }}</td>
+                        <td>{{ channel['value'] }}℃</td>
+                        <td>{{ channel['value_updated'] }}</td>
+                        <td><a href="{{ url_for('sensor_details', sensor_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
