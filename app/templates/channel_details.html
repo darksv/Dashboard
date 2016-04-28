@@ -5,12 +5,20 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-8 col-md-offset-2 main">
             <h1 class="page-header">Panel zarządzania</h1>
 
-            <h2 class="sub-header">Kanał {{ channel['name'] }}</h2>
+            <h2 class="sub-header">Informacje o kanale</h2>
             <div class="row">
                 <div class="col-md-8">
+                     <div class="row">
+                        <div class="col-md-6">Nazwa</div>
+                        <div class="col-md-6">{{ channel['name'] }}</div>
+                    </div>
                     <div class="row">
                         <div class="col-md-6">Unikalny identyfikator</div>
                         <div class="col-md-6">{{ channel['uuid'] }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">Typ</div>
+                        <div class="col-md-6">{{ ['temperatura'][channel['type']] }}</div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">Opis</div>
