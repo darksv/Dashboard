@@ -30,7 +30,7 @@ if config.DEVELOPMENT:
 def devices_list():
     devices = requests.get('http://test.hsdxd.usermd.net/devices').json()['data']
 
-    return render_template('devices.html', title='Dashboard', devices=devices)
+    return render_template('devices.html', devices=devices)
 
 
 @app.route('/api/<path:path>')
@@ -43,14 +43,14 @@ def api_redirect(path: str):
 def device_details(device_id: int):
     device_data = requests.get('http://test.hsdxd.usermd.net/devices/{0}'.format(device_id)).json()['data']
 
-    return render_template('device_details.html', title='Urządzenie #' + str(device_id), device=device_data)
+    return render_template('device_details.html', device=device_data)
 
 
 @app.route('/channel/<int:channel_id>')
 def channel_details(channel_id: int):
     channel_data = requests.get('http://test.hsdxd.usermd.net/channels/{0}'.format(channel_id)).json()['data']
 
-    return render_template('channel_details.html', title='Kanał #' + str(channel_id), channel=channel_data)
+    return render_template('channel_details.html', channel=channel_data)
 
 if __name__ == '__main__':
     app.run(debug=config.DEVELOPMENT, host=config.HOST)

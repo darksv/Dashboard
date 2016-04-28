@@ -1,56 +1,52 @@
-{% extends "base.html" %}
-{% block body %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12 col-lg-8 col-lg-offset-2">
-            <h1 class="page-header">Panel zarządzania</h1>
+{% extends "base_info_page.html" %}
 
-            <h2 class="sub-header">Informacje o kanale</h2>
-            <div class="row">
-                <div class="col-md-7">
-                    <ul class="list-group info">
-                        <li class="list-group-item row">
-                            <div class="col-md-4">Identyfikator</div>
-                            <div class="col-md-8">{{ channel['uuid'] }}</div>
-                        </li>
-                        <li class="list-group-item row">
-                            <div class="col-md-4">Nazwa</div>
-                            <div class="col-md-8">{{ channel['name'] }}</div>
-                        </li>
-                        <li class="list-group-item row">
-                            <div class="col-md-4">Typ</div>
-                            <div class="col-md-8">{{ ['temperatura'][channel['type']] }}</div>
-                        </li>
-                        {% if channel['description'] %}
-                        <li class="list-group-item row">
-                            <div class="col-md-4">Opis</div>
-                            <div class="col-md-8">{{ channel['description'] }}</div>
-                        </li>
-                        {% endif %}
-                        <li class="list-group-item row hidden-md hidden-lg">
-                            <div class="col-md-4">Pomiar</div>
-                            <div class="col-md-8 temperature">{{ channel['value'] }}</div>
-                        </li>
-                        <li class="list-group-item row hidden-md hidden-lg">
-                            <div class="col-md-4">Ostatnia aktualizacja</div>
-                            <div class="col-md-8">{{ channel['value_updated'] }}</div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-md-5 hidden-sm hidden-xs">
-                    <div class="label label-info temperature_indicator">
-                        <span class="glyphicon glyphicon-arrow-down"></span>
-                        <span id="temperature_value" class="temperature" title="{{ channel['value_updated'] }}">{{ channel['value'] }}</span>
-                    </div>
-                </div>
-            </div>
+{% block title %}
+    Informacje o kanale {{ channel['name'] }}
+{% endblock %}
 
-            <h2 class="sub-header">Statystyki</h2>
-            <div data-chart="realtime" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
-            <div data-chart="daily" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
-            <div data-chart="monthly" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
-            <div data-chart="yearly" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
+{% block content %}
+<div class="row">
+    <div class="col-md-7">
+        <ul class="list-group info">
+            <li class="list-group-item row">
+                <div class="col-md-4">Identyfikator</div>
+                <div class="col-md-8">{{ channel['uuid'] }}</div>
+            </li>
+            <li class="list-group-item row">
+                <div class="col-md-4">Nazwa</div>
+                <div class="col-md-8">{{ channel['name'] }}</div>
+            </li>
+            <li class="list-group-item row">
+                <div class="col-md-4">Typ</div>
+                <div class="col-md-8">{{ ['temperatura'][channel['type']] }}</div>
+            </li>
+            {% if channel['description'] %}
+            <li class="list-group-item row">
+                <div class="col-md-4">Opis</div>
+                <div class="col-md-8">{{ channel['description'] }}</div>
+            </li>
+            {% endif %}
+            <li class="list-group-item row hidden-md hidden-lg">
+                <div class="col-md-4">Pomiar</div>
+                <div class="col-md-8 temperature">{{ channel['value'] }}</div>
+            </li>
+            <li class="list-group-item row hidden-md hidden-lg">
+                <div class="col-md-4">Ostatnia aktualizacja</div>
+                <div class="col-md-8">{{ channel['value_updated'] }}</div>
+            </li>
+        </ul>
+    </div>
+    <div class="col-md-5 hidden-sm hidden-xs">
+        <div class="label label-info temperature_indicator">
+            <span class="glyphicon glyphicon-arrow-down"></span>
+            <span id="temperature_value" class="temperature" title="{{ channel['value_updated'] }}">{{ channel['value'] }}</span>
         </div>
     </div>
 </div>
+
+<h2 class="sub-header">Statystyki</h2>
+<div data-chart="realtime" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
+<div data-chart="daily" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
+<div data-chart="monthly" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
+<div data-chart="yearly" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
 {% endblock %}

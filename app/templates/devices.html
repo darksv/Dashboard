@@ -1,40 +1,35 @@
-{% extends "base.html" %}
-{% block body %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-9 col-sm-offset-3 col-md-8 col-md-offset-2 main">
-            <h1 class="page-header">Panel zarządzania</h1>
+{% extends "base_info_page.html" %}
 
-            <h2 class="sub-header">Urządzenia</h2>
-            {% for device in devices %}
-            <div class="panel panel-default">
-                <div class="panel-heading"><a href="{{ url_for('device_details', device_id=device['id']) }}">{{ device['name'] }}</a></div>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Nazwa</th>
-                            <th>Pomiar</th>
-                            <th>Ostatnia aktualizacja</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for channel in device['channels'] %}
-                        <tr>
-                            <td>{{ channel['id'] }}</td>
-                            <td>{{ channel['name'] }}</td>
-                            <td>{{ channel['value'] }}℃</td>
-                            <td>{{ channel['value_updated'] | datetime }}</td>
-                            <td><a href="{{ url_for('channel_details', channel_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endfor %}
+{% block title %}
+    Lista urządzeń
+{% endblock %}
 
-        </div>
-    </div>
+{% block content %}
+{% for device in devices %}
+<div class="panel panel-default">
+    <div class="panel-heading"><a href="{{ url_for('device_details', device_id=device['id']) }}">{{ device['name'] }}</a></div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nazwa</th>
+                <th>Pomiar</th>
+                <th>Ostatnia aktualizacja</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for channel in device['channels'] %}
+            <tr>
+                <td>{{ channel['id'] }}</td>
+                <td>{{ channel['name'] }}</td>
+                <td>{{ channel['value'] }}℃</td>
+                <td>{{ channel['value_updated'] | datetime }}</td>
+                <td><a href="{{ url_for('channel_details', channel_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
+{% endfor %}
 {% endblock %}
