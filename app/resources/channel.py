@@ -1,8 +1,8 @@
 from binascii import hexlify
+from flask_restful import Resource
 from app.db import DB
 from app.db.channels import get_channel, get_all_channels
 from app.util import localize_datetime
-from flask_restful import Resource
 
 
 class ChannelResource(Resource):

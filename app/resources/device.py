@@ -1,9 +1,9 @@
 from binascii import hexlify
+from flask_restful import Resource, marshal, fields
 from app.db import DB
 from app.db.channels import get_device_channels
 from app.db.devices import get_all_devices, get_device
 from app.util import localize_datetime
-from flask_restful import Resource, marshal, fields
 
 
 class Bytes(fields.Raw):
