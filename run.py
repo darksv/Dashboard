@@ -1,11 +1,14 @@
 import config
 import requests
-import iso8601
 import collections
+from datetime import datetime
 import json
 from flask import render_template, send_from_directory, jsonify
 from app import app
-from app.utils import convert_in_dict
+from app.utils import convert_in_dict, format_datetime
+
+
+app.jinja_env.filters['datetime'] = format_datetime
 
 if config.DEVELOPMENT:
     @app.route('/css/<path:path>')
@@ -27,10 +30,6 @@ if config.DEVELOPMENT:
 def devices_list():
     devices = requests.get('http://test.hsdxd.usermd.net/devices').json()['data']
 
-    for device in devices:
-        for channel in device['channels']:
-            convert_in_dict(channel, 'value_updated', iso8601.parse_date)
-
     return render_template('devices.html', title='Dashboard', devices=devices)
 
 
@@ -50,7 +49,6 @@ def device_details(device_id: int):
 @app.route('/channel/<int:channel_id>')
 def channel_details(channel_id: int):
     channel_data = requests.get('http://test.hsdxd.usermd.net/channels/{0}'.format(channel_id)).json()['data']
-    convert_in_dict(channel_data, 'value_updated', iso8601.parse_date)
 
     return render_template('channel_details.html', title='Kanał #' + str(channel_id), channel=channel_data)
 
