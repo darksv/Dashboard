@@ -18,7 +18,7 @@
             </li>
             <li class="list-group-item row">
                 <div class="col-md-4">Typ</div>
-                <div class="col-md-8">{{ ['temperatura'][channel['type']] }}</div>
+                <div class="col-md-8">{{ ['temperatura', 'ciśnienie'][channel['type']] }}</div>
             </li>
             {% if channel['description'] %}
             <li class="list-group-item row">
@@ -28,7 +28,7 @@
             {% endif %}
             <li class="list-group-item row hidden-md hidden-lg">
                 <div class="col-md-4">Pomiar</div>
-                <div class="col-md-8 temperature">{{ channel['value'] }}</div>
+                <div class="col-md-8 {{ ['temperature', 'pressure'][channel['type']] }}">{{ channel['value'] }}</div>
             </li>
             <li class="list-group-item row hidden-md hidden-lg">
                 <div class="col-md-4">Ostatnia aktualizacja</div>
@@ -39,7 +39,7 @@
     <div class="col-md-5 hidden-sm hidden-xs">
         <div class="label label-info temperature_indicator">
             <span class="glyphicon"></span>
-            <span id="temperature_value" class="temperature" title="{{ channel['value_updated'] }}">{{ channel['value'] }}</span>
+            <span id="temperature_value" class="{{ ['temperature', 'pressure'][channel['type']] }}" title="{{ channel['value_updated'] }}">{{ channel['value'] }}</span>
         </div>
     </div>
 </div>

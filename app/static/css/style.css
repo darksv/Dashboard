@@ -20,7 +20,11 @@ body {
 }
 
 .temperature:after {
-    content: "℃";
+    content: " ℃";
+}
+
+.pressure:after {
+    content: " hPa"
 }
 
 .info li :first-child {
