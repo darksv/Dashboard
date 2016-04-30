@@ -1,8 +1,7 @@
-from binascii import hexlify
-from flask_restful import Resource
+from flask_restful import Resource, marshal
 from app.db import DB
 from app.db.channels import get_channel, get_all_channels
-from app.util import localize_datetime
+from app.resources import channel_fields
 
 
 class ChannelResource(Resource):
@@ -20,11 +19,7 @@ class ChannelResource(Resource):
             if channel is None:
                 continue
 
-            channel_data = channel._asdict()
-            channel_data['uuid'] = hexlify(channel_data['uuid']).decode('ascii')
-            channel_data['value_updated'] = localize_datetime(channel_data['value_updated']).isoformat()
-
-            data.append(channel_data)
+            data.append(marshal(channel._asdict(), channel_fields))
 
         if len(data) == 0:
             return {}
