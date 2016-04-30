@@ -89,7 +89,7 @@ def update_channel(db: Database, channel_id: Union[int, str], value: float) -> b
 
     now = datetime.now()
 
-    if channel.value_updated is None or channel.value_updated.minute != now.minute:
+    if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
         # add entry to channel history
         query = insert(ENTRIES).values(
             channel_id=channel.id,
