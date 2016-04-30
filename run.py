@@ -1,11 +1,8 @@
 import config
 import requests
-import collections
-from datetime import datetime
-import json
 from flask import render_template, send_from_directory, jsonify
 from app import app
-from app.utils import convert_in_dict, format_datetime
+from app.utils import format_datetime
 
 
 app.jinja_env.filters['datetime'] = format_datetime
