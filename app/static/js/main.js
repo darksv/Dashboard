@@ -4,12 +4,87 @@ Highcharts.setOptions({
     }
 });
 
-function createChart(container, title)
+function showChannelStats(options)
 {
-    var options = {
+    const isRealtime = (options.type == 'realtime');
+
+    var startUpdates = function(chart) {
+        var series = chart.series[0];
+
+        setInterval(function(){
+            $.getJSON('/api/channels/' + options.channelId, function(response) {
+                var data = response.data,
+                    x = (new Date(data.value_updated)).getTime(),
+                    y = data.value,
+                    lastTimestamp = series.data[series.data.length - 1].x;
+
+                var channelValueLabel = $('#channel_value');
+                var delta = y - channelValueLabel.text();
+
+                var changeIndicator = channelValueLabel.prev().removeClass('glyphicon-arrow-up glyphicon-arrow-down');
+                if (delta < 0)
+                    changeIndicator.addClass('glyphicon-arrow-down');
+                else if (delta > 0)
+                    changeIndicator.addClass('glyphicon-arrow-up');
+
+                channelValueLabel.text(y);
+                channelValueLabel.attr('title', data.value_updated);
+
+                if (lastTimestamp != x)
+                    series.addPoint([x, y], true, true);
+            });
+        }, 5000);
+    };
+
+    var onChartLoad = function () {
+        const chart = this;
+
+        $.getJSON('/api/channels/' + options.channelId + '/stats/' + (isRealtime ? 'recent': options.type), function (data) {
+            var labels = [],
+                series = [];
+
+            for (var i = 0; i < data.data.length; i++) {
+                var label = data.data[i][0],
+                    value = data.data[i][1];
+
+                if (isRealtime) {
+                    label = (new Date(label)).getTime();
+                    series.push([label, value]);
+                } else {
+                    labels.push(label);
+                    series.push(value);
+                }
+            }
+
+            chart.addSeries({
+                data: series,
+                marker: {
+                    enabled: false,
+                    states: {
+                        hover: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+
+            if (isRealtime) {
+                startUpdates(chart);
+            } else {
+                chart.xAxis[0].setCategories(labels);
+            }
+
+            chart.redraw();
+        });
+    };
+
+    var chartOptions = {
         chart: {
             type: 'spline',
-            renderTo: container
+            renderTo: options.container,
+            events: {
+                load: onChartLoad
+            }
         },
         plotOptions: {
             line: {
@@ -19,165 +94,73 @@ function createChart(container, title)
             }
         },
         title: {
-            text: title,
+            text: options.title,
             x: -20
-        },
-        xAxis: {
-            categories: []
-        },
-        yAxis: {
-            title: {
-                text: 'Temperatura (°C)'
-            },
-            plotLines: [{
-                value: 0,
-                width: 1,
-                color: '#808080'
-            }]
-        },
-        tooltip: {
-            valueSuffix: '°C'
-        },
-        legend: {
-            enabled: false
-        }
-    };
-
-    return new Highcharts.Chart(options);
-}
-
-function createRealtimeChart(container, channelId)
-{
-    var options = {
-        chart: {
-            type: 'spline',
-            animation: Highcharts.svg,
-            events: {
-                load: function () {
-                    var series = this.series[0];
-
-                    setInterval(function(){
-                        $.getJSON('/api/channels/' + channelId, function(response) {
-                            var data = response.data,
-                                x = (new Date(data.value_updated)).getTime(),
-                                y = data.value,
-                                lastTimestamp = series.data[series.data.length - 1].x;
-
-                            var channelValueLabel = $('#channel_value');
-                            var delta = y - channelValueLabel.text();
-
-                            var changeIndicator = channelValueLabel.prev().removeClass('glyphicon-arrow-up glyphicon-arrow-down');
-                            if (delta < 0)
-                                changeIndicator.addClass('glyphicon-arrow-down');
-                            else if (delta > 0)
-                                changeIndicator.addClass('glyphicon-arrow-up');
-
-                            channelValueLabel.text(y);
-                            channelValueLabel.attr('title', data.value_updated);
-
-                            if (lastTimestamp != x)
-                                series.addPoint([x, y], true, true);
-                        });
-                    }, 5000);
-                }
-            },
-            renderTo: container
-        },
-        title: {
-            text: 'Wykres w czasie rzeczywistym'
-        },
-        xAxis: {
-            type: 'datetime',
-            tickPixelInterval: 150
-        },
-        yAxis: {
-            title: {
-                text: 'Temperatura (°C)'
-            },
-            plotLines: [{
-                value: 0,
-                width: 1,
-                color: '#808080'
-            }]
-        },
-        tooltip: {
-            enabled: true,
-            valueSuffix: '°C'
-        },
-        legend: {
-            enabled: false
         },
         exporting: {
             enabled: false
         },
-        series: [{}]
+        yAxis: {
+            title: {
+                text: options.axisTitle + ' [' + options.unit + ']'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            valueSuffix: options.unit
+        },
+        legend: {
+            enabled: false
+        }
     };
 
-    $.getJSON('/api/channels/' + channelId + '/stats/recent', function(response) {
-        var data = response.data
-            points = [];
+    if (isRealtime)
+    {
+        chartOptions.animation = Highcharts.svg;
+        chartOptions.xAxis = {
+            type: 'datetime',
+            tickPixelInterval: 150
+        };
+    }
 
-        for (var i = 0; i < data.length; ++i)
-        {
-            var entry = data[i];
-            points.push([(new Date(entry[0])).getTime(), entry[1]]);
-        }
+    console.log(chartOptions);
 
-        options.series[0].name = 'Temperatura';
-        options.series[0].data = points;
-        new Highcharts.Chart(options);
-    });
-}
-
-function updateChart(chart, type, sensorId)
-{
-    $.getJSON('/api/channels/' + sensorId + '/stats/' + type, function(data) {
-        var labels = [];
-        var series = [];
-
-        for (var i = 0; i < data.data.length; i++)
-        {
-            labels.push(data.data[i][0]);
-            series.push(data.data[i][1]);
-        }
-
-        chart.xAxis[0].setCategories(labels);
-        chart.addSeries({
-            data: series,
-            marker: {
-                enabled: false,
-                states: {
-                    hover: {
-                        enabled: false
-                    }
-                }
-            }
-        });
-
-        chart.redraw();
-    });
+    return new Highcharts.Chart(chartOptions);
 }
 
 $(function () {
     const chartTitles = {
-        realtime: 'Na żywo',
+        realtime: 'Wykres w czasie rzeczywistym',
         daily: 'Ostatnie 24 godziny',
         monthly: 'Ostatni miesiąc'
     };
 
-    $('[data-chart]').each(function() {
-        var chartType = $(this).data('chart');
-        var channelId = $(this).data('channel-id')
-        var chart = null;
+    const axisTitles = {
+        0: 'Temperatura',
+        1: 'Ciśnienie'
+    };
 
-        if (chartType == 'realtime')
-        {
-            chart = createRealtimeChart(this, channelId);
-        }
-        else
-        {
-            chart = createChart(this, chartTitles[chartType]);
-            updateChart(chart, chartType, channelId);
-        }
+    const axisUnits = {
+        0: '℃',
+        1: 'hPa'
+    };
+
+    $('[data-chart]').each(function() {
+        var chartType = $(this).data('chart'),
+            channelId = +$(this).data('channel-id'),
+            channelType = +$(this).data('channel-type');
+
+        showChannelStats({
+            container: this,
+            channelId: channelId,
+            type: chartType,
+            title: chartTitles[chartType],
+            axisTitle: axisTitles[channelType],
+            unit: axisUnits[channelType]
+        });
     });
 });

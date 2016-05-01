@@ -45,8 +45,8 @@
 </div>
 
 <h2 class="sub-header">Statystyki</h2>
-<div data-chart="realtime" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
-<div data-chart="daily" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
-<div data-chart="monthly" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
-<div data-chart="yearly" data-channel-id="{{ channel['id'] }}" class="col-md-12"></div>
+<div data-chart="realtime" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
+<div data-chart="daily" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
+<div data-chart="monthly" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
+<div data-chart="yearly" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
 {% endblock %}
