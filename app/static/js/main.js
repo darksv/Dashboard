@@ -63,17 +63,17 @@ function createRealtimeChart(container, channelId)
                                 y = data.value,
                                 lastTimestamp = series.data[series.data.length - 1].x;
 
-                            var valueLabel = $('#temperature_value');
-                            var delta = y - valueLabel.text();
+                            var channelValueLabel = $('#channel_value');
+                            var delta = y - channelValueLabel.text();
 
-                            var changeIndicator = valueLabel.prev().removeClass('glyphicon-arrow-up glyphicon-arrow-down');
+                            var changeIndicator = channelValueLabel.prev().removeClass('glyphicon-arrow-up glyphicon-arrow-down');
                             if (delta < 0)
                                 changeIndicator.addClass('glyphicon-arrow-down');
                             else if (delta > 0)
                                 changeIndicator.addClass('glyphicon-arrow-up');
 
-                            valueLabel.text(y);
-                            valueLabel.attr('title', data.value_updated);
+                            channelValueLabel.text(y);
+                            channelValueLabel.attr('title', data.value_updated);
 
                             if (lastTimestamp != x)
                                 series.addPoint([x, y], true, true);

@@ -2,7 +2,7 @@ body {
     margin: 1em;
 }
 
-.temperature_indicator {
+.value_indicator {
     margin: auto;
     width: 400px;
     height: 100%;
@@ -11,11 +11,11 @@ body {
     display: block;
 }
 
-.temperature_indicator span {
+.value_indicator span {
     vertical-align: middle;
 }
 
-.temperature_indicator span.glyphicon {
+.value_indicator span.glyphicon {
     font-size: 0.8em;
 }
 
