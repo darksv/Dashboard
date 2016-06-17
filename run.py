@@ -1,3 +1,4 @@
+import os
 import config
 import requests
 from flask import render_template, send_from_directory, jsonify
@@ -6,6 +7,7 @@ from app.utils import format_datetime
 
 
 app.jinja_env.filters['datetime'] = format_datetime
+app.jinja_env.filters['script_mod_time'] = lambda name: int(os.path.getmtime(os.path.join('.', 'app', 'static', 'js', name)))
 
 if config.DEVELOPMENT:
     @app.route('/css/<path:path>')

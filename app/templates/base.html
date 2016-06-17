@@ -15,13 +15,13 @@
 
     <!-- Custom styles for this template -->
     <link href="/css/style.css" rel="stylesheet">
-  </head>
 
+    <script src="/js/lib/jquery.min.js" defer="defer"></script>
+    <script src="/js/lib/bootstrap.min.js" defer="defer"></script>
+    <script src="/js/lib/highcharts.js" defer="defer"></script>
+    <script src="/js/main.js?{{ ['main.js'] | random | script_mod_time }}" defer="defer"></script>
+  </head>
   <body>
     {% block body %}{% endblock %}
-    <script src="/js/lib/jquery.min.js"></script>
-    <script src="/js/lib/bootstrap.min.js"></script>
-    <script src="/js/lib/highcharts.js"></script>
-    <script src="/js/main.js"></script>
   </body>
 </html>
