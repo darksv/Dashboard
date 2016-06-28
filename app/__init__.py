@@ -1,6 +1,6 @@
 import config
 import os
-from flask import Flask, send_from_directory, jsonify, render_template
+from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for
 from flask_restful import Api
 from app import utils
 from app.resources.channel import ChannelResource
@@ -55,3 +55,15 @@ def channel_details(channel_id: int):
     channel_data = ChannelResource().get(channel_id)['data']
 
     return render_template('channel_details.html', channel=channel_data)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username == 'admin' and password == 'admin':
+            return redirect(url_for('devices_list'))
+
+    return render_template('login.html')
