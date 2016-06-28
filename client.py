@@ -35,7 +35,7 @@ def start_client(in_background: bool=False):
     client.on_connect = on_connect
     client.on_message = on_message
 
-    client.connect(config.MQTT_HOST, MQTT_PORT, 60)
+    client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
 
     if in_background:
         client.loop_start()
