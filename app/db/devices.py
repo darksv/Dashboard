@@ -19,7 +19,7 @@ def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
         return None
 
     query = select(DEVICES.c).select_from(DEVICES).where(condition)
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     row = result.fetchone()
 
@@ -35,7 +35,7 @@ def get_all_devices(db: Database) -> List[Device]:
     """
 
     query = select(DEVICES.c).select_from(DEVICES)
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return [Device(*row) for row in result]
 
@@ -48,7 +48,7 @@ def create_device(db: Database, device_uuid: str, device_name: str='') -> Option
         uuid=func.unhex(device_uuid),
         name=device_name
     )
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return get_device(db, device_id=result.lastrowid)
 

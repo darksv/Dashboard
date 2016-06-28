@@ -1,3 +1,4 @@
+from threading import RLock
 from sqlalchemy import MetaData, Table, Binary, Column, Integer, String, SmallInteger, Text, ForeignKey, Float, DateTime
 from sqlalchemy import create_engine
 import config
@@ -39,11 +40,16 @@ class Database:
     def __init__(self, db_uri: str):
         self._engine = create_engine(db_uri, echo=False)
         self._connection = self._engine.connect()
+        self._lock = RLock()
 
         self.create()
 
     def create(self):
         meta.create_all(bind=self._engine)
+
+    def execute(self, object, *multiparams, **params):
+        with self._lock:
+            return self.conn.execute(object, *multiparams, **params)
 
     @property
     def conn(self):

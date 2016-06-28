@@ -20,7 +20,7 @@ def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
         return None
 
     query = select(CHANNELS.c).select_from(CHANNELS).where(condition)
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     row = result.fetchone()
 
@@ -35,7 +35,7 @@ def get_device_channels(db: Database, device_id: int) -> List[Channel]:
     Get device channels.
     """
     query = select(CHANNELS.c).select_from(CHANNELS).where(CHANNELS.c.device_id == device_id)
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return [Channel(*row) for row in result]
 
@@ -46,7 +46,7 @@ def get_all_channels(db: Database) -> List[Channel]:
     """
 
     query = select(CHANNELS.c).select_from(CHANNELS)
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return [Channel(*row) for row in result]
 
@@ -61,7 +61,7 @@ def create_channel(db: Database, device_id: int, channel_uuid: str, channel_type
         type=channel_type,
         name=channel_name
     )
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return get_channel(db, channel_id=result.lastrowid)
 
@@ -91,29 +91,22 @@ def update_channel(db: Database, channel_id: Union[int, str], value: float) -> b
 
     now = datetime.now()
 
-    trans = db.conn.begin()
-    try:
-        if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
-            # add entry to channel history
-            query = insert(ENTRIES).values(
-                channel_id=channel.id,
-                value=channel.value,
-                timestamp=channel.value_updated
-            )
+    if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
+        # add entry to channel history
+        query = insert(ENTRIES).values(
+            channel_id=channel.id,
+            value=channel.value,
+            timestamp=channel.value_updated
+        )
 
-            db.conn.execute(query)
+        db.execute(query)
 
-        query = update(CHANNELS).values(
-            value=value,
-            value_updated=now
-        ).where(CHANNELS.c.id == channel.id)
+    query = update(CHANNELS).values(
+        value=value,
+        value_updated=now
+    ).where(CHANNELS.c.id == channel.id)
 
-        db.conn.execute(query)
-
-        trans.commit()
-    except:
-        trans.rollback()
-        raise
+    db.execute(query)
 
     return True
 
@@ -134,7 +127,7 @@ def get_recent_channel_stats(db: Database, channel_id: int, count: int=100) -> L
         .order_by(subquery.c.timestamp.asc()) \
         .limit(count)
 
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return [(timestamp, value) for timestamp, value in result]
 
@@ -149,7 +142,7 @@ def get_daily_channel_stats(db: Database, channel_id: int, hours: int=24) -> Lis
         .group_by(func.hour(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
         .order_by(ENTRIES.c.timestamp.asc())\
         .limit(hours)
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return [['{0:02}:00'.format(hour), round(temp, 2)] for hour, temp in result]
 
@@ -164,6 +157,6 @@ def get_monthly_channel_stats(db: Database, channel_id: int, days: int=30) -> Li
         .group_by(func.day(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
         .order_by(ENTRIES.c.timestamp.asc())\
         .limit(days)
-    result = db.conn.execute(query)
+    result = db.execute(query)
 
     return [[day, round(temp, 2)] for day, temp in result]
