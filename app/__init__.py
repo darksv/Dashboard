@@ -6,7 +6,6 @@ from app import utils
 from app.resources.channel import ChannelResource
 from app.resources.channel_stats import ChannelStatsResource
 from app.resources.device import DeviceResource
-from app.resources.entry import EntryResource
 
 
 app = Flask('dashboard', static_folder='app/static', template_folder='app/templates')
@@ -21,13 +20,11 @@ api.add_resource(ChannelResource, '/channels/<int:channel_id>', endpoint='channe
 api.add_resource(ChannelStatsResource, '/channels/<int:channel_id>/stats/<string:period>')
 api.add_resource(DeviceResource, '/devices')
 api.add_resource(DeviceResource, '/devices/<int:device_id>', endpoint='devices')
-api.add_resource(EntryResource, '/updates')
 
 if config.DEVELOPMENT:
     @app.route('/css/<path:path>')
     def send_css(path: str):
         return send_from_directory('app/static/css', path)
-
 
     @app.route('/js/<path:path>')
     def send_js(path: str):
