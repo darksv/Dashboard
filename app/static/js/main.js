@@ -12,7 +12,7 @@ function showChannelStats(options)
         var series = chart.series[0];
 
         setInterval(function(){
-            $.getJSON('/api/channels/' + options.channelId, function(response) {
+            $.getJSON('/channels/' + options.channelId, function(response) {
                 var data = response.data,
                     x = (new Date(data.value_updated)).getTime(),
                     y = data.value,
@@ -39,7 +39,7 @@ function showChannelStats(options)
     var onChartLoad = function () {
         const chart = this;
 
-        $.getJSON('/api/channels/' + options.channelId + '/stats/' + (isRealtime ? 'recent': options.type), function (data) {
+        $.getJSON('/channels/' + options.channelId + '/stats/' + (isRealtime ? 'recent': options.type), function (data) {
             var labels = [],
                 series = [];
 

@@ -1,6 +1,5 @@
 import config
 import os
-import requests
 from flask import Flask, send_from_directory, jsonify, render_template
 from flask_restful import Api
 from app import utils
@@ -42,26 +41,20 @@ if config.DEVELOPMENT:
 @app.route('/')
 @app.route('/devices')
 def devices_list():
-    devices = requests.get('http://test.hsdxd.usermd.net/devices').json()['data']
+    devices = DeviceResource().get()['data']
 
     return render_template('devices.html', devices=devices)
 
 
-@app.route('/api/<path:path>')
-def api_redirect(path: str):
-    result = requests.get('http://test.hsdxd.usermd.net/' + path).json()
-    return jsonify(result)
-
-
 @app.route('/device/<int:device_id>')
 def device_details(device_id: int):
-    device_data = requests.get('http://test.hsdxd.usermd.net/devices/{0}'.format(device_id)).json()['data']
+    device_data = DeviceResource().get(device_id)['data']
 
     return render_template('device_details.html', device=device_data)
 
 
 @app.route('/channel/<int:channel_id>')
 def channel_details(channel_id: int):
-    channel_data = requests.get('http://test.hsdxd.usermd.net/channels/{0}'.format(channel_id)).json()['data']
+    channel_data = ChannelResource().get(channel_id)['data']
 
     return render_template('channel_details.html', channel=channel_data)
