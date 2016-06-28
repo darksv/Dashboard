@@ -63,9 +63,7 @@ def create_channel(db: Database, device_id: int, channel_uuid: str, channel_type
     )
     result = db.conn.execute(query)
 
-    channel_id = result.lastrowid
-
-    return get_channel(db, channel_id=channel_id)
+    return get_channel(db, channel_id=result.lastrowid)
 
 
 def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: int=None) -> Optional[Channel]:
@@ -76,7 +74,11 @@ def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: 
     if channel is not None:
         return channel
 
-    return create_channel(db, device_id, channel_id)
+    channel = create_channel(db, device_id, channel_id)
+    if channel is None:
+        raise SystemError('Could not create a device')
+
+    return channel
 
 
 def update_channel(db: Database, channel_id: Union[int, str], value: float) -> bool:
@@ -89,22 +91,29 @@ def update_channel(db: Database, channel_id: Union[int, str], value: float) -> b
 
     now = datetime.now()
 
-    if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
-        # add entry to channel history
-        query = insert(ENTRIES).values(
-            channel_id=channel.id,
-            value=channel.value,
-            timestamp=channel.value_updated
-        )
+    trans = db.conn.begin()
+    try:
+        if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
+            # add entry to channel history
+            query = insert(ENTRIES).values(
+                channel_id=channel.id,
+                value=channel.value,
+                timestamp=channel.value_updated
+            )
+
+            db.conn.execute(query)
+
+        query = update(CHANNELS).values(
+            value=value,
+            value_updated=now
+        ).where(CHANNELS.c.id == channel.id)
 
         db.conn.execute(query)
 
-    query = update(CHANNELS).values(
-        value=value,
-        value_updated=now
-    ).where(CHANNELS.c.id == channel.id)
-
-    db.conn.execute(query)
+        trans.commit()
+    except:
+        trans.rollback()
+        raise
 
     return True
 

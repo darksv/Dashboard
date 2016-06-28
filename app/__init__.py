@@ -5,6 +5,7 @@ from app.resources.channel_stats import ChannelStatsResource
 from app.resources.device import DeviceResource
 from app.resources.entry import EntryResource
 
+
 app = Flask(__name__)
 
 api = Api(app)

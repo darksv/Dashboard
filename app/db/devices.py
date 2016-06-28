@@ -57,8 +57,12 @@ def get_or_create_device(db: Database, device_id: Union[int, str]) -> Optional[D
     """
     Get device by ID or create.
     """
-    channel = get_device(db, device_id)
-    if channel is not None:
-        return channel
+    device = get_device(db, device_id)
+    if device is not None:
+        return device
 
-    return create_device(db, device_id)
+    device = create_device(db, device_id)
+    if device is None:
+        raise SystemError('Could not create device')
+
+    return device
