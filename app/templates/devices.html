@@ -22,8 +22,20 @@
         {% for channel in device['channels'] %}
             <tr>
                 <td>{{ loop.index }}</td>
-                <td>{{ channel['name'] }}</td>
-                <td class="{{ ['temperature', 'pressure'][channel['type']] }}">{{ channel['value'] }}</td>
+                <td>
+                    {% if channel['name'] %}
+                        {{ channel['name'] }}
+                    {% else %}
+                        {{ channel['uuid'] }}
+                    {% endif %}
+                </td>
+                <td class="{{ ['temperature', 'pressure'][channel['type']] }}">
+                    {% if channel['value'] %}
+                        {{ channel['value'] }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <td>
                     {% if channel['value_updated'] %}
                         {{ channel['value_updated'] | datetime }}
