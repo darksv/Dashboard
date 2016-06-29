@@ -79,7 +79,7 @@ def login():
 
             flask_login.login_user(user)
         else:
-            message = ('danger', 'Nieprawidłowe dane logowania!')
+            message = ('danger', 'Nieprawidłowe dane!')
 
     return render_template('login.html', message=message)
 
