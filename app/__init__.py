@@ -4,6 +4,8 @@ from flask import Flask, send_from_directory, jsonify, render_template, request,
 from flask_restful import Api
 from flask.ext import login as flask_login
 from app import utils
+from app.db import DB
+from app.db.channels import update_channel
 from app.resources.channel import ChannelResource
 from app.resources.channel_stats import ChannelStatsResource
 from app.resources.device import DeviceResource
@@ -70,10 +72,24 @@ def channel_details(channel_id: int):
     return render_template('channel_details.html', channel=channel_data)
 
 
-@app.route('/channel/<int:channel_id>/settings')
+@app.route('/channel/<int:channel_id>/settings', methods=['GET', 'POST'])
 @flask_login.login_required
 def channel_settings(channel_id: int):
     channel_data = ChannelResource().get(channel_id)['data']
+
+    if request.method == 'POST':
+        channel_name = request.form.get('channel_name', '')
+        try:
+            channel_type = int(request.form.get('channel_type', 0))
+        except ValueError:
+            channel_type = 0
+
+        if len(channel_name) <= 100 and channel_type in (0, 1):
+            update_channel(DB, channel_id, channel_name, channel_type)
+
+            return redirect(url_for('channel_details', channel_id=channel_id))
+
+        channel_data.update(name=channel_name, type=channel_type)
 
     return render_template('channel_settings.html', channel=channel_data)
 

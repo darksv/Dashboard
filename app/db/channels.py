@@ -81,9 +81,9 @@ def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: 
     return channel
 
 
-def update_channel(db: Database, channel_id: Union[int, str], value: float) -> bool:
+def update_channel_value(db: Database, channel_id: Union[int, str], value: float) -> bool:
     """
-    Update channel data.
+    Update channel value.
     """
     channel = get_channel(db, channel_id)
     if channel is None:
@@ -107,6 +107,30 @@ def update_channel(db: Database, channel_id: Union[int, str], value: float) -> b
     ).where(CHANNELS.c.id == channel.id)
 
     db.execute(query)
+
+    return True
+
+
+def update_channel(db: Database, channel_id: int, channel_name: str = None, channel_type: int = None) -> bool:
+    """
+    Update channel name.
+    """
+    channel = get_channel(db, channel_id)
+    if channel is None:
+        return False
+
+    values = dict()
+
+    if channel_name is not None:
+        values['name'] = channel_name
+
+    if channel_type is not None:
+        values['type'] = channel_type
+
+    if len(values) > 0:
+        query = update(CHANNELS).values(**values).where(CHANNELS.c.id == channel.id)
+
+        db.execute(query)
 
     return True
 

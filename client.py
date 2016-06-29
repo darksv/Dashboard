@@ -1,7 +1,7 @@
 import math
 import paho.mqtt.client as mqtt
 from app.db import DB
-from app.db.channels import get_or_create_channel, update_channel
+from app.db.channels import get_or_create_channel, update_channel_value
 from app.db.devices import get_or_create_device
 import config
 
@@ -32,7 +32,7 @@ def on_message(client, userdata, msg):
         try:
             device = get_or_create_device(DB, device_uuid)
             channel = get_or_create_channel(DB, channel_uuid, device_id=device.id)
-            update_channel(DB, channel.id, value)
+            update_channel_value(DB, channel.id, value)
 
             print('Channel update successful')
         except SystemError as e:
