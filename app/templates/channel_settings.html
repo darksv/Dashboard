@@ -1,0 +1,29 @@
+{% extends "base_info_page.html" %}
+
+{% block title %}
+    Ustawienia kanału {{ channel.name }}
+{% endblock %}
+
+{% block content %}
+<form role="form" method="POST" action="{{ url_for('channel_settings', channel_id=channel.id) }}">
+    <div class="form-group">
+        <label for="channel_uuid">Identyfikator:</label>
+        <input type="text" class="form-control" id="channel_uuid" value="{{ channel.uuid }}" disabled="disabled">
+    </div>
+    <div class="form-group">
+        <label for="channel_name">Nazwa:</label>
+        <input type="text" class="form-control" id="channel_name" name="channel_name" value="{{ channel.name }}">
+    </div>
+    <div class="form-group">
+        <label for="channel_type">Typ:</label>
+        <select class="form-control" id="channel_type" name="channel_type">
+            {% for type in range(2) %}
+                <option value="{{ type }}" {{ 'selected="selected"' if channel.type == type }}>{{ ['temperatura', 'ciśnienie'][type] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+    <button type="submit" class="btn btn-default">Zapisz</button>
+</form>
+{% endblock %}

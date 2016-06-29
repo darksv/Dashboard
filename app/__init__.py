@@ -64,6 +64,14 @@ def channel_details(channel_id: int):
     return render_template('channel_details.html', channel=channel_data)
 
 
+@app.route('/channel/<int:channel_id>/settings')
+@flask_login.login_required
+def channel_settings(channel_id: int):
+    channel_data = ChannelResource().get(channel_id)['data']
+
+    return render_template('channel_settings.html', channel=channel_data)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 @login_manager.unauthorized_handler
 def login():
