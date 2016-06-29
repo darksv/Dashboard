@@ -1,3 +1,4 @@
 sqlalchemy
 Flask==0.10.1
+flask-login
 iso8601==0.1.11

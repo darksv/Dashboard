@@ -6,7 +6,13 @@
 <div class="container-fluid">
     <div class="col-lg-offset-4 col-lg-4 col-sm-offset-3 col-sm-6">
         <h1 class="page-header">Logowanie</h1>
-        <form role="form" method="POST">
+        {% if message %}
+        <div class="alert alert-{{ message[0] }}" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{ message[1] }}
+        </div>
+        {% endif %}
+        <form role="form" method="POST" action="{{ url_for('login') }}">
             <div class="form-group">
                 <label for="username">Nazwa użytkownika:</label>
                 <input type="text" class="form-control" id="username" name="username">
