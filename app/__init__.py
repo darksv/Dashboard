@@ -49,7 +49,6 @@ def devices_list():
 
 
 @app.route('/device/<int:device_id>')
-@flask_login.login_required
 def device_details(device_id: int):
     device_data = DeviceResource().get(device_id)['data']
 
@@ -65,7 +64,6 @@ def device_settings(device_id: int):
 
 
 @app.route('/channel/<int:channel_id>')
-@flask_login.login_required
 def channel_details(channel_id: int):
     channel_data = ChannelResource().get(channel_id)['data']
 
