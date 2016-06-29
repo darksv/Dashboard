@@ -80,10 +80,15 @@ def channel_settings(channel_id: int):
     return render_template('channel_settings.html', channel=channel_data)
 
 
-@app.route('/login', methods=['GET', 'POST'])
 @login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('login', next=request.path))
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     message = None
+    next_page = request.args.get('next', None)
 
     if request.method == 'POST':
         username = request.form['username']
@@ -94,10 +99,12 @@ def login():
             user.id = username
 
             flask_login.login_user(user)
+
+            return redirect(next_page or url_for('devices_list'))
         else:
             message = ('danger', 'Nieprawidłowe dane!')
 
-    return render_template('login.html', message=message)
+    return render_template('login.html', message=message, next=next_page)
 
 
 @app.route('/logout')
