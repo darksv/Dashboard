@@ -1,7 +1,7 @@
 {% extends "base_info_page.html" %}
 
 {% block title %}
-    Informacje o urządzeniu {{ device['name'] }}
+    Informacje o urządzeniu
 {% endblock %}
 
 {% block content %}
@@ -11,6 +11,10 @@
             <li class="list-group-item row">
                 <div class="col-md-4">Identyfikator</div>
                 <div class="col-md-8">{{ device['uuid'] }}</div>
+            </li>
+            <li class="list-group-item row">
+                <div class="col-md-4">Nazwa</div>
+                <div class="col-md-8">{{ device['name'] }}</div>
             </li>
         </ul>
     </div>
