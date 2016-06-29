@@ -56,6 +56,14 @@ def device_details(device_id: int):
     return render_template('device_details.html', device=device_data)
 
 
+@app.route('/device/<int:device_id>/settings')
+@flask_login.login_required
+def device_settings(device_id: int):
+    device_data = DeviceResource().get(device_id)['data']
+
+    return render_template('device_settings.html', device=device_data)
+
+
 @app.route('/channel/<int:channel_id>')
 @flask_login.login_required
 def channel_details(channel_id: int):

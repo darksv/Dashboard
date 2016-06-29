@@ -1,0 +1,22 @@
+{% extends "base_info_page.html" %}
+
+{% block title %}
+    Ustawienia urządzenia
+{% endblock %}
+
+{% block content %}
+<form role="form" method="POST" action="{{ url_for('device_settings', device_id=device.id) }}">
+    <div class="form-group">
+        <label for="channel_uuid">Identyfikator:</label>
+        <input type="text" class="form-control" id="device_uuid" value="{{ device.uuid }}" disabled="disabled">
+    </div>
+    <div class="form-group">
+        <label for="device_name">Nazwa:</label>
+        <input type="text" class="form-control" id="device_name" name="device_name" value="{{ device.name }}">
+    </div>
+    <div class="form-group pull-right">
+        <a href="{{ url_for('device_details', device_id=device.id) }}" class="btn btn-default">Anuluj</a>
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+    </div>
+</form>
+{% endblock %}
