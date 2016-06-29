@@ -1,3 +1,4 @@
+import math
 import paho.mqtt.client as mqtt
 from app.db import DB
 from app.db.channels import get_or_create_channel, update_channel
@@ -11,10 +12,18 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe('#')
 
 
+def parse_value(val: str) -> float:
+    result = float(val)
+    if math.isnan(result) or math.isinf(result):
+        raise ValueError('Only finite float is a valid value (got {0})'.format(result))
+
+    return result
+
+
 def on_message(client, userdata, msg):
     try:
         device_uuid, channel_uuid = msg.topic.split('/')
-        value = float(msg.payload.decode('ascii'))
+        value = parse_value(msg.payload.decode('ascii'))
     except ValueError:
         print(msg.topic, msg.payload)
     else:
