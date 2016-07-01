@@ -6,7 +6,7 @@ from app import utils
 from app.db import DB
 from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_daily_channel_stats, get_monthly_channel_stats
 from app.db.devices import get_all_devices, get_device
-from app.util import localize_datetime
+from app.utils import localize_datetime
 
 
 app = Flask('dashboard', static_folder='app/static', template_folder='app/templates')

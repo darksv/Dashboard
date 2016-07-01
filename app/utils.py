@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, Callable, Optional, Tuple
 from iso8601 import parse_date, ParseError
+from tzlocal import get_localzone
 
 
 def convert_in_dict(dct: dict, key: Any, mapper: Callable) -> None:
@@ -35,3 +36,18 @@ def extract_keys(d: dict, keys) -> dict:
         result[key] = d[key]
 
     return result
+
+
+def localize_datetime(dt: datetime) -> datetime:
+    """
+    Add local timezone to datetime.
+    """
+    return get_localzone().localize(dt)
+
+
+def convert_datetime_to_iso(dt: datetime) -> str:
+    """
+    Convert datetime to ISO8601 string.
+    """
+    return localize_datetime(dt).isoformat()
+
