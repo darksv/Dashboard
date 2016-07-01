@@ -1,14 +1,12 @@
 import config
 import os
-from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for
-from flask_restful import Api
+from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for, abort
 from flask.ext import login as flask_login
 from app import utils
 from app.db import DB
-from app.db.channels import update_channel
-from app.resources.channel import ChannelResource
-from app.resources.channel_stats import ChannelStatsResource
-from app.resources.device import DeviceResource
+from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_daily_channel_stats, get_monthly_channel_stats
+from app.db.devices import get_all_devices, get_device
+from app.util import localize_datetime
 
 
 app = Flask('dashboard', static_folder='app/static', template_folder='app/templates')
@@ -17,13 +15,6 @@ app.secret_key = config.SECRET_KEY
 app.jinja_env.filters['datetime'] = utils.format_datetime
 app.jinja_env.filters['script_mod_time'] = lambda name:\
     int(os.path.getmtime(os.path.join('.', 'app', 'static', 'js', name)))
-
-api = Api(app)
-api.add_resource(ChannelResource, '/channels')
-api.add_resource(ChannelResource, '/channels/<int:channel_id>', endpoint='channels')
-api.add_resource(ChannelStatsResource, '/channels/<int:channel_id>/stats/<string:period>')
-api.add_resource(DeviceResource, '/devices')
-api.add_resource(DeviceResource, '/devices/<int:device_id>', endpoint='devices')
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
@@ -45,37 +36,43 @@ if config.DEVELOPMENT:
 @app.route('/')
 @app.route('/devices')
 def devices_list():
-    devices = DeviceResource().get()['data']
+    devices = get_all_devices(DB)
 
     return render_template('devices.html', devices=devices)
 
 
 @app.route('/device/<int:device_id>')
 def device_details(device_id: int):
-    device_data = DeviceResource().get(device_id)['data']
+    device = get_device(DB, device_id)
 
-    return render_template('device_details.html', device=device_data)
+    if device is None:
+        return redirect(url_for('devices_list'))
+
+    return render_template('device_details.html', device=device)
 
 
 @app.route('/device/<int:device_id>/settings')
 @flask_login.login_required
 def device_settings(device_id: int):
-    device_data = DeviceResource().get(device_id)['data']
+    device = get_device(DB, device_id)
 
-    return render_template('device_settings.html', device=device_data)
+    if device is None:
+        return redirect(url_for('devices_list'))
+
+    return render_template('device_settings.html', device=device)
 
 
 @app.route('/channel/<int:channel_id>')
 def channel_details(channel_id: int):
-    channel_data = ChannelResource().get(channel_id)['data']
+    channel = get_channel(DB, channel_id)
 
-    return render_template('channel_details.html', channel=channel_data)
+    return render_template('channel_details.html', channel=channel)
 
 
 @app.route('/channel/<int:channel_id>/settings', methods=['GET', 'POST'])
 @flask_login.login_required
 def channel_settings(channel_id: int):
-    channel_data = ChannelResource().get(channel_id)['data']
+    channel_data = get_channel(DB, channel_id)
 
     if request.method == 'POST':
         channel_name = request.form.get('channel_name', '')
@@ -141,3 +138,19 @@ def user_loader(username):
     user.id = username
 
     return user
+
+
+@app.route('/channel/<int:channel_id>/stats/<period>')
+def channel_stats(channel_id: int, period: str):
+    data = []
+
+    if period == 'recent':
+        data = []
+        for timestamp, value in get_recent_channel_stats(DB, channel_id, 100):
+            data.append((localize_datetime(timestamp).isoformat(), value))
+    elif period == 'daily':
+        data = get_daily_channel_stats(DB, channel_id)
+    elif period == 'monthly':
+        data = get_monthly_channel_stats(DB, channel_id)
+
+    return jsonify(items=data)

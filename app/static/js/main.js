@@ -39,13 +39,14 @@ function showChannelStats(options)
     var onChartLoad = function () {
         const chart = this;
 
-        $.getJSON('/channels/' + options.channelId + '/stats/' + (isRealtime ? 'recent': options.type), function (data) {
-            var labels = [],
+        $.getJSON('/channel/' + options.channelId + '/stats/' + (isRealtime ? 'recent': options.type), function (data) {
+            var items = data.items,
+                labels = [],
                 series = [];
 
-            for (var i = 0; i < data.data.length; i++) {
-                var label = data.data[i][0],
-                    value = data.data[i][1];
+            for (var i = 0; i < items.length; i++) {
+                var label = items[i][0],
+                    value = items[i][1];
 
                 if (isRealtime) {
                     label = (new Date(label)).getTime();
@@ -55,6 +56,8 @@ function showChannelStats(options)
                     series.push(value);
                 }
             }
+
+            console.log(labels, series);
 
             chart.addSeries({
                 data: series,

@@ -1,10 +1,8 @@
-from collections import namedtuple
-from operator import attrgetter
 from typing import Optional, Union, List
 from sqlalchemy import select, insert, func
 from app.db import Database, DEVICES
-
-Device = namedtuple('Device', map(attrgetter('key'), DEVICES.c))
+from app.db.device import Device
+from app.utils import extract_keys
 
 
 def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
@@ -26,7 +24,7 @@ def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
     if row is None:
         return None
 
-    return Device(*row)
+    return Device(**extract_keys(row, ['id', 'uuid', 'name']))
 
 
 def get_all_devices(db: Database) -> List[Device]:
@@ -37,7 +35,7 @@ def get_all_devices(db: Database) -> List[Device]:
     query = select(DEVICES.c).select_from(DEVICES)
     result = db.execute(query)
 
-    return [Device(*row) for row in result]
+    return [Device(id=row['id'], uuid=row['uuid'], name=row['name']) for row in result]
 
 
 def create_device(db: Database, device_uuid: str, device_name: str='') -> Optional[Device]:

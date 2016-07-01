@@ -37,7 +37,11 @@
             <td>{{ loop.index }}</td>
             <td>{{ channel['name'] }}</td>
             <td class="{{ ['temperature', 'pressure'][channel['type']] }}">{{ channel['value'] }}</td>
-            <td>{{ channel['value_updated'] | datetime}}</td>
+            <td>
+                {% if channel.value_updated %}
+                    {{ channel['value_updated'] | datetime}}
+                {% endif %}
+            </td>
             <td><a href="{{ url_for('channel_details', channel_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
         </tr>
     {% endfor %}

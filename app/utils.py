@@ -23,3 +23,15 @@ def format_datetime(value: Tuple[str, datetime], dt_format: str='%H:%M:%S') -> O
         raise ValueError('Cannot convert {0} to datetime'.format(value))
 
     return dt.strftime(dt_format) if isinstance(dt, datetime) else None
+
+
+def extract_keys(d: dict, keys) -> dict:
+    """
+    Creates new dict based on specified keys from list.
+    """
+    result = dict()
+
+    for key in keys:
+        result[key] = d[key]
+
+    return result
