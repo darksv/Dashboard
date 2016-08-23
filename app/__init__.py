@@ -5,7 +5,7 @@ from flask.ext import login as flask_login
 from app.db import DB
 from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_daily_channel_stats, get_monthly_channel_stats
 from app.db.devices import get_all_devices, get_device
-from app.db.users import get_user_by_username
+from app.db.users import get_user_by_id, get_user_by_username
 from app.utils import localize_datetime
 
 
@@ -129,7 +129,7 @@ def logout():
 
 @login_manager.user_loader
 def user_loader(user_id):
-    return get_user_by_username(DB, user_id)
+    return get_user_by_id(DB, user_id)
 
 
 @app.route('/channel/<int:channel_id>/stats/<period>')
