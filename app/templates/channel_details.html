@@ -5,51 +5,48 @@
 {% endblock %}
 
 {% block content %}
-<script>
-    var channelId = '{{ channel.uuid }}';
-</script>
 <div class="row">
     <div class="col-md-7">
         <ul class="list-group info">
             <li class="list-group-item row">
                 <div class="col-md-4">Identyfikator</div>
-                <div class="col-md-8">{{ channel['uuid'] }}</div>
+                <div class="col-md-8">{{ channel.uuid }}</div>
             </li>
             <li class="list-group-item row">
                 <div class="col-md-4">Nazwa</div>
-                <div class="col-md-8">{{ channel['name'] }}</div>
+                <div class="col-md-8">{{ channel.name }}</div>
             </li>
             <li class="list-group-item row">
                 <div class="col-md-4">Typ</div>
-                <div class="col-md-8">{{ ['temperatura', 'ciśnienie'][channel['type']] }}</div>
+                <div class="col-md-8">{{ ['temperatura', 'ciśnienie'][channel.type] }}</div>
             </li>
             {% if channel['description'] %}
             <li class="list-group-item row">
                 <div class="col-md-4">Opis</div>
-                <div class="col-md-8">{{ channel['description'] }}</div>
+                <div class="col-md-8">{{ channel.description }}</div>
             </li>
             {% endif %}
             <li class="list-group-item row hidden-md hidden-lg">
                 <div class="col-md-4">Pomiar</div>
-                <div class="col-md-8 {{ ['temperature', 'pressure'][channel['type']] }}">{{ channel['value'] }}</div>
+                <div class="col-md-8 {{ ['temperature', 'pressure'][channel.type] }}">{{ channel.value }}</div>
             </li>
             <li class="list-group-item row hidden-md hidden-lg">
                 <div class="col-md-4">Ostatnia aktualizacja</div>
-                <div class="col-md-8">{{ channel['value_updated'] }}</div>
+                <div class="col-md-8">{{ channel.value_updated }}</div>
             </li>
         </ul>
     </div>
     <div class="col-md-5 hidden-sm hidden-xs">
         <div class="label label-info value_indicator">
             <span class="glyphicon"></span>
-            <span id="channel_value" class="{{ ['temperature', 'pressure'][channel['type']] }}" title="">-</span>
+            <span id="channel_value" class="{{ ['temperature', 'pressure'][channel.type] }}" title="">-</span>
         </div>
     </div>
 </div>
 
 <h2 class="sub-header">Statystyki</h2>
-<div data-chart="realtime" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
-<div data-chart="daily" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
-<div data-chart="monthly" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
-<div data-chart="yearly" data-channel-id="{{ channel['id'] }}" data-channel-type="{{ channel['type'] }}" class="col-md-12"></div>
+<div data-chart="realtime" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
+<div data-chart="daily" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
+<div data-chart="monthly" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
+<div data-chart="yearly" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
 {% endblock %}

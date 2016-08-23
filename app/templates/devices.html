@@ -7,7 +7,7 @@
 {% block content %}
 {% for device in devices %}
 <div class="panel panel-default">
-    <div class="panel-heading"><a href="{{ url_for('device_details', device_id=device['id']) }}">{{ device['name'] }}</a></div>
+    <div class="panel-heading"><a href="{{ url_for('device_details', device_id=device.id) }}">{{ device.name }}</a></div>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -19,31 +19,27 @@
             </tr>
         </thead>
         <tbody>
-        {% for channel in device['channels'] %}
+        {% for channel in device.channels %}
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>
-                    {% if channel['name'] %}
-                        {{ channel['name'] }}
-                    {% else %}
-                        {{ channel['uuid'] }}
-                    {% endif %}
+                    {{ channel.name or channel.uuid }}
                 </td>
-                <td class="{{ ['temperature', 'pressure'][channel['type']] }}">
-                    {% if channel['value'] %}
-                        {{ channel['value'] }}
-                    {% else %}
-                        -
-                    {% endif %}
+                <td class="{{ ['temperature', 'pressure'][channel.type] }}">
+                    {{ channel.value or '-' }}
                 </td>
                 <td>
-                    {% if channel['value_updated'] %}
-                        {{ channel['value_updated'] | datetime }}
+                    {% if channel.value_updated %}
+                        {{ channel.value_updated | datetime }}
                     {% else %}
                         brak
                     {% endif %}
                 </td>
-                <td><a href="{{ url_for('channel_details', channel_id=channel['id']) }}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></td>
+                <td>
+                    <a href="{{ url_for('channel_details', channel_id=channel.id) }}">
+                        <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </a>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
