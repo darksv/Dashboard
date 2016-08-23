@@ -188,7 +188,7 @@
     client.onMessageArrived = function (message) {
         console.log('got channel update', message.destinationName, message.payloadString);
 
-        if (typeof channelId !== 'undefined' && message.destinationName.indexOf(channelId) !== -1) {
+        if ('channel_uuid' in data && message.destinationName.indexOf(data['channel_uuid']) !== -1) {
             updateChannelLabel(message.payloadString, Date.now());
         } else if (message.destinationName === 'testNotify') {
             new Notification('Informacja', {
@@ -201,8 +201,8 @@
         onSuccess: function() {
             console.log('connected');
 
-            if (typeof channelId !== 'undefined')
-                client.subscribe('+/' + channelId);
+            if ('channel_uuid' in data)
+                client.subscribe('+/' + data['channel_uuid']);
 
             client.subscribe('testNotify');
         }

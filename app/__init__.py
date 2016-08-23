@@ -66,7 +66,7 @@ def device_settings(device_id: int):
 def channel_details(channel_id: int):
     channel = get_channel(DB, channel_id)
 
-    return render_template('channel_details.html', channel=channel)
+    return render_template('channel_details.html', channel=channel, data=dict(channel_uuid=channel.uuid))
 
 
 @app.route('/channel/<int:channel_id>/settings', methods=['GET', 'POST'])
