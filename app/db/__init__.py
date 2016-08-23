@@ -35,6 +35,12 @@ ENTRIES = Table('entries', meta,
     Column('timestamp', DateTime(timezone=True), nullable=False)
 )
 
+USERS = Table('users', meta,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('name', String(100), unique=True),
+    Column('hash', String(100))
+)
+
 
 class Database:
     def __init__(self, db_uri: str):

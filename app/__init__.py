@@ -2,10 +2,10 @@ import config
 import os
 from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for, abort
 from flask.ext import login as flask_login
-from app import utils
 from app.db import DB
 from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_daily_channel_stats, get_monthly_channel_stats
 from app.db.devices import get_all_devices, get_device
+from app.db.users import get_user_by_username
 from app.utils import localize_datetime
 
 
@@ -105,10 +105,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        if username in config.USERS and config.USERS[username] == password:
-            user = User()
-            user.id = username
+        user = get_user_by_username(DB, username)
 
+        if user and user.check_password(password):
             flask_login.login_user(user)
 
             return redirect(next_page or url_for('devices_list'))
@@ -125,19 +124,9 @@ def logout():
     return redirect(url_for('login'))
 
 
-class User(flask_login.UserMixin):
-    pass
-
-
 @login_manager.user_loader
-def user_loader(username):
-    if username not in config.USERS:
-        return
-
-    user = User()
-    user.id = username
-
-    return user
+def user_loader(user_id):
+    return get_user_by_username(DB, user_id)
 
 
 @app.route('/channel/<int:channel_id>/stats/<period>')
