@@ -13,8 +13,11 @@ app = Flask('dashboard', static_folder='app/static', template_folder='app/templa
 app.secret_key = config.SECRET_KEY
 
 app.jinja_env.filters['datetime'] = utils.format_datetime
-app.jinja_env.filters['script_mod_time'] = lambda name:\
-    int(os.path.getmtime(os.path.join('.', 'app', 'static', 'js', name)))
+
+
+@app.context_processor
+def inject_utils():
+    return dict(path_with_mtime=lambda path: '{0}?{1}'.format(path, int(os.path.getmtime('./app/static' + path))))
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
