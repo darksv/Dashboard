@@ -39,18 +39,28 @@ def on_message(client, userdata, msg):
             print('Exception', e)
 
 
+def _start_client(in_background: bool=False):
+    try:
+        client = mqtt.Client()
+        client.on_connect = on_connect
+        client.on_message = on_message
+
+        if in_background:
+            client.connect_async(config.MQTT_HOST, config.MQTT_PORT, 60)
+            client.loop_start()
+        else:
+            client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
+            client.loop_forever()
+    except Exception as e:
+        print('exception in thread', e)
+
+
 def start_client(in_background: bool=False):
-    client = mqtt.Client()
-    client.on_connect = on_connect
-    client.on_message = on_message
-
-    client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
-
-    if in_background:
-        client.loop_start()
+    if not in_background:
+        while True:
+            _start_client(in_background)
     else:
-        client.loop_forever()
-
+        _start_client(in_background)
 
 if __name__ == '__main__':
     start_client(in_background=False)
