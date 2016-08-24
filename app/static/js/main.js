@@ -188,9 +188,9 @@
     client.onMessageArrived = function (message) {
         console.log('got channel update', message.destinationName, message.payloadString);
 
-        if ('channel_uuid' in data && message.destinationName.indexOf(data['channel_uuid']) !== -1) {
+        if (data.endpoint == 'channel_details' && message.destinationName.indexOf(data.channel_uuid) !== -1) {
             updateChannelLabel(message.payloadString, Date.now());
-        } else if (message.destinationName === 'testNotify') {
+        } else if (message.destinationName.startsWith('notify')) {
             new Notification('Informacja', {
                 body: message.payloadString
             });
@@ -201,10 +201,11 @@
         onSuccess: function() {
             console.log('connected');
 
-            if ('channel_uuid' in data)
-                client.subscribe('+/' + data['channel_uuid']);
+            if (data.endpoint === 'channel_datails')
+                client.subscribe('+/' + data.channel_uuid);
 
-            client.subscribe('testNotify');
+            if (data.user.name !== null)
+                client.subscribe('notify/' + data.user.name);
         }
     });
 })();

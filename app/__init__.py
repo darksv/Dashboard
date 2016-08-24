@@ -2,6 +2,7 @@ import config
 import os
 from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for, abort
 from flask.ext import login as flask_login
+from flask.ext.login import current_user
 from app.db import DB
 from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_daily_channel_stats, get_monthly_channel_stats
 from app.db.devices import get_all_devices, get_device
@@ -14,12 +15,16 @@ app.secret_key = config.SECRET_KEY
 
 app.jinja_env.filters['datetime'] = utils.format_datetime
 
-js_globals = dict()
+js_vars = dict()
 
 
 @app.before_request
-def inject_endpoint():
-    js_globals['endpoint'] = request.endpoint
+def add_js_vars():
+    js_vars['endpoint'] = request.endpoint
+    js_vars['user'] = dict(
+        name=current_user.name if not current_user.is_anonymous else None,
+        hash=current_user.hash if not current_user.is_anonymous else None
+    )
 
 
 @app.context_processor
@@ -28,8 +33,8 @@ def inject_utils():
 
 
 @app.context_processor
-def inject_js_globals():
-    return dict(data=js_globals)
+def inject_js_vars():
+    return dict(data=js_vars)
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
@@ -81,7 +86,7 @@ def device_settings(device_id: int):
 def channel_details(channel_id: int):
     channel = get_channel(DB, channel_id)
 
-    js_globals['channel_uuid'] = channel.uuid
+    js_vars['channel_uuid'] = channel.uuid
 
     return render_template('channel_details.html', channel=channel)
 
