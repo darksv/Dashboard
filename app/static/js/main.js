@@ -201,7 +201,7 @@
         onSuccess: function() {
             console.log('connected');
 
-            if (data.endpoint === 'channel_datails')
+            if (data.endpoint === 'channel_details')
                 client.subscribe('+/' + data.channel_uuid);
 
             if (data.user.name !== null)
