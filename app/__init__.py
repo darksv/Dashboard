@@ -14,10 +14,22 @@ app.secret_key = config.SECRET_KEY
 
 app.jinja_env.filters['datetime'] = utils.format_datetime
 
+js_globals = dict()
+
+
+@app.before_request
+def inject_endpoint():
+    js_globals['endpoint'] = request.endpoint
+
 
 @app.context_processor
 def inject_utils():
     return dict(path_with_mtime=lambda path: '{0}?{1}'.format(path, int(os.path.getmtime('./app/static' + path))))
+
+
+@app.context_processor
+def inject_js_globals():
+    return dict(data=js_globals)
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
@@ -69,7 +81,9 @@ def device_settings(device_id: int):
 def channel_details(channel_id: int):
     channel = get_channel(DB, channel_id)
 
-    return render_template('channel_details.html', channel=channel, data=dict(channel_uuid=channel.uuid))
+    js_globals['channel_uuid'] = channel.uuid
+
+    return render_template('channel_details.html', channel=channel)
 
 
 @app.route('/channel/<int:channel_id>/settings', methods=['GET', 'POST'])
