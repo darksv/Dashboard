@@ -4,7 +4,7 @@ from flask import Flask, send_from_directory, jsonify, render_template, request,
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
 from app.db import DB
-from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_daily_channel_stats, get_monthly_channel_stats
+from app.db.channels import update_channel, get_channel, get_recent_channel_stats
 from app.db.devices import get_all_devices, get_device
 from app.db.users import get_user_by_id, get_user_by_username
 from app.utils import localize_datetime
@@ -86,6 +86,7 @@ def device_settings(device_id: int):
 def channel_details(channel_id: int):
     channel = get_channel(DB, channel_id)
 
+    js_vars['channel_id'] = channel.id
     js_vars['channel_uuid'] = channel.uuid
 
     return render_template('channel_details.html', channel=channel)
@@ -151,17 +152,22 @@ def user_loader(user_id):
     return get_user_by_id(DB, user_id)
 
 
-@app.route('/channel/<int:channel_id>/stats/<period>')
-def channel_stats(channel_id: int, period: str):
-    data = []
+@app.route('/getStats')
+def channel_stats():
+    period = request.args.get('type')
+    channel_id = int(request.args.get('channelId'))
+
+    channel = get_channel(DB, channel_id)
+    if not channel:
+        return jsonify()
 
     if period == 'recent':
-        data = []
-        for timestamp, value in get_recent_channel_stats(DB, channel_id, 100):
-            data.append((localize_datetime(timestamp).isoformat(), value))
-    elif period == 'daily':
-        data = get_daily_channel_stats(DB, channel_id)
-    elif period == 'monthly':
-        data = get_monthly_channel_stats(DB, channel_id)
+        title = ['Temperatura', 'Ciśnienie'][channel.type]
+        unit = ['℃', 'hPa'][channel.type]
+        labels = []
+        values = []
+        for timestamp, value in get_recent_channel_stats(DB, channel_id, 30):
+            labels.append(localize_datetime(timestamp).strftime('%H:%M'))
+            values.append(value)
 
-    return jsonify(items=data)
+        return jsonify(title=title, unit=unit, labels=labels, values=values)

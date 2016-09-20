@@ -1,15 +1,9 @@
 (function() {
-    console.log(Notification.permission);
+    "use strict";
 
     if (Notification.permission === 'default') {
         Notification.requestPermission();
     }
-
-    Highcharts.setOptions({
-        global: {
-            useUTC: false
-        }
-    });
 
     function updateChannelLabel(newValue, timestamp) {
         var channelValueLabel = $('#channel_value'),
@@ -38,135 +32,48 @@
         channelValueLabel.attr('title', new Date(timestamp).toLocaleTimeString());
     }
 
-    function showChannelStats(options) {
-        const isRealtime = (options.type == 'realtime');
-
-        var onChartLoad = function () {
-            const chart = this;
-
-            $.getJSON('/channel/' + options.channelId + '/stats/' + (isRealtime ? 'recent': options.type), function (data) {
-                var items = data.items,
-                    labels = [],
-                    series = [];
-
-                for (var i = 0; i < items.length; i++) {
-                    var label = items[i][0],
-                        value = items[i][1];
-
-                    if (isRealtime) {
-                        label = (new Date(label)).getTime();
-                        series.push([label, value]);
-                    } else {
-                        labels.push(label);
-                        series.push(value);
+    function showRealtimeChart(options) {
+        var realtimeChart = new Chart(document.getElementById('realtime_chart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        fill: true,
+                        lineTension: 0.3,
+                        pointRadius: 0,
+                        data: []
                     }
-                }
-
-                console.log(labels, series);
-
-                chart.addSeries({
-                    data: series,
-                    marker: {
-                        enabled: false,
-                        states: {
-                            hover: {
-                                enabled: false
-                            }
-                        }
-                    }
-                });
-
-                if (!isRealtime) {
-                    chart.xAxis[0].setCategories(labels);
-                }
-
-                chart.redraw();
-            });
-        };
-
-        var chartOptions = {
-            chart: {
-                type: 'spline',
-                renderTo: options.container,
-                events: {
-                    load: onChartLoad
-                }
+                ]
             },
-            plotOptions: {
-                line: {
-                    marker: {
-                        enabled: false
-                    }
-                }
-            },
-            title: {
-                text: options.title,
-                x: -20
-            },
-            exporting: {
-                enabled: false
-            },
-            yAxis: {
-                title: {
-                    text: options.axisTitle + ' [' + options.unit + ']'
+            options: {
+                legend: {
+                    display: false
                 },
-                plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#808080'
-                }]
-            },
-            tooltip: {
-                valueSuffix: options.unit
-            },
-            legend: {
-                enabled: false
+                scales: {
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: ''
+                        }
+                    }]
+                }
             }
-        };
+        });
 
-        if (isRealtime) {
-            chartOptions.animation = Highcharts.svg;
-            chartOptions.xAxis = {
-                type: 'datetime',
-                tickPixelInterval: 150
-            };
-        }
+        var url = '/getStats?' + $.param({'channelId': options.channelId, 'type': 'recent'});
+        $.getJSON(url, function (data) {
+            realtimeChart.data.labels = data.labels;
+            realtimeChart.data.datasets[0].data = data.values;
+            realtimeChart.options.scales.yAxes[0].scaleLabel.labelString = data.title + ' [' + data.unit + ']';
+            realtimeChart.update();
+        });
 
-        console.log(chartOptions);
-
-        return new Highcharts.Chart(chartOptions);
+        return realtimeChart;
     }
 
-    const chartTitles = {
-        realtime: 'Wykres w czasie rzeczywistym',
-        daily: 'Ostatnie 24 godziny',
-        monthly: 'Ostatni miesiąc'
-    };
-
-    const axisTitles = {
-        0: 'Temperatura',
-        1: 'Ciśnienie'
-    };
-
-    const axisUnits = {
-        0: '℃',
-        1: 'hPa'
-    };
-
-    $('[data-chart]').each(function() {
-        var chartType = $(this).data('chart'),
-            channelId = +$(this).data('channel-id'),
-            channelType = +$(this).data('channel-type');
-
-        showChannelStats({
-            container: this,
-            channelId: channelId,
-            type: chartType,
-            title: chartTitles[chartType],
-            axisTitle: axisTitles[channelType],
-            unit: axisUnits[channelType]
-        });
-    });
+    var realtimeChart = showRealtimeChart({channelId: data.channel_id});
 
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -179,16 +86,42 @@
 
     var clientId = navigator.userAgent;
 
-    var client = new Paho.MQTT.Client('ws://xxx:9001/ws', clientId);
+    var client = new Paho.MQTT.Client('wss://xxx:9883/ws', clientId);
     client.onConnectionLost = function (responseObject) {
         if (responseObject.errorCode !== 0)
             console.log('connection lost', responseObject.errorMessage);
     };
 
-    client.onMessageArrived = function (message) {
-        console.log('got channel update', message.destinationName, message.payloadString);
+    function zfill(x) {
+        return (x < 10 ? '0' : '') + x;
+    }
 
+    function pushAndShift(arr, item) {
+        arr.shift();
+        arr.push(item);
+    }
+
+    function addToChart(chart, label, value) {
+        console.log(chart, label, value);
+
+        pushAndShift(chart.data.labels, label);
+        pushAndShift(chart.data.datasets[0].data, value);
+        chart.update();
+    }
+
+    function lastItem(arr) {
+        return arr[arr.length - 1];
+    }
+
+    client.onMessageArrived = function (message) {
         if (data.endpoint == 'channel_details' && message.destinationName.indexOf(data.channel_uuid) !== -1) {
+            var currentTime = new Date;
+            var label = zfill(currentTime.getHours()) + ':' + zfill(currentTime.getMinutes());
+
+            if (lastItem(realtimeChart.data.labels) !== label) {
+                addToChart(realtimeChart, label, parseFloat(message.payloadString));
+            }
+
             updateChannelLabel(message.payloadString, Date.now());
         } else if (message.destinationName.startsWith('notify')) {
             new Notification('Informacja', {
@@ -199,8 +132,6 @@
 
     client.connect({
         onSuccess: function() {
-            console.log('connected');
-
             if (data.endpoint === 'channel_details')
                 client.subscribe('+/' + data.channel_uuid);
 

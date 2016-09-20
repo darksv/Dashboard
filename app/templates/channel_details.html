@@ -39,14 +39,18 @@
     <div class="col-md-5 hidden-sm hidden-xs">
         <div class="label label-info value_indicator">
             <span class="glyphicon"></span>
-            <span id="channel_value" class="{{ ['temperature', 'pressure'][channel.type] }}" title="">-</span>
+            <span id="channel_value" class="{{ ['temperature', 'pressure'][channel.type] }}" title="">{{ channel.value }}</span>
         </div>
     </div>
 </div>
 
-<h2 class="sub-header">Statystyki</h2>
-<div data-chart="realtime" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
-<div data-chart="daily" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
-<div data-chart="monthly" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
-<div data-chart="yearly" data-channel-id="{{ channel.id }}" data-channel-type="{{ channel.type }}" class="col-md-12"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">Statystyki</h2>
+    </div>
+    <div class="panel-body">
+        <canvas id="realtime_chart"></canvas>
+    </div>
+</div>
+
 {% endblock %}
