@@ -1,8 +1,6 @@
 import math
 import paho.mqtt.client as mqtt
-from app.db import DB
-from app.db.channels import get_or_create_channel, update_channel_value
-from app.db.devices import get_or_create_device
+import requests
 import config
 
 
@@ -30,11 +28,13 @@ def on_message(client, userdata, msg):
         print('Received channel update: device={0} channel={1} value={2}'.format(device_uuid, channel_uuid, value))
 
         try:
-            device = get_or_create_device(DB, device_uuid)
-            channel = get_or_create_channel(DB, channel_uuid, device_id=device.id)
-            update_channel_value(DB, channel.id, value)
+            req = requests.get('https://xxx/updateChannel',
+                               dict(deviceUuid=device_uuid, channelUuid=channel_uuid, value=value))
 
-            print('Channel update successful')
+            if req.status_code == 200:
+                print('Channel update successful')
+            else:
+                print('Update unsuccessful', req.status_code, req.content)
         except SystemError as e:
             print('Exception', e)
 

@@ -4,3 +4,5 @@ flask-login
 iso8601==0.1.11
 tzlocal
 paho-mqtt
+pymysql
+requests

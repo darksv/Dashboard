@@ -4,8 +4,9 @@ from flask import Flask, send_from_directory, jsonify, render_template, request,
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
 from app.db import DB
-from app.db.channels import update_channel, get_channel, get_recent_channel_stats
-from app.db.devices import get_all_devices, get_device
+from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_or_create_channel, \
+    update_channel_value
+from app.db.devices import get_all_devices, get_device, get_or_create_device
 from app.db.users import get_user_by_id, get_user_by_username
 from app.utils import localize_datetime
 
@@ -171,3 +172,20 @@ def channel_stats():
             values.append(value)
 
         return jsonify(title=title, unit=unit, labels=labels, values=values)
+
+
+@app.route('/updateChannel')
+def channel_update():
+    try:
+        device_uuid = request.args.get('deviceUuid')
+        channel_uuid = request.args.get('channelUuid')
+        value = float(request.args.get('value'))
+
+        device = get_or_create_device(DB, device_uuid)
+        channel = get_or_create_channel(DB, channel_uuid, device_id=device.id)
+        if update_channel_value(DB, channel.id, value):
+            return '', 200
+        else:
+            return 'ERROR', 500
+    except Exception:
+        abort(403)
