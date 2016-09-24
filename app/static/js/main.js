@@ -40,7 +40,7 @@
                 datasets: [
                     {
                         fill: true,
-                        lineTension: 0.3,
+                        lineTension: 0,
                         pointRadius: 0,
                         data: []
                     }
