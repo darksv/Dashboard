@@ -53,4 +53,26 @@
     </div>
 </div>
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">Statystyki</h2>
+    </div>
+    <div class="panel-body">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse">
+                <form id="chart_settings" class="navbar-form navbar-left">
+                    <div class="form-group">
+                        <label>Zakres dat: </label>
+                        <input type="date" class="form-control" name="from">
+                        -
+                        <input type="date" class="form-control" name="to">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Aktualizuj</button>
+                </form>
+            </div>
+        </div>
+        <canvas id="custom_chart"></canvas>
+    </div>
+</div>
+
 {% endblock %}

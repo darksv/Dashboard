@@ -4,8 +4,8 @@ from flask import Flask, send_from_directory, jsonify, render_template, request,
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
 from app.db import DB
-from app.db.channels import update_channel, get_channel, get_recent_channel_stats, get_or_create_channel, \
-    update_channel_value
+from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
+    get_recent_channel_stats, get_channel_stats
 from app.db.devices import get_all_devices, get_device, get_or_create_device
 from app.db.users import get_user_by_id, get_user_by_username
 from app.utils import localize_datetime
@@ -162,16 +162,28 @@ def channel_stats():
     if not channel:
         return jsonify()
 
+    title = ['Temperatura', 'Ciśnienie'][channel.type]
+    unit = ['℃', 'hPa'][channel.type]
+
+    labels = []
+    values = []
+
     if period == 'recent':
-        title = ['Temperatura', 'Ciśnienie'][channel.type]
-        unit = ['℃', 'hPa'][channel.type]
-        labels = []
-        values = []
         for timestamp, value in get_recent_channel_stats(DB, channel_id, 30):
             labels.append(localize_datetime(timestamp).strftime('%H:%M'))
             values.append(value)
+    elif period == 'custom':
+        try:
+            period_start = utils.parse_datetime(request.args.get('from'))
+            period_end = utils.parse_datetime(request.args.get('to'))
+        except ValueError:
+            pass
+        else:
+            for dt, value in get_channel_stats(DB, channel_id, period_start, period_end):
+                labels.append(dt)
+                values.append(value)
 
-        return jsonify(title=title, unit=unit, labels=labels, values=values)
+    return jsonify(title=title, unit=unit, labels=labels, values=values)
 
 
 @app.route('/updateChannel')

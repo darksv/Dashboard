@@ -81,7 +81,7 @@ def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: 
 
 def update_channel_value(db: Database, channel_id: Union[int, str], value: float) -> bool:
     """
-    Update channel value.
+    Update channel's value.
     """
     channel = get_channel(db, channel_id)
     if channel is None:
@@ -111,7 +111,7 @@ def update_channel_value(db: Database, channel_id: Union[int, str], value: float
 
 def update_channel(db: Database, channel_id: int, channel_name: str = None, channel_type: int = None) -> bool:
     """
-    Update channel name.
+    Update channel's name.
     """
     channel = get_channel(db, channel_id)
     if channel is None:
@@ -135,7 +135,7 @@ def update_channel(db: Database, channel_id: int, channel_name: str = None, chan
 
 def get_recent_channel_stats(db: Database, channel_id: int, count: int=100) -> List:
     """
-    Get recent sensor's stats.
+    Get recent channels's stats.
     """
     subquery = select([ENTRIES.c.timestamp, ENTRIES.c.value]) \
         .select_from(ENTRIES) \
@@ -154,31 +154,17 @@ def get_recent_channel_stats(db: Database, channel_id: int, count: int=100) -> L
     return [(timestamp, value) for timestamp, value in result]
 
 
-def get_daily_channel_stats(db: Database, channel_id: int, hours: int=24) -> List:
+def get_channel_stats(db: Database, channel_id: int, period_start: datetime, period_end: datetime) -> List:
     """
-    Get sensor's stats for last n hours.
+    Get channel's stats for specified period.
     """
-    query = select([func.hour(ENTRIES.c.timestamp), func.avg(ENTRIES.c.value)])\
-        .select_from(ENTRIES)\
-        .where(and_(ENTRIES.c.channel_id == channel_id, ENTRIES.c.timestamp >= datetime.now() - timedelta(hours=hours)))\
-        .group_by(func.hour(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
-        .order_by(ENTRIES.c.timestamp.asc())\
-        .limit(hours)
+    query = select([func.date(ENTRIES.c.timestamp), func.avg(ENTRIES.c.value)]) \
+        .select_from(ENTRIES) \
+        .where(and_(ENTRIES.c.channel_id == channel_id,
+                    ENTRIES.c.timestamp >= period_start,
+                    ENTRIES.c.timestamp <= period_end))\
+        .group_by(func.date(ENTRIES.c.timestamp), func.hour(ENTRIES.c.timestamp)) \
+        .order_by(ENTRIES.c.timestamp.asc())
     result = db.execute(query)
 
-    return [['{0:02}:00'.format(hour), round(temp, 2)] for hour, temp in result]
-
-
-def get_monthly_channel_stats(db: Database, channel_id: int, days: int=30) -> List:
-    """
-    Get sensor's stats for last n days.
-    """
-    query = select([func.date_format(ENTRIES.c.timestamp, '%e.%m'), func.avg(ENTRIES.c.value)])\
-        .select_from(ENTRIES)\
-        .where(and_(ENTRIES.c.channel_id == channel_id, ENTRIES.c.timestamp >= datetime.now() - timedelta(days=days)))\
-        .group_by(func.day(ENTRIES.c.timestamp), func.date(ENTRIES.c.timestamp))\
-        .order_by(ENTRIES.c.timestamp.asc())\
-        .limit(days)
-    result = db.execute(query)
-
-    return [[day, round(temp, 2)] for day, temp in result]
+    return [[str(time), round(value, 2)] for time, value in result]

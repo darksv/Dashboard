@@ -24,7 +24,7 @@
   </head>
   <body>
     <script>
-        var data = {{ (data or {}) | tojson | safe }};
+        var page_data = {{ (data or {}) | tojson | safe }};
     </script>
     {% block body %}{% endblock %}
   </body>
