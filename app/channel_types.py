@@ -26,6 +26,13 @@ def get_types() -> List[ChannelType]:
     return types
 
 
+def get_type_ids() -> List[int]:
+    """
+    Get all possible type IDs.
+    """
+    return [channel_type.id for channel_type in types]
+
+
 def get_type_by_id(type_id: int) -> Optional[ChannelType]:
     """
     Get ChannelType object with specified type ID.

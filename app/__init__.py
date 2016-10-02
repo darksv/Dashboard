@@ -3,7 +3,7 @@ import os
 from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for, abort
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
-from app.channel_types import get_types
+from app.channel_types import get_types, get_type_ids
 from app.db import DB
 from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
     get_recent_channel_stats, get_channel_stats
@@ -97,7 +97,9 @@ def channel_details(channel_id: int):
 @app.route('/channel/<int:channel_id>/settings', methods=['GET', 'POST'])
 @flask_login.login_required
 def channel_settings(channel_id: int):
-    channel_data = get_channel(DB, channel_id)
+    channel = get_channel(DB, channel_id)
+    if channel is None:
+        return redirect('/')
 
     if request.method == 'POST':
         channel_name = request.form.get('channel_name', '')
@@ -106,12 +108,14 @@ def channel_settings(channel_id: int):
         except ValueError:
             channel_type = 0
 
-        if len(channel_name) <= 100 and channel_type in (0, 1):
+        if len(channel_name) <= 100 and channel_type in get_type_ids():
             update_channel(DB, channel_id, channel_name, channel_type)
 
             return redirect(url_for('channel_details', channel_id=channel_id))
 
-        channel_data.update(name=channel_name, type=channel_type)
+        channel_data = request.form.args
+    else:
+        channel_data = channel
 
     return render_template('channel_settings.html', channel=channel_data, channel_types=get_types())
 
