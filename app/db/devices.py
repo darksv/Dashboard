@@ -31,11 +31,10 @@ def get_all_devices(db: Database) -> List[Device]:
     """
     Get all devices.
     """
-
     query = select(DEVICES.c).select_from(DEVICES)
-    result = db.execute(query)
+    rows = db.execute(query)
 
-    return [Device(id=row['id'], uuid=row['uuid'], name=row['name']) for row in result]
+    return [Device(**extract_keys(row, ['id', 'uuid', 'name'])) for row in rows]
 
 
 def create_device(db: Database, device_uuid: str, device_name: str='') -> Optional[Device]:
