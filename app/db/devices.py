@@ -17,10 +17,9 @@ def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
         return None
 
     query = select(DEVICES.c).select_from(DEVICES).where(condition)
-    result = db.execute(query)
+    rows = db.execute(query)
 
-    row = result.fetchone()
-
+    row = rows.fetchone()
     if row is None:
         return None
 
