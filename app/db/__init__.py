@@ -53,9 +53,9 @@ class Database:
     def create(self):
         meta.create_all(bind=self._engine)
 
-    def execute(self, object, *multiparams, **params):
+    def execute(self, obj, *args, **kwargs):
         with self._lock:
-            return self.conn.execute(object, *multiparams, **params)
+            return self.conn.execute(obj, *args, **kwargs)
 
     @property
     def conn(self):
