@@ -3,6 +3,7 @@ import os
 from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for, abort
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
+from app.channel_types import get_types
 from app.db import DB
 from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
     get_recent_channel_stats, get_channel_stats
@@ -112,7 +113,7 @@ def channel_settings(channel_id: int):
 
         channel_data.update(name=channel_name, type=channel_type)
 
-    return render_template('channel_settings.html', channel=channel_data)
+    return render_template('channel_settings.html', channel=channel_data, channel_types=get_types())
 
 
 @login_manager.unauthorized_handler
@@ -162,9 +163,6 @@ def channel_stats():
     if not channel:
         return jsonify()
 
-    title = ['Temperatura', 'Ciśnienie'][channel.type]
-    unit = ['℃', 'hPa'][channel.type]
-
     labels = []
     values = []
 
@@ -182,6 +180,9 @@ def channel_stats():
             for dt, value in get_channel_stats(DB, channel_id, period_start, period_end):
                 labels.append(dt)
                 values.append(value)
+
+    title = channel.type.title
+    unit = channel.type.unit
 
     return jsonify(title=title, unit=unit, labels=labels, values=values)
 

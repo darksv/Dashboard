@@ -25,7 +25,7 @@
                 <td>
                     {{ channel.name or channel.uuid }}
                 </td>
-                <td class="{{ ['temperature', 'pressure'][channel.type] }}">
+                <td class="{{ channel.type.name }}">
                     {{ channel.value or '-' }}
                 </td>
                 <td>

@@ -36,7 +36,7 @@
         <tr>
             <td>{{ loop.index }}</td>
             <td>{{ channel.name }}</td>
-            <td class="{{ ['temperature', 'pressure'][channel.type] }}">{{ channel.value }}</td>
+            <td class="{{ channel.type.name }}">{{ channel.value }}</td>
             <td>
                 {% if channel.value_updated %}
                     {{ channel.value_updated | datetime}}

@@ -17,8 +17,10 @@
     <div class="form-group">
         <label for="channel_type">Typ:</label>
         <select class="form-control" id="channel_type" name="channel_type">
-            {% for type in range(2) %}
-                <option value="{{ type }}" {{ 'selected="selected"' if channel.type == type }}>{{ ['temperatura', 'ciśnienie'][type] }}</option>
+            {% for type in channel_types %}
+                <option value="{{ type.id }}"{% if channel.type_id == type.id %} selected="selected"{% endif %}>
+                    {{ type.title | lower}}
+                </option>
             {% endfor %}
         </select>
     </div>

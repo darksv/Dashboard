@@ -1,6 +1,6 @@
 from binascii import hexlify
 from datetime import datetime
-from app import DB
+from app.channel_types import get_type_by_id
 
 
 class Channel:
@@ -28,6 +28,10 @@ class Channel:
 
     @property
     def type(self):
+        return get_type_by_id(self._type)
+
+    @property
+    def type_id(self):
         return self._type
 
     @property
