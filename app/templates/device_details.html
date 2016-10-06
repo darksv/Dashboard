@@ -36,7 +36,7 @@
         <tr>
             <td>{{ loop.index }}</td>
             <td>{{ channel.name }}</td>
-            <td class="{{ channel.type.name }}">{{ channel.value }}</td>
+            <td>{{ channel.value_with_unit or '-'}}</td>
             <td>
                 {% if channel.value_updated %}
                     {{ channel.value_updated | datetime}}

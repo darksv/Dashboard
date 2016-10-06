@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-7 col-sm-12 col-xs-12">
         <ul class="list-group info">
             <li class="list-group-item row">
                 <div class="col-md-4">Identyfikator</div>
@@ -27,19 +27,15 @@
             </li>
             {% endif %}
             <li class="list-group-item row hidden-md hidden-lg">
-                <div class="col-md-4">Pomiar</div>
-                <div class="col-md-8 {{ channel.type.name }}">{{ channel.value }}</div>
-            </li>
-            <li class="list-group-item row hidden-md hidden-lg">
                 <div class="col-md-4">Ostatnia aktualizacja</div>
                 <div class="col-md-8">{{ channel.value_updated }}</div>
             </li>
         </ul>
     </div>
-    <div class="col-md-5 hidden-sm hidden-xs">
+    <div class="col-md-5 col-sm-12 col-xs-12">
         <div class="label label-info value_indicator">
             <span class="glyphicon"></span>
-            <span id="channel_value" class="{{ channel.type.name }}" title="">{{ channel.value }}</span>
+            <span id="channel_value" data-value="{{ channel.value }}" data-unit="{{ channel.unit }}">...</span>
         </div>
     </div>
 </div>

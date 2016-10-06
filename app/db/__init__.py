@@ -1,5 +1,5 @@
 from threading import RLock
-from sqlalchemy import MetaData, Table, Binary, Column, Integer, String, SmallInteger, Text, ForeignKey, Float, DateTime
+from sqlalchemy import MetaData, Table, Binary, Column, Integer, String, SmallInteger, Text, ForeignKey, Float, DateTime, Boolean
 from sqlalchemy import create_engine
 import config
 
@@ -18,7 +18,8 @@ CHANNELS = Table('channels', meta,
     Column('type', SmallInteger, nullable=False),
     Column('name', String(100), nullable=False, default=''),
     Column('value', Float),
-    Column('value_updated', DateTime(timezone=True))
+    Column('value_updated', DateTime(timezone=True)),
+    Column('unit', String(10), nullable=True, default=None)
 )
 
 SENSORS = Table('sensors', meta,

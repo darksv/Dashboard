@@ -25,7 +25,7 @@ def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
     if row is None:
         return None
 
-    return Channel(**extract_keys(row, ['id', 'uuid', 'device_id', 'type', 'name', 'value', 'value_updated']))
+    return Channel(**extract_keys(row, ['id', 'uuid', 'device_id', 'type', 'name', 'value', 'value_updated', 'unit']))
 
 
 def get_device_channels(db: Database, device_id: int) -> List[Channel]:
@@ -109,7 +109,8 @@ def update_channel_value(db: Database, channel_id: Union[int, str], value: float
     return True
 
 
-def update_channel(db: Database, channel_id: int, channel_name: str = None, channel_type: int = None) -> bool:
+def update_channel(db: Database, channel_id: int, channel_name: str = None, channel_type: int = None,
+                   channel_unit: str = None) -> bool:
     """
     Update channel's name.
     """
@@ -124,6 +125,9 @@ def update_channel(db: Database, channel_id: int, channel_name: str = None, chan
 
     if channel_type is not None:
         values['type'] = channel_type
+
+    if channel_unit is not None:
+        values['unit'] = channel_unit
 
     if len(values) > 0:
         query = update(CHANNELS).values(**values).where(CHANNELS.c.id == channel.id)

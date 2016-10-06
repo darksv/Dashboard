@@ -107,9 +107,10 @@ def channel_settings(channel_id: int):
             channel_type = int(request.form.get('channel_type', 0))
         except ValueError:
             channel_type = 0
+        channel_unit = request.form.get('channel_unit', '')
 
         if len(channel_name) <= 100 and channel_type in get_type_ids():
-            update_channel(DB, channel_id, channel_name, channel_type)
+            update_channel(DB, channel_id, channel_name, channel_type, channel_unit)
 
             return redirect(url_for('channel_details', channel_id=channel_id))
 
@@ -185,8 +186,8 @@ def channel_stats():
                 labels.append(dt)
                 values.append(value)
 
-    title = channel.type.title
-    unit = channel.type.unit
+    title = channel.name
+    unit = channel.unit
 
     return jsonify(title=title, unit=unit, labels=labels, values=values)
 

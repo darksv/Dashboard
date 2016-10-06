@@ -5,7 +5,7 @@ from app.channel_types import get_type_by_id
 
 class Channel:
     def __init__(self, id: int = None, uuid: bytes = None, device_id: int = None, type: int = None, name: str = None,
-                 value: float = None, value_updated: datetime = None):
+                 value: float = None, value_updated: datetime = None, unit: str = None):
         self._id = id
         self._uuid = uuid
         self._device_id = device_id
@@ -13,6 +13,7 @@ class Channel:
         self._name = name
         self._value = value
         self._value_updated = value_updated
+        self._unit = unit
 
     @property
     def id(self):
@@ -43,8 +44,19 @@ class Channel:
         return self._value
 
     @property
+    def value_with_unit(self):
+        if self.unit:
+            return '{0} {1}'.format(self.value, self.unit)
+        else:
+            return str(self.value)
+
+    @property
     def value_updated(self):
         return self._value_updated
+
+    @property
+    def unit(self):
+        return (self._unit or '').strip()
 
     def save(self):
         pass

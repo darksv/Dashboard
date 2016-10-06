@@ -36,7 +36,7 @@
 
     function updateChannelLabel(newValue, timestamp) {
         var channelValueLabel = $('#channel_value'),
-            oldValue = parseFloat(channelValueLabel.text()),
+            oldValue = parseFloat(channelValueLabel.data('value')),
             diff = newValue - oldValue,
             diffSign = Math.sign(diff),
             changeIndicator = channelValueLabel.prev();
@@ -57,7 +57,8 @@
                 break;
         }
 
-        channelValueLabel.text(newValue);
+        channelValueLabel.data('value', newValue);
+        channelValueLabel.text(newValue + ' ' + channelValueLabel.data('unit'));
         channelValueLabel.attr('title', new Date(timestamp).toLocaleTimeString());
     }
 

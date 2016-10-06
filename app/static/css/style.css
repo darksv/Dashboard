@@ -3,8 +3,8 @@ body {
 }
 
 .value_indicator {
-    margin: auto;
-    width: 400px;
+    margin: 0 auto 0.5em auto;
+    width: 100%;
     height: 100%;
     text-align: center;
     font-size: 4em;
@@ -17,14 +17,6 @@ body {
 
 .value_indicator span.glyphicon {
     font-size: 0.8em;
-}
-
-.temperature:after {
-    content: " ℃";
-}
-
-.pressure:after {
-    content: " hPa"
 }
 
 .info li :first-child {

@@ -1,21 +1,14 @@
 from collections import namedtuple
 from typing import Optional, List
 
-ChannelType = namedtuple('ChannelType', ('id', 'name', 'title', 'unit'))
+ChannelType = namedtuple('ChannelType', ('id', 'name', 'title'))
 
 types = (
     ChannelType(
         id=0,
-        name='temperature',
-        title='Temperatura',
-        unit='℃'
+        name='float',
+        title='Numeryczne'
     ),
-    ChannelType(
-        id=1,
-        name='pressure',
-        title='Ciśnienie',
-        unit='hPa'
-    )
 )
 
 
