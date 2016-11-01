@@ -34,6 +34,16 @@
         Notification.requestPermission();
     }
 
+    var windowActive = true,
+        originalWindowTitle = document.title,
+        windowTitlePrefix = '';
+
+    $(window).on('focus', function (e) {
+        windowActive = true;
+    }).on('blue', function (e) {
+        windowActive = false;
+    });
+
     function updateChannelLabel(newValue, timestamp) {
         var channelValueLabel = $('#channel_value'),
             oldValue = parseFloat(channelValueLabel.data('value')),
@@ -45,21 +55,29 @@
             changeIndicator.removeClass('glyphicon-arrow-up glyphicon-arrow-down');
         }
 
+        var arrow = '';
         switch (diffSign) {
             case -1:
                 changeIndicator.addClass('glyphicon-arrow-down');
+                arrow = '↓';
                 break;
             case 1:
                 changeIndicator.addClass('glyphicon-arrow-up');
+                arrow = '↑';
                 break;
             case 0:
                 // no change
                 break;
         }
 
+        var valueWithUnit = newValue + ' ' + channelValueLabel.data('unit');
+
         channelValueLabel.data('value', newValue);
-        channelValueLabel.text(newValue + ' ' + channelValueLabel.data('unit'));
+        channelValueLabel.text(valueWithUnit);
         channelValueLabel.attr('title', new Date(timestamp).toLocaleTimeString());
+
+        windowTitlePrefix = arrow + valueWithUnit;
+        document.title = windowTitlePrefix + ' - ' + originalWindowTitle;
     }
 
     function updateChart(chart, options) {
