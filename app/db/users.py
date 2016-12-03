@@ -1,8 +1,7 @@
-from typing import Optional, Union, List
-from sqlalchemy import select, insert, func
+from typing import Optional
+from sqlalchemy import select
 from app.db import Database, USERS
-from app.db.user import User
-from app.utils import extract_keys
+from app.models.user import User
 
 
 def get_user_by_id(db: Database, user_id: int) -> Optional[User]:

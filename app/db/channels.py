@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional, Union, List
-from sqlalchemy import select, insert, update, func, and_
+from sqlalchemy import select, insert, update, func, and_, between
 from app.db import Database, CHANNELS, ENTRIES
-from app.db.channel import Channel
 from app.utils import extract_keys
+from app.models.channel import Channel
 
 
 def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
