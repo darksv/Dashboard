@@ -107,10 +107,12 @@
                 labels: [],
                 datasets: [
                     {
-                        fill: true,
+                        fill: false,
                         lineTension: 0,
                         pointRadius: 0,
-                        data: []
+                        data: [],
+                        borderColor: 'rgba(50, 120, 180, 0.5)',
+                        borderWidth: 1.5
                     }
                 ]
             },
@@ -122,8 +124,7 @@
                     yAxes: [{
                         display: true,
                         scaleLabel: {
-                            display: true,
-                            labelString: ''
+                            display: false
                         }
                     }]
                 }
