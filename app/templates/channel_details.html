@@ -33,7 +33,7 @@
         </ul>
     </div>
     <div class="col-md-5 col-sm-12 col-xs-12">
-        <div class="label label-info value_indicator">
+        <div class="label label-info value_indicator hidden-print">
             <span class="glyphicon"></span>
             <span id="channel_value" data-value="{{ channel.value }}" data-unit="{{ channel.unit }}">...</span>
         </div>
@@ -42,7 +42,7 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h2 class="panel-title">Statystyki</h2>
+        <h2 class="panel-title">Najnowsze statystyki</h2>
     </div>
     <div class="panel-body">
         <canvas id="realtime_chart"></canvas>
@@ -51,19 +51,19 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h2 class="panel-title">Statystyki</h2>
+        <h2 class="panel-title">Statystyki historyczne</h2>
     </div>
     <div class="panel-body">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
                 <form id="chart_settings" class="navbar-form navbar-left">
                     <div class="form-group">
-                        <label>Zakres dat: </label>
-                        <input type="date" class="form-control" name="from">
+                        <label>Okres: </label>
+                        <input type="date" required="required" class="form-control" name="from">
                         -
-                        <input type="date" class="form-control" name="to">
+                        <input type="date" required="required" class="form-control" name="to">
                     </div>
-                    <button type="submit" class="btn btn-primary">Aktualizuj</button>
+                    <button type="submit" class="btn btn-primary">Aktualizuj wykres</button>
                 </form>
             </div>
         </div>
