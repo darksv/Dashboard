@@ -158,17 +158,20 @@ def get_recent_channel_stats(db: Database, channel_id: int, count: int=100) -> L
     return [(timestamp, value) for timestamp, value in result]
 
 
-def get_channel_stats(db: Database, channel_id: int, period_start: datetime, period_end: datetime) -> List:
+def get_channel_stats(db: Database, channel_id: int, period_start: datetime, period_end: datetime,
+                      average_interval: int = 60) -> List:
     """
     Get channel's stats for specified period.
     """
-    query = select([func.date(ENTRIES.c.timestamp), func.avg(ENTRIES.c.value)]) \
+    query = select([func.date_format(ENTRIES.c.timestamp, '%d.%m.%y %H:%i'), func.avg(ENTRIES.c.value)]) \
         .select_from(ENTRIES) \
         .where(and_(ENTRIES.c.channel_id == channel_id,
-                    ENTRIES.c.timestamp >= period_start,
-                    ENTRIES.c.timestamp <= period_end))\
-        .group_by(func.date(ENTRIES.c.timestamp), func.hour(ENTRIES.c.timestamp)) \
+                    between(ENTRIES.c.timestamp, period_start, period_end))) \
+        .group_by(func.date(ENTRIES.c.timestamp),
+                  func.hour(ENTRIES.c.timestamp),
+                  func.floor(func.minute(ENTRIES.c.timestamp) / average_interval)) \
         .order_by(ENTRIES.c.timestamp.asc())
+
     result = db.execute(query)
 
     return [[str(time), round(value, 2)] for time, value in result]
