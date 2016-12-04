@@ -35,8 +35,11 @@ def inject_utils():
 
 
 @app.context_processor
-def inject_js_vars():
-    return dict(data=js_vars)
+def inject_variables():
+    return dict(
+        user=current_user,
+        data=js_vars
+    )
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
@@ -151,7 +154,7 @@ def login():
 @flask_login.login_required
 def logout():
     flask_login.logout_user()
-    return redirect(url_for('login'))
+    return redirect(request.referrer or url_for('index'))
 
 
 @login_manager.user_loader

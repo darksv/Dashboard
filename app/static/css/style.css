@@ -22,3 +22,11 @@ body {
 .info li :first-child {
     font-weight: bold;
 }
+
+footer.main {
+    text-align: center;
+}
+
+footer.main .username {
+    font-weight: bold;
+}

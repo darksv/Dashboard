@@ -11,4 +11,11 @@
         </div>
     </div>
 </div>
+<footer class="main">
+{% if user.is_anonymous %}
+    <p>Nie jesteś zalogowany. Przejdź do <a href="{{ url_for('login') }}">strony logowania</a>.</p>
+{% else %}
+    <p>Jesteś zalogowany jako <span class="username">{{ user.name }}</span>. <a href="{{ url_for('logout') }}">Kliknij</a>, aby się wylogować.</p>
+{% endif %}
+</footer>
 {% endblock %}
