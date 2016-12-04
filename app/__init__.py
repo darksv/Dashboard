@@ -12,7 +12,7 @@ from app.db.users import get_user_by_id, get_user_by_username
 from app.utils import localize_datetime
 
 
-app = Flask('dashboard', static_folder='app/static', template_folder='app/templates')
+app = Flask('dashboard', static_folder='static', template_folder='app/templates')
 app.secret_key = config.SECRET_KEY
 
 app.jinja_env.filters['datetime'] = utils.format_datetime
@@ -31,7 +31,7 @@ def add_js_vars():
 
 @app.context_processor
 def inject_utils():
-    return dict(path_with_mtime=lambda path: '{0}?{1}'.format(path, int(os.path.getmtime('./app/static' + path))))
+    return dict(path_with_mtime=lambda path: '{0}?{1}'.format(path, int(os.path.getmtime('./static' + path))))
 
 
 @app.context_processor
@@ -47,15 +47,15 @@ login_manager.init_app(app)
 if config.DEVELOPMENT:
     @app.route('/css/<path:path>')
     def send_css(path: str):
-        return send_from_directory('app/static/css', path)
+        return send_from_directory('static/css', path)
 
     @app.route('/js/<path:path>')
     def send_js(path: str):
-        return send_from_directory('app/static/js', path)
+        return send_from_directory('static/js', path)
 
     @app.route('/fonts/<path:path>')
     def send_font(path: str):
-        return send_from_directory('app/static/fonts', path)
+        return send_from_directory('static/fonts', path)
 
 
 @app.route('/')
@@ -200,13 +200,22 @@ def channel_update():
     try:
         device_uuid = request.args.get('deviceUuid')
         channel_uuid = request.args.get('channelUuid')
-        value = float(request.args.get('value'))
 
         device = get_or_create_device(DB, device_uuid)
         channel = get_or_create_channel(DB, channel_uuid, device_id=device.id)
-        if update_channel_value(DB, channel.id, value):
-            return '', 200
-        else:
-            return 'ERROR', 500
+
+        raw_value = request.args.get('value')
+
+        if channel.type.name == 'float':
+            value = float(raw_value)
+
+            if update_channel_value(DB, channel.id, value):
+                return '', 200
+            else:
+                return 'ERROR', 500
+        elif channel.type.name == 'color':
+            value = utils.parse_color(raw_value)
+            return ' ' .join(map(str, value))
+
     except Exception:
-        abort(403)
+        raise

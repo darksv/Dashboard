@@ -96,3 +96,30 @@ def parse_time_interval(s: str) -> Tuple[int, str]:
     value, suffix = match.groups()
 
     return int(value), suffixes[suffix]
+
+
+def parse_color(s: str) -> Tuple[int, int, int]:
+    """
+    Parse color in hexadecimal string into a tuple of RGB values.
+    """
+    if s.startswith('#'):
+        s = s[1:]
+
+    try:
+        if len(s) == 3:
+            r = s[0] * 2
+            g = s[1] * 2
+            b = s[2] * 2
+        elif len(s) == 6:
+            r = s[0:2]
+            g = s[2:4]
+            b = s[4:6]
+        else:
+            r = ''
+            g = ''
+            b = ''
+        value = tuple(map(lambda x: int(x, 16), [r, g, b]))
+    except ValueError:
+        raise ValueError('Invalid color format')
+    else:
+        return value

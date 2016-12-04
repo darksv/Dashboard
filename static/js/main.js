@@ -137,61 +137,101 @@
         return chart;
     }
 
-    var realtimeChart = createChart({
-        target: document.getElementById('realtime_chart'),
-        type: 'recent',
-        channelId: page_data.channel_id,
-        autoUpdate: true
-    });
-
-    var customChartOptions = {
-        target: document.getElementById('custom_chart'),
-        type: 'custom',
-        channelId: page_data.channel_id,
-        autoUpdate: false
-    };
-    var customChart = createChart(customChartOptions);
-
-    var chartSettingsForm = $('#chart_settings');
-    var chartFrom = $('input[name=from]', chartSettingsForm);
-    var chartTo = $('input[name=to]', chartSettingsForm);
-    chartFrom.val((new Date).addDays(-30).toISOString().substr(0, 10));
-    chartTo.val((new Date).toISOString().substr(0, 10));
-
-    chartSettingsForm.submit(function (e) {
-        if (chartFrom.val().length > 0 && chartTo.val().length > 0) {
-            customChartOptions['from'] = chartFrom.val().replace(/-/g, '') + '0000';
-            customChartOptions['to'] = chartTo.val().replace(/-/g, '') + '2359';
-
-            updateChart(customChart, customChartOptions);
-        }
-
-        e.preventDefault();
-        return false;
-    }).submit();
-
     function addToChart(chart, label, value) {
         chart.data.labels.pushAndShift(label);
         chart.data.datasets[0].data.pushAndShift(value);
         chart.update();
     }
 
-    var clientId = navigator.userAgent;
+    function generateGuid() {
+        var result = '';
+        for (var j = 0; j < 32; j++) {
+            if (j == 8 || j == 12|| j == 16|| j == 20)
+                result += '-';
+            result += Math.floor(Math.random() * 16).toString(16).toUpperCase();
+        }
+        return result;
+    }
+
+    var clientId = generateGuid();
 
     var client = new Paho.MQTT.Client('wss://xxx:9883/ws', clientId);
-    client.onConnectionLost = function (responseObject) {
-        if (responseObject.errorCode !== 0)
-            console.log('connection lost', responseObject.errorMessage);
+    client.onConnectionLost = function (response) {
+        if (response.errorCode !== 0) {
+            console.log('connection lost', response.errorMessage, response.errorCode);
+        }
     };
+
+    if (typeof channel !== 'undefined' && channel.type == 'float') {
+        var realtimeChart = createChart({
+            target: document.getElementById('realtime_chart'),
+            type: 'recent',
+            channelId: page_data.channel_id,
+            autoUpdate: true
+        });
+
+        var customChartOptions = {
+            target: document.getElementById('custom_chart'),
+            type: 'custom',
+            channelId: page_data.channel_id,
+            autoUpdate: false
+        };
+        var customChart = createChart(customChartOptions);
+
+        var chartSettingsForm = $('#chart_settings');
+        var chartFrom = $('input[name=from]', chartSettingsForm);
+        var chartTo = $('input[name=to]', chartSettingsForm);
+        chartFrom.val((new Date).addDays(-30).toISOString().substr(0, 10));
+        chartTo.val((new Date).toISOString().substr(0, 10));
+
+        chartSettingsForm.submit(function (e) {
+            if (chartFrom.val().length > 0 && chartTo.val().length > 0) {
+                customChartOptions['from'] = chartFrom.val().replace(/-/g, '') + '0000';
+                customChartOptions['to'] = chartTo.val().replace(/-/g, '') + '2359';
+
+                updateChart(customChart, customChartOptions);
+            }
+
+            e.preventDefault();
+            return false;
+        }).submit();
+    } else if (typeof channel !== 'undefined' && channel.type == 'color') {
+        var colorControl = $('.color-control');
+        var lastSend = Date.now();
+
+        var picker = new jscolor(colorControl[0], {
+            onFineChange: function() {
+                var color = picker.toHEXString();
+                if (Date.now() - lastSend >= 100) {
+                    lastSend = Date.now();
+                    client.send(clientId + '/' + page_data.channel_uuid, color, 2);
+                }
+                colorControl.css('backgroundColor', color).text(color);
+            }
+        });
+
+        colorControl.click(function() {
+            picker.fromString(colorControl.text().substr(1));
+            picker.show();
+        });
+    }
 
     client.onMessageArrived = function (message) {
         if (page_data.endpoint == 'channel_details' && message.destinationName.indexOf(page_data.channel_uuid) !== -1) {
-            var label = (new Date).toHourMinute();
-            if (realtimeChart.data.labels.last() !== label) {
-                addToChart(realtimeChart, label, parseFloat(message.payloadString));
-            }
+            if (channel.type == 'float') {
+                var label = (new Date).toHourMinute();
 
-            updateChannelLabel(message.payloadString, Date.now());
+                if (realtimeChart.data.labels.last() !== label) {
+                    addToChart(realtimeChart, label, parseFloat(message.payloadString));
+                }
+
+                updateChannelLabel(message.payloadString, Date.now());
+            } else if (channel.type == 'color') {
+                if (message.destinationName.indexOf(clientId) === -1) {
+                    var color = message.payloadString;
+                    $('.color-control').css('backgroundColor', color).text(color);
+                }
+            }
         } else if (message.destinationName.startsWith('notify')) {
             new Notification('Informacja', {
                 body: message.payloadString

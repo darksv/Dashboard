@@ -32,14 +32,24 @@
             </li>
         </ul>
     </div>
+
+{% if channel.type.name == 'float' %}
     <div class="col-md-5 col-sm-12 col-xs-12">
-        <div class="label label-info value_indicator hidden-print">
+        <div class="label label-info value-indicator hidden-print">
             <span class="glyphicon"></span>
             <span id="channel_value" data-value="{{ channel.value }}" data-unit="{{ channel.unit }}">...</span>
         </div>
     </div>
+{% else %}
+    <div class="col-md-5 col-sm-12 col-xs-12">
+        <div class="color-control">
+            <span>#DEADBE</span>
+        </div>
+    </div>
+{% endif %}
 </div>
 
+{% if channel.type.name == 'float' %}
 <div class="panel panel-default">
     <div class="panel-heading">
         <h2 class="panel-title">Najnowsze statystyki</h2>
@@ -70,5 +80,12 @@
         <canvas id="custom_chart"></canvas>
     </div>
 </div>
+{% endif %}
+
+<script>
+    var channel = {
+        type: {{ channel.type.name | tojson }}
+    };
+</script>
 
 {% endblock %}

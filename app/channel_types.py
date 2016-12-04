@@ -9,6 +9,11 @@ types = (
         name='float',
         title='Numeryczne'
     ),
+    ChannelType(
+        id=1,
+        name='color',
+        title='Kolor'
+    )
 )
 
 
