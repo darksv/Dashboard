@@ -30,3 +30,7 @@ footer.main {
 footer.main .username {
     font-weight: bold;
 }
+
+tr:not(:hover) td.channel-actions a {
+    opacity: 0;
+}
