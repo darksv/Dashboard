@@ -31,6 +31,7 @@ SENSORS = Table('sensors', meta,
 )
 
 ENTRIES = Table('entries', meta,
+    Column('id', Integer, primary_key=True, autoincrement=True),
     Column('channel_id', Integer, ForeignKey('channels.id'), nullable=False),
     Column('value', Float, nullable=False),
     Column('timestamp', DateTime(timezone=True), nullable=False)
@@ -40,6 +41,16 @@ USERS = Table('users', meta,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('name', String(100), unique=True),
     Column('hash', String(100))
+)
+
+WATCHERS = Table('watches', meta,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('channel_id', Integer, ForeignKey('channels.id'), nullable=False),
+    Column('condition', Text),
+    Column('message', String(100)),
+    Column('last_notification', DateTime(timezone=True)),
+    Column('renew_time', Integer)
 )
 
 

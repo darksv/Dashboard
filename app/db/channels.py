@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional, Union, List
 from sqlalchemy import select, insert, update, func, and_, between
+from sqlalchemy.exc import IntegrityError
+
 from app.db import Database, CHANNELS, ENTRIES
 from app.utils import extract_keys
 from app.models.channel import Channel
@@ -97,7 +99,11 @@ def update_channel_value(db: Database, channel_id: Union[int, str], value: float
             timestamp=channel.value_updated
         )
 
-        db.execute(query)
+        try:
+            db.execute(query)
+        except IntegrityError:
+            # ignore entry duplication errors
+            pass
 
     query = update(CHANNELS).values(
         value=value,

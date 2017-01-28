@@ -6,3 +6,4 @@ tzlocal
 paho-mqtt
 pymysql
 requests
+marshmallow

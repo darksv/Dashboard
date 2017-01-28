@@ -8,14 +8,35 @@ from app.db import DB
 from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
     get_recent_channel_stats, get_channel_stats
 from app.db.devices import get_all_devices, get_device, get_or_create_device
+from app.db.watchers import get_watchers
 from app.db.users import get_user_by_id, get_user_by_username
 from app.utils import localize_datetime
+from marshmallow import Schema, fields
 
 
 app = Flask('dashboard', static_folder='static', template_folder='app/templates')
 app.secret_key = config.SECRET_KEY
-
 app.jinja_env.filters['datetime'] = utils.format_datetime
+
+
+class ChannelSchema(Schema):
+    id = fields.Integer()
+    device_id = fields.Integer()
+    name = fields.String()
+    type = fields.Integer()
+    value = fields.Float()
+    value_updated = fields.DateTime()
+    unit = fields.String()
+
+
+class MonitorSchema(Schema):
+    id = fields.Integer()
+    user_id = fields.Integer()
+    channel_id = fields.Integer()
+    condition = fields.String()
+    message = fields.String()
+    last_notification = fields.Boolean()
+    renew_time = fields.Integer()
 
 js_vars = dict()
 
@@ -24,6 +45,7 @@ js_vars = dict()
 def add_js_vars():
     js_vars['endpoint'] = request.endpoint
     js_vars['user'] = dict(
+        id=current_user.id if not current_user.is_anonymous else None,
         name=current_user.name if not current_user.is_anonymous else None,
         hash=current_user.hash if not current_user.is_anonymous else None
     )
@@ -56,6 +78,11 @@ if config.DEVELOPMENT:
     @app.route('/fonts/<path:path>')
     def send_font(path: str):
         return send_from_directory('static/fonts', path)
+
+
+    @app.route('/audio/<path:path>')
+    def send_audio(path: str):
+        return send_from_directory('static/audio', path)
 
 
 @app.route('/')
@@ -162,6 +189,11 @@ def user_loader(user_id):
     return get_user_by_id(DB, user_id)
 
 
+@app.route('/api/v1/channel/<int:channel_id>')
+def api_channel_get(channel_id):
+    pass
+
+
 @app.route('/getStats')
 def channel_stats():
     period = request.args.get('type')
@@ -210,12 +242,32 @@ def channel_update():
             value = float(raw_value)
 
             if update_channel_value(DB, channel.id, value):
-                return '', 200
+                return str(channel.id), 200
             else:
                 return 'ERROR', 500
         elif channel.type.name == 'color':
             value = utils.parse_color(raw_value)
             return ' ' .join(map(str, value))
 
-    except Exception:
+    except Exception as e:
         raise
+
+
+@app.route('/api/watchers')
+def api_monitors():
+    channel_id = request.args.get('channel_id')
+    if channel_id:
+        watchers = get_watchers(DB, channel_id)
+        return jsonify(watchers=MonitorSchema().dump(watchers, many=True).data)
+
+
+@app.route('/api/watcher/set_notified')
+def api_watcher_set_notified():
+    watcher_id = request.args.get('watcher_id')
+    if not watcher_id:
+        return '', 500
+
+
+@app.route('/api/channel/<int:channel_id>/monitors')
+def api_get_channel_uuid(channel_id):
+    return redirect(url_for('api_monitors', channel_id=channel_id))

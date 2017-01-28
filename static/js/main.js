@@ -220,12 +220,16 @@
         if (page_data.endpoint == 'channel_details' && message.destinationName.indexOf(page_data.channel_uuid) !== -1) {
             if (channel.type == 'float') {
                 var label = (new Date).toHourMinute();
-
-                if (realtimeChart.data.labels.last() !== label) {
-                    addToChart(realtimeChart, label, parseFloat(message.payloadString));
+                var value = parseFloat(message.payloadString);
+                if (value > 4000) {
+                    value -= 4096;
                 }
 
-                updateChannelLabel(message.payloadString, Date.now());
+                if (realtimeChart.data.labels.last() !== label) {
+                    addToChart(realtimeChart, label, value);
+                }
+
+                updateChannelLabel(value.toFixed(2), Date.now());
             } else if (channel.type == 'color') {
                 if (message.destinationName.indexOf(clientId) === -1) {
                     var color = message.payloadString;
@@ -233,9 +237,19 @@
                 }
             }
         } else if (message.destinationName.startsWith('notify')) {
-            new Notification('Informacja', {
-                body: message.payloadString
+            var data = JSON.parse(message.payloadString);
+            var notification = new Notification(data.title, {
+                body: data.body,
+                requireInteraction: true,
+                icon: '/static/images/warning.png'
             });
+            notification.onclick = function(e) {
+                e.preventDefault();
+                if (data.url != null) {
+                    window.open(data.url, '_blank');
+                }
+                this.close();
+            };
         }
     };
 
@@ -245,7 +259,7 @@
                 client.subscribe('+/' + page_data.channel_uuid);
 
             if (page_data.user.name !== null)
-                client.subscribe('notify/' + page_data.user.name);
+                client.subscribe('notify/' + page_data.user.id);
         }
     });
 })();
