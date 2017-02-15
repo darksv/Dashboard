@@ -1,24 +1,3 @@
-body {
-    margin: 1em;
-}
-
-.value-indicator {
-    margin: 0 auto 0.5em auto;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    font-size: 4em;
-    display: block;
-}
-
-.value-indicator span {
-    vertical-align: middle;
-}
-
-.value-indicator span.glyphicon {
-    font-size: 0.8em;
-}
-
 .color-control {
     width: 100px;
     height: 100px;
@@ -43,6 +22,10 @@ body {
     font-weight: bold;
 }
 
+footer {
+    text-align: center;
+}
+
 footer.main {
     text-align: center;
 }
@@ -53,4 +36,81 @@ footer.main .username {
 
 tr:not(:hover) td.channel-actions a {
     opacity: 0;
+}
+
+.tile-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-flow: row wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+.sorting-enabled .channel-tile {
+    cursor: move;
+}
+
+.channel-tile {
+    width: 350px;
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 3em 2em;
+    border-radius: 0.5em;
+    margin: 0.5em 0.5em;
+    text-align: center;
+}
+
+.sorting-disabled .channel-tile:hover span {
+    display: none;
+}
+
+.channel-tile a {
+    text-decoration: none;
+}
+
+.channel-tile span {
+    font-size: 3em;
+    color: #ffffff;
+}
+
+.channel-tile .action {
+    display: none;
+    line-height: 2em;
+}
+
+.sorting-disabled .channel-tile:hover .action {
+    display: inline-block;
+    cursor: pointer;
+    padding: 0 0.2em;
+}
+
+.channel-tile .value:after {
+    content: attr(data-unit);
+    margin-left: 5px;
+}
+
+.channel-tile span.glyphicon {
+    font-size: 2.1em;
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity .5s ease;
+}
+
+.fade-enter, .fade-leave-active {
+    opacity: 0
+}
+
+.child-view {
+    position: absolute;
+    transition: all .5s cubic-bezier(.55,0,.1,1);
+}
+
+.text-success {
+    color: #5cb85c;
+}
+
+.text-danger {
+    color: #d9534f;
 }

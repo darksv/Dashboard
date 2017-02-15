@@ -19,15 +19,15 @@ CHANNELS = Table('channels', meta,
     Column('name', String(100), nullable=False, default=''),
     Column('value', Float),
     Column('value_updated', DateTime(timezone=True)),
-    Column('unit', String(10), nullable=True, default=None)
+    Column('unit', String(10), nullable=True, default=None),
+    Column('color', String(7), nullable=True, default=None),
+    Column('disabled', Boolean, default=False)
 )
 
-SENSORS = Table('sensors', meta,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('internal_id', String(50), unique=True),
-    Column('type', Integer, nullable=False),
-    Column('name', String(100), nullable=False, default=''),
-    Column('description', Text, nullable=False, default='')
+CHANNELS_ORDER = Table('channels_order', meta,
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('channel_id', Integer, ForeignKey('channels.id'), nullable=False),
+    Column('order', Integer)
 )
 
 ENTRIES = Table('entries', meta,
@@ -43,7 +43,7 @@ USERS = Table('users', meta,
     Column('hash', String(100))
 )
 
-WATCHERS = Table('watches', meta,
+WATCHERS = Table('watchers', meta,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
     Column('channel_id', Integer, ForeignKey('channels.id'), nullable=False),

@@ -12,11 +12,15 @@
     </div>
     <div class="form-group">
         <label for="channel_name">Nazwa:</label>
-        <input type="text" class="form-control" id="channel_name" name="channel_name" value="{{ channel.name }}">
+        <input type="text" class="form-control" id="channel_name" name="name" value="{{ channel.name }}">
+    </div>
+    <div class="form-group">
+        <label for="channel_color">Kolor:</label>
+        <input type="color" class="form-control" id="channel_color" name="color" value="{{ channel.color }}">
     </div>
     <div class="form-group">
         <label for="channel_type">Typ:</label>
-        <select class="form-control" id="channel_type" name="channel_type">
+        <select class="form-control" id="channel_type" name="type">
             {% for type in channel_types %}
                 <option value="{{ type.id }}"{% if channel.type_id == type.id %} selected="selected"{% endif %}>
                     {{ type.title | lower}}
@@ -26,10 +30,14 @@
     </div>
     <div class="form-group">
         <label for="channel_unit">Jednostka:</label>
-        <input type="text" class="form-control" id="channel_unit" name="channel_unit" value="{{ channel.unit }}">
+        <input type="text" class="form-control" id="channel_unit" name="unit" value="{{ channel.unit }}">
+    </div>
+    <div class="form-group">
+        <label for="channel_disabled">Wyłączony:</label>
+        <input type="checkbox" class="form-control" id="channel_disabled" name="disabled" value="{{ channel.disabled }}">
     </div>
     <div class="form-group pull-right">
-        <a href="{{ url_for('channel_details', channel_id=channel.id) }}" class="btn btn-default">Anuluj</a>
+        <a href="javascript:history.back()" class="btn btn-default">Anuluj</a>
         <button type="submit" class="btn btn-primary">Zapisz</button>
     </div>
 </form>

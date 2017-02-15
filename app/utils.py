@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Callable, Optional, Tuple
 import re
 from iso8601 import parse_date, ParseError
@@ -123,3 +123,36 @@ def parse_color(s: str) -> Tuple[int, int, int]:
         raise ValueError('Invalid color format')
     else:
         return value
+
+
+def hours_between_dates(start: datetime, end: datetime):
+    """
+    Generates datetimes between two other with one hour interval.
+    """
+    yield from datetimes_between(start, end, 3600)
+
+
+def minutes_between_dates(start: datetime, end: datetime):
+    """
+    Generates datetimes between two other with one minute interval.
+    """
+    yield from datetimes_between(start, end, 60)
+
+
+def datetimes_between(start: datetime, end: datetime, interval: int):
+    """
+    Generates datetimes between two other with given interval in seconds.
+    """
+    if interval not in (60, 3600):
+        raise ValueError('Unsupported interval {0}'.format(interval))
+
+    parts_to_replace = {'microsecond': 0}
+    if 0 < interval <= 60:
+        parts_to_replace['second'] = 0
+    if 60 < interval <= 3600:
+        parts_to_replace['minute'] = 0
+
+    delta = end - start
+    for seconds in range(0, int(delta.total_seconds()), interval):
+        date = start + timedelta(seconds=seconds)
+        yield date.replace(**parts_to_replace)

@@ -1,10 +1,10 @@
+from collections import OrderedDict
 from datetime import datetime
 from typing import Optional, Union, List
-from sqlalchemy import select, insert, update, func, and_, between
+from sqlalchemy import select, delete, insert, update, func, and_, between
 from sqlalchemy.exc import IntegrityError
-
-from app.db import Database, CHANNELS, ENTRIES
-from app.utils import extract_keys
+from app.db import Database, CHANNELS, ENTRIES, CHANNELS_ORDER, USERS
+from app.utils import extract_keys, minutes_between_dates, datetimes_between
 from app.models.channel import Channel
 
 
@@ -27,7 +27,7 @@ def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
     if row is None:
         return None
 
-    return Channel(**extract_keys(row, ['id', 'uuid', 'device_id', 'type', 'name', 'value', 'value_updated', 'unit']))
+    return Channel(**extract_keys(row, ['id', 'uuid', 'device_id', 'type', 'name', 'value', 'value_updated', 'unit', 'color', 'disabled']))
 
 
 def get_device_channels(db: Database, device_id: int) -> List[Channel]:
@@ -44,8 +44,23 @@ def get_all_channels(db: Database) -> List[Channel]:
     """
     Get all channels.
     """
-
     query = select(CHANNELS.c).select_from(CHANNELS)
+    result = db.execute(query)
+
+    return [Channel(*row) for row in result]
+
+
+def get_all_channels_ordered(db: Database, user_id: int) -> List[Channel]:
+    """
+    Get all channels sorted by specified user's order.
+    """
+    joined = CHANNELS.outerjoin(CHANNELS_ORDER, CHANNELS_ORDER.c.channel_id == CHANNELS.c.id)\
+        .join(USERS)
+
+    query = select(CHANNELS.c)\
+        .select_from(joined)\
+        .where(USERS.c.id == user_id)\
+        .order_by(CHANNELS_ORDER.c.order)
     result = db.execute(query)
 
     return [Channel(*row) for row in result]
@@ -115,25 +130,13 @@ def update_channel_value(db: Database, channel_id: Union[int, str], value: float
     return True
 
 
-def update_channel(db: Database, channel_id: int, channel_name: str = None, channel_type: int = None,
-                   channel_unit: str = None) -> bool:
+def update_channel(db: Database, channel_id: int, **values) -> bool:
     """
     Update channel's name.
     """
     channel = get_channel(db, channel_id)
     if channel is None:
         return False
-
-    values = dict()
-
-    if channel_name is not None:
-        values['name'] = channel_name
-
-    if channel_type is not None:
-        values['type'] = channel_type
-
-    if channel_unit is not None:
-        values['unit'] = channel_unit
 
     if len(values) > 0:
         query = update(CHANNELS).values(**values).where(CHANNELS.c.id == channel.id)
@@ -143,25 +146,24 @@ def update_channel(db: Database, channel_id: int, channel_name: str = None, chan
     return True
 
 
-def get_recent_channel_stats(db: Database, channel_id: int, count: int=100) -> List:
+def get_recent_channel_stats(db: Database, channel_id: int, period_start: datetime, period_end: datetime) -> List:
     """
     Get recent channels's stats.
     """
-    subquery = select([ENTRIES.c.timestamp, ENTRIES.c.value]) \
+    query = select([ENTRIES.c.timestamp, ENTRIES.c.value]) \
         .select_from(ENTRIES) \
-        .where(ENTRIES.c.channel_id == channel_id) \
-        .order_by(ENTRIES.c.timestamp.desc()) \
-        .limit(count) \
-        .alias()
-
-    query = select(subquery.c) \
-        .select_from(subquery) \
-        .order_by(subquery.c.timestamp.asc()) \
-        .limit(count)
+        .where(and_(ENTRIES.c.channel_id == channel_id,
+                    between(ENTRIES.c.timestamp, period_start, period_end))) \
+        .order_by(ENTRIES.c.timestamp.asc())
 
     result = db.execute(query)
 
-    return [(timestamp, value) for timestamp, value in result]
+    all_datetimes = OrderedDict.fromkeys(minutes_between_dates(period_start, period_end))
+    for time, value in result:
+        dt = time.replace(second=0)
+        all_datetimes[dt] = round(value, 2)
+
+    return [(time.strftime('%H:%M'), value) for time, value in all_datetimes.items()]
 
 
 def get_channel_stats(db: Database, channel_id: int, period_start: datetime, period_end: datetime,
@@ -169,7 +171,7 @@ def get_channel_stats(db: Database, channel_id: int, period_start: datetime, per
     """
     Get channel's stats for specified period.
     """
-    query = select([func.date_format(ENTRIES.c.timestamp, '%d.%m.%y %H:%i'), func.avg(ENTRIES.c.value)]) \
+    query = select([ENTRIES.c.timestamp, func.avg(ENTRIES.c.value)]) \
         .select_from(ENTRIES) \
         .where(and_(ENTRIES.c.channel_id == channel_id,
                     between(ENTRIES.c.timestamp, period_start, period_end))) \
@@ -180,4 +182,19 @@ def get_channel_stats(db: Database, channel_id: int, period_start: datetime, per
 
     result = db.execute(query)
 
-    return [[str(time), round(value, 2)] for time, value in result]
+    all_datetimes = OrderedDict.fromkeys(datetimes_between(period_start, period_end, average_interval * 60))
+    for time, value in result:
+        dt = time.replace(minute=0, second=0)
+        all_datetimes[dt] = round(value, 2)
+
+    return [(time.strftime('%d.%m.%Y %H:00'), value) for time, value in all_datetimes.items()]
+
+
+def update_channels_order(db: Database, user_id: int, channels: List[int]) -> None:
+    query = delete(CHANNELS_ORDER).where(CHANNELS_ORDER.c.user_id == user_id)
+    db.execute(query)
+
+    query = insert(CHANNELS_ORDER)
+    db.execute(query, [
+        dict(user_id=user_id, channel_id=channel_id, order=order) for order, channel_id in enumerate(channels, 1)
+    ])
