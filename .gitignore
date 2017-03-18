@@ -140,5 +140,8 @@ fabric.properties
 
 .idea/
 
-#ignore config
+# config
 config.py
+
+# automatically built css
+static/css/*.css
