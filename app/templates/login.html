@@ -1,28 +1,29 @@
-{% extends "base.html" %}
-
-{% block title %}Logowanie{% endblock %}
-
-{% block body %}
-<div class="container-fluid">
-    <div class="col-lg-offset-4 col-lg-4 col-sm-offset-3 col-sm-6">
+<!DOCTYPE html>
+<html lang="pl">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="theme-color" content="#060606">
+        <link rel="icon" href="/static/images/favicon.png">
+        <title>Panel statystyk - logowanie</title>
+        <link href="/static/css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
         <h1 class="page-header">Logowanie</h1>
-        {% if message %}
-        <div class="alert alert-{{ message[0] }}" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            {{ message[1] }}
+        <div class="login-box">
+            {% if message %}
+            <div class="login-message login-message-{{ message[0] }}">
+            {{ message[1]}}
+            </div>
+            {% endif %}
+            <form role="form" class="login-form" method="POST" action="{{ url_for('login', next=next) }}">
+                <input type="text" class="input" name="username" placeholder="Nazwa użytkownika">
+                <input type="password" class="input" name="password" placeholder="Hasło">
+                <input type="submit" class="button" value="Zaloguj się">
+            </form>
         </div>
-        {% endif %}
-        <form role="form" method="POST" action="{{ url_for('login', next=next) }}">
-            <div class="form-group">
-                <label for="username">Nazwa użytkownika:</label>
-                <input type="text" class="form-control" id="username" name="username">
-            </div>
-            <div class="form-group">
-                <label for="password">Hasło:</label>
-                <input type="password" class="form-control" id="password" name="password">
-            </div>
-            <button type="submit" class="btn btn-default">Zaloguj się</button>
-        </form>
-    </div>
-</div>
-{% endblock %}
+    </body>
+</html>

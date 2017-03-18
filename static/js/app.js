@@ -233,7 +233,7 @@ const ChannelCustom = Vue.component('channel-custom', {
         }
     },
     created: function () {
-        this.from = (new Date).addDays(-30).toISOString().substr(0, 10);
+        this.from = (new Date).addDays(-365).toISOString().substr(0, 10);
         this.to = (new Date).toISOString().substr(0, 10);
 
         this.loadStats();

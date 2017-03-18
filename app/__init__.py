@@ -109,7 +109,7 @@ def login():
 
             return redirect(next_page or url_for('index'))
         else:
-            message = ('danger', 'Nieprawidłowe dane!')
+            message = ('error', 'Nieprawidłowe dane!')
 
     return render_template('login.html', message=message, next=next_page)
 
