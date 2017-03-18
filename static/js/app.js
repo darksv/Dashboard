@@ -1,5 +1,7 @@
 "use strict";
 
+Chart.defaults.global.defaultFontColor = '#ccc';
+
 String.prototype.zfill = function(width) {
     if (width > this.length) {
         return new Array(width - this.length + 1).join('0') + this;
@@ -54,8 +56,6 @@ function generateGuid() {
 
 function createChart(options) {
     return new Chart(options.target, {
-        animation: false,
-        responsive: true,
         type: 'line',
         data: {
             labels: options.labels || [],
@@ -65,21 +65,25 @@ function createChart(options) {
                     lineTension: 0,
                     pointRadius: 0,
                     data: options.values || [],
-                    borderColor: options.color || 'rgba(0, 0, 144, 0.5)',
-                    borderWidth: 2.5
+                    borderColor: options.color || hexToRgba('#FFFFFF', 0.5),
+                    borderWidth: 2.5,
+                    label: options.label
                 }
             ]
         },
         options: {
+            animation: false,
+            responsive: true,
+            maintainAspectRatio: false,
             legend: {
-                display: false
+                display: true
             },
             scales: {
                 yAxes: [{
                     display: true,
                     scaleLabel: {
-                        display: !!options.axisTitle,
-                        labelString: options.axisTitle || ''
+                        display: !!options.label,
+                        labelString: (options.label + ' [' + options.unit + ']') || ''
                     }
                 }]
             }
@@ -152,11 +156,12 @@ const ChannelRecent = Vue.component('channel-recent', {
     watch: {
         stats: function () {
             this.chart = createChart({
-                target: this.$el,
+                target: this.$el.querySelector('canvas'),
                 type: 'recent',
                 labels: this.stats.labels,
                 values: this.stats.values,
-                axisTitle: this.stats.title + ' [' + this.stats.unit + ']',
+                label: this.stats.title,
+                unit:  this.stats.unit,
                 color: hexToRgba(app.channelById(this.channelId).color, 0.75)
             });
         },
@@ -221,7 +226,9 @@ const ChannelCustom = Vue.component('channel-custom', {
                 type: 'recent',
                 labels: this.stats.labels,
                 values: this.stats.values,
-                axisTitle: this.stats.title + ' [' + this.stats.unit + ']'
+                label: this.stats.title,
+                unit:  this.stats.unit,
+                color: hexToRgba(app.channelById(this.channelId).color, 0.75)
             });
         }
     },
