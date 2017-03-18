@@ -1,0 +1,63 @@
+.tile-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex-flow: row wrap;
+  align-content: center;
+  justify-content: center;
+}
+
+.channel-tile {
+  width: 350px;
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 3em 1em;
+  border-radius: 0.5em;
+  margin: 0.5em 0.5em;
+  text-align: center;
+
+  a {
+    text-decoration: none;
+  }
+
+  span {
+    font-size: 3em;
+    color: #ffffff;
+  }
+
+  .action {
+    display: none;
+  }
+
+  .value:after {
+    content: attr(data-unit);
+    margin-left: 5px;
+  }
+
+  .sorting-enabled & {
+    cursor: move;
+  }
+
+  .sorting-disabled & {
+    &:hover {
+      span {
+         display: none
+      }
+
+      .action {
+        display: inline-block;
+        cursor: pointer;
+        padding: 0 0.2em;
+      }
+    }
+  }
+}
+
+.tile-container-options {
+  text-align: center;
+  margin: 1em 0 0 0;
+
+  label {
+    padding: 0.1em;
+  }
+}

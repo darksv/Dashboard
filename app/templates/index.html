@@ -6,98 +6,75 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="">
         <meta name="author" content="">
-        <link rel="icon" href="">
+        <meta name="theme-color" content="#060606">
+        <link rel="icon" href="/static/images/favicon.png">
         <title>Panel statystyk</title>
-        <link href="/static/css/lib/bootstrap.min.css" rel="stylesheet" />
-        <link href="/static/css/style.css" rel="stylesheet" />
+        <link href="/static/css/styles.css" rel="stylesheet" />
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" />
         <script src="/static/js/lib/axios.min.js" defer="defer"></script>
-        <script src="/static/js/lib/vue.js" defer="defer"></script>
-        <script src="/static/js/lib/vue-router.js" defer="defer"></script>
+        <script src="/static/js/lib/vue.min.js" defer="defer"></script>
+        <script src="/static/js/lib/vue-router.min.js" defer="defer"></script>
         <script src="/static/js/lib/Sortable.min.js" defer="defer"></script>
         <script src="/static/js/lib/vuedraggable.min.js" defer="defer"></script>
-        <script src="/static/js/lib/Chart.bundle.js" defer="defer"></script>
-        <script src="/static/js/lib/mqttws31.js" defer="defer"></script>
-        <script src="/static/js/lib/jscolor.js" defer="defer"></script>
+        <script src="/static/js/lib/Chart.min.js" defer="defer"></script>
+        <script src="/static/js/lib/mqttws31.min.js" defer="defer"></script>
     </head>
     <body>
     {% raw %}
         <script type="x-template" id="channel-item">
             <div>
-                <span v-if="channel.change === 1" class="glyphicon glyphicon-arrow-up"></span>
-                <span v-if="channel.change === -1" class="glyphicon glyphicon-arrow-down"></span>
+                <span v-if="channel.change === 1" class="fa fa-long-arrow-up indicator"></span>
+                <span v-if="channel.change === -1" class="fa fa-long-arrow-down indicator"></span>
                 <span :data-unit="channel.unit" :title="channel.value_updated" class="value">{{ channel.value.toFixed(2) }}</span>
-                <router-link :to="{ name: 'channel_recent', params: { channelId: channel.id } }" title="Statystyki">
-                    <span class="action glyphicon glyphicon-stats"></span>
+                <router-link :to="{ name: 'channel_recent', params: { channelId: channel.id } }" title="Wykres">
+                    <span class="action fa fa-line-chart"></span>
                 </router-link>
-                <a v-if="user.is_authenticated" :href="'/channel/' + channel.id + '/settings'" title="Ustawienia">
-                    <span class="action glyphicon glyphicon-cog"></span>
+                <a v-if="user.is_authenticated" :href="'/channel/' + channel.id + '/settings'" title="Edytuj">
+                    <span class="action fa fa-edit"></span>
                 </a>
             </div>
         </script>
 
         <script type="x-template" id="channel-list">
-            <div>
+            <div class="channel-list">
+                <h1 class="page-header">Kanały pomiarowe</h1>
                 <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
                     <div v-for="channel in channels" v-if="!channel.disabled || showDisabled" :title="channel.name" class="channel-tile" :style="{ backgroundColor: channel.color, opacity: channel.disabled ? 0.8 : 1}">
                         <item :channel="channel" :user="user"></item>
                     </div>
                 </draggable>
-                <div v-if="user.is_authenticated">
-                    <label><input type="checkbox" v-model="enableSort"> Zezwalaj na sortowanie kanałów</label>
-                </div>
-                <div>
+                <div class="tile-container-options">
+                    <label v-if="user.is_authenticated"><input type="checkbox" v-model="enableSort"> Zezwalaj na sortowanie kanałów</label>
                     <label><input type="checkbox" v-model="showDisabled"> Wyświetlaj wyłączone kanały</label>
                 </div>
             </div>
         </script>
 
         <script type="x-template" id="channel-recent">
-            <canvas></canvas>
+            <div class="chart-container">
+                <canvas></canvas>
+            </div>
         </script>
 
         <script type="x-template" id="channel-custom">
-            <div class="container-fluid">
-                <div class="collapse navbar-collapse">
-                    <form class="navbar-form navbar-left" v-on:submit.prevent="show">
-                        <div class="form-group">
-                            <label>Okres: </label>
-                            <input type="date" required="required" class="form-control" v-model="from">
-                            -
-                            <input type="date" required="required" class="form-control" v-model="to">
-                        </div>
-                        <button type="submit" class="btn btn-default">Wyświetl</button>
-                    </form>
-                </div>
+            <div class="chart-container">
                 <canvas></canvas>
             </div>
         </script>
 
         <div id="app">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-12 col-lg-10 col-lg-offset-1">
-                        <h1 class="page-header">Kanały pomiarowe</h1>
-                        <transition name="fade" mode="out-in">
-                            <router-view class="view" :channels="channels" :user="user"></router-view>
-                        </transition>
-                    </div>
-                </div>
-            </div>
+            <transition name="fade" mode="out-in" class="page-content">
+                <router-view class="view" :channels="channels" :user="user"></router-view>
+            </transition>
             <footer>
-                <p>
-                    <span v-if="connected" class="glyphicon glyphicon-ok-sign text-success" title="Połączony z serwerem"></span>
-                    <span v-if="!connected" class="glyphicon glyphicon-remove-sign text-danger" title="Brak połączenia"></span>
-                    <a v-if="isLogged" href="/logout" title="Wyloguj się">
-                        <span class="glyphicon glyphicon-log-out text-success"></span>
-                    </a>
-                    <a v-if="!isLogged" href="/login" title="Zaloguj się">
-                        <span class="glyphicon glyphicon-log-in text-danger"></span>
-                    </a>
-                </p>
+                <span v-if="connected" class="fa fa-check-circle text-success" title="Połączony z serwerem"></span>
+                <span v-if="!connected" class="fa fa-times-circle text-danger" title="Brak połączenia"></span>
+                <span v-if="isLogged" class="fa fa-user text-success" :title="'Zalogowany jako ' + user.name"></span>
+                <span v-if="!isLogged" class="fa fa-user text-danger" title="Niezalogowany"></span>
             </footer>
         </div>
     {% endraw %}
-        <script src="{{ path_with_mtime('/js/app.js') }}" defer="defer"></script>
+        <script src="/static{{ path_with_mtime('/js/app.js') }}" defer="defer"></script>
         <script>
             app.page_data = {{ (data or {}) | tojson | safe }};
         </script>
