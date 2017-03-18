@@ -1,7 +1,7 @@
 import config
 import os
 from datetime import datetime, timedelta
-from flask import Flask, send_from_directory, jsonify, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, request, redirect, url_for
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
 from app import utils
@@ -9,13 +9,14 @@ from app.channel_types import get_types
 from app.db import DB
 from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
     get_recent_channel_stats, get_channel_stats, get_all_channels, update_channels_order, get_all_channels_ordered
-from app.db.devices import get_all_devices, get_device, get_or_create_device
+from app.db.devices import get_device, get_or_create_device
+from app.db.notification import create_notification, get_pending_notifications
 from app.db.watchers import get_watchers
 from app.db.users import get_user_by_id, get_user_by_username
 from app.schemas.channel import ChannelSchema
 from app.schemas.watcher import WatcherSchema
+from app.schemas.notification import NotificationSchema
 from app.schemas.user import UserSchema
-
 
 app = Flask('dashboard', static_folder='static', template_folder='app/templates')
 app.secret_key = config.SECRET_KEY
@@ -36,30 +37,10 @@ def inject_variables():
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-if config.DEVELOPMENT:
-    @app.route('/css/<path:path>')
-    def send_css(path: str):
-        return send_from_directory('static/css', path)
-
-    @app.route('/js/<path:path>')
-    def send_js(path: str):
-        return send_from_directory('static/js', path)
-
-    @app.route('/fonts/<path:path>')
-    def send_font(path: str):
-        return send_from_directory('static/fonts', path)
-
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
-
-@app.route('/devices')
-def devices_list():
-    devices = get_all_devices(DB)
-
-    return render_template('devices.html', devices=devices)
 
 
 @app.route('/device/<int:device_id>')
@@ -97,7 +78,7 @@ def channel_settings(channel_id: int):
 
         data, errors = schema.load(request.form, partial=editable_fields)
         if not errors and update_channel(DB, channel_id, **data):
-            return redirect(url_for('index', _anchor='/channel/{}'.format(channel_id)))
+            return redirect(url_for('index'))
     else:
         data = {}
 
@@ -170,6 +151,32 @@ def channel_update():
     elif channel.type.name == 'color':
         value = utils.parse_color(raw_value)
         return ' ' .join(map(str, value))
+
+
+@app.route('/api/notification', methods=['POST'])
+def new_notification():
+    data, errors = NotificationSchema().load(request.args)
+    if errors:
+        return jsonify(errors=errors)
+
+    user_id = data['user_id']
+    watcher_id = data['watcher_id']
+    message = data['message']
+
+    notification_id = create_notification(DB, user_id, message, watcher_id)
+    if not notification_id:
+        return jsonify({}), 500
+
+    return jsonify(id=notification_id)
+
+
+@app.route('/api/notifications', methods=['GET'])
+def api_notifications():
+    if current_user.is_anonymous:
+        return jsonify({}), 403
+
+    notifications = get_pending_notifications(DB, current_user.id)
+    return jsonify(NotificationSchema().dump(notifications, many=True).data)
 
 
 @app.route('/api/getStats')

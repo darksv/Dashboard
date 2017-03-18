@@ -49,8 +49,16 @@ WATCHERS = Table('watchers', meta,
     Column('channel_id', Integer, ForeignKey('channels.id'), nullable=False),
     Column('condition', Text),
     Column('message', String(100)),
-    Column('last_notification', DateTime(timezone=True)),
     Column('renew_time', Integer)
+)
+
+NOTIFICATIONS = Table('notifications', meta,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('watcher_id', Integer, ForeignKey('watchers.id'), nullable=True),
+    Column('created', DateTime(timezone=True)),
+    Column('received', DateTime(timezone=True), nullable=True),
+    Column('message', String(100))
 )
 
 

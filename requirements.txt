@@ -1,3 +1,4 @@
+uwsgi
 sqlalchemy
 Flask==0.10.1
 flask-login

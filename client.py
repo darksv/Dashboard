@@ -1,4 +1,3 @@
-import json
 import math
 import traceback
 import paho.mqtt.client as mqtt
@@ -22,20 +21,25 @@ def parse_value(val: str) -> float:
 
 def process_watchers(channel_id, value):
     data = requests.get('http://xxx/api/watchers', dict(channel_id=channel_id)).json()
-    watchers = data['watchers']
-    for watcher in watchers:
+
+    users_to_notify = set()
+    for watcher in data['watchers']:
         condition = watcher['condition']
+        watcher_id = watcher['id']
         user_id = watcher['user_id']
         message = watcher['message']
 
         if eval(condition, dict(), dict(value=value)):
             notification = dict(
-                title='Ostrzeżenie',
-                body=message.replace('value', str(value)),
-                url='http://xxx/channel/{0}'.format(channel_id)
+                message=message.replace('value', str(value)),
+                watcher_id=watcher_id,
+                user_id=user_id,
             )
+            requests.get('http://xxx/api/notification', notification)
+            users_to_notify.add(user_id)
 
-            client.publish('notify/{0}'.format(user_id), json.dumps(notification), 2)
+    for user_id in users_to_notify:
+        client.publish('notify/{0}'.format(user_id), '', 2)
 
 
 def on_message(client, userdata, msg):
