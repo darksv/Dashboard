@@ -1,7 +1,7 @@
-HOST = '127.0.0.1'
+HOST = ''
 DATABASE_URL = ''
-MQTT_HOST = 'xxx'
+MQTT_HOST = ''
 MQTT_PORT = 1883
 DEVELOPMENT = True
-SECRET_KEY = 'lorem ipsum'
-USERS = {'admin': 'admin'}
+SECRET_KEY = ''
+DASHBOARD_URL = ''

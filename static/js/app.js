@@ -317,7 +317,7 @@ function channelUpdate(channel, newValue) {
 // MQTT Client
 var clientId = generateGuid();
 
-var client = new Paho.MQTT.Client('wss://xxx:9883/ws', clientId);
+var client = new Paho.MQTT.Client('wss://' + window.location.host + ':9883/ws', clientId);
 client.onConnectionLost = function (response) {
     console.log(response);
     app.connected = false

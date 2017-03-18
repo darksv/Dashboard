@@ -20,7 +20,7 @@ def parse_value(val: str) -> float:
 
 
 def process_watchers(channel_id, value):
-    data = requests.get('http://xxx/api/watchers', dict(channel_id=channel_id)).json()
+    data = requests.get(config.DASHBOARD_URL + '/api/watchers', dict(channel_id=channel_id)).json()
 
     users_to_notify = set()
     for watcher in data['watchers']:
@@ -35,7 +35,7 @@ def process_watchers(channel_id, value):
                 watcher_id=watcher_id,
                 user_id=user_id,
             )
-            requests.get('http://xxx/api/notification', notification)
+            requests.get(config.DASHBOARD_URL + '/api/notification', notification)
             users_to_notify.add(user_id)
 
     for user_id in users_to_notify:
@@ -57,7 +57,7 @@ def on_message(client, userdata, msg):
         print('Received channel update: device={0} channel={1} value={2}'.format(device_uuid, channel_uuid, value))
 
         try:
-            req = requests.get('https://xxx/updateChannel',
+            req = requests.get(config.DASHBOARD_URL + '/updateChannel',
                                dict(deviceUuid=device_uuid, channelUuid=channel_uuid, value=value))
 
             if req.status_code != 200:
