@@ -203,7 +203,9 @@ const ChannelCustom = Vue.component('channel-custom', {
             stats: {},
             chart: null,
             from: null,
-            to: null
+            to: null,
+            fieldsShown: false,
+            fieldsEnabled: true
         };
     },
     props: {
@@ -233,21 +235,30 @@ const ChannelCustom = Vue.component('channel-custom', {
         }
     },
     created: function () {
-        this.from = (new Date).addDays(-365).toISOString().substr(0, 10);
+        this.from = (new Date).addDays(-30).toISOString().substr(0, 10);
         this.to = (new Date).toISOString().substr(0, 10);
 
         this.loadStats();
     },
     methods: {
         loadStats: function() {
+            if (!this.fieldsEnabled) {
+                return;
+            }
+
             var url = '/api/getStats?channelId=' + this.channelId + '&type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
             var self = this;
+            self.fieldsEnabled = false;
             axios.get(url).then(function (response) {
                 self.stats = response.data;
+                self.fieldsEnabled = true;
             });
         },
         show: function () {
             this.loadStats();
+        },
+        toggleFields: function () {
+            this.fieldsShown = !this.fieldsShown;
         }
     }
 });

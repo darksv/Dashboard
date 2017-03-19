@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<html lang="pl" xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-model="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -58,6 +59,14 @@
 
         <script type="x-template" id="channel-custom">
             <div class="chart-container">
+                <div class="chart-toolbar">
+                    <div class="chart-toolbar-fields" v-if="fieldsShown">
+                        <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="!fieldsEnabled">
+                        -
+                        <input type="date" class="input" v-model="to" v-on:keyup.enter="show" :readonly="!fieldsEnabled">
+                    </div>
+                    <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
+                </div>
                 <canvas></canvas>
             </div>
         </script>
