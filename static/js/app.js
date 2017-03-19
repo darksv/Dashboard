@@ -232,11 +232,19 @@ const ChannelCustom = Vue.component('channel-custom', {
                 unit:  this.stats.unit,
                 color: hexToRgba(app.channelById(this.channelId).color, 0.75)
             });
+        },
+        '$route': function () {
+            this.loadStats();
         }
     },
     created: function () {
-        this.from = (new Date).addDays(-30).toISOString().substr(0, 10);
-        this.to = (new Date).toISOString().substr(0, 10);
+        if (this.$route.query.from && this.$route.query.to) {
+            this.from = this.$route.query.from;
+            this.to = this.$route.query.to;
+        } else {
+            this.from = (new Date).addDays(-30).toISOString().substr(0, 10);
+            this.to = (new Date).toISOString().substr(0, 10);
+        }
 
         this.loadStats();
     },
@@ -255,7 +263,13 @@ const ChannelCustom = Vue.component('channel-custom', {
             });
         },
         show: function () {
-            this.loadStats();
+            this.$router.push({
+                name: 'channel_custom',
+                query: {
+                    from: this.from,
+                    to: this.to
+                }
+            });
         },
         toggleFields: function () {
             this.fieldsShown = !this.fieldsShown;
