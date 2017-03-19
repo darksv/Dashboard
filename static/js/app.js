@@ -54,6 +54,10 @@ function generateGuid() {
     return result;
 }
 
+function isValidDate(str) {
+    return !isNaN(Date.parse(str));
+}
+
 function createChart(options) {
     return new Chart(options.target, {
         type: 'line',
@@ -234,26 +238,27 @@ const ChannelCustom = Vue.component('channel-custom', {
             });
         },
         '$route': function () {
+            console.log('$route');
             this.loadStats();
         }
     },
     created: function () {
-        if (this.$route.query.from && this.$route.query.to) {
-            this.from = this.$route.query.from;
-            this.to = this.$route.query.to;
+        var dateFrom, dateTo;
+
+        if (isValidDate(this.$route.query.from) && isValidDate(this.$route.query.to)) {
+            dateFrom = new Date(this.$route.query.from);
+            dateTo = new Date(this.$route.query.to);
         } else {
-            this.from = (new Date).addDays(-30).toISOString().substr(0, 10);
-            this.to = (new Date).toISOString().substr(0, 10);
+            dateFrom = (new Date).addDays(-30);
+            dateTo = (new Date);
         }
 
-        this.loadStats();
+        this.from = dateFrom.toISOString().substr(0, 10);
+        this.to = dateTo.toISOString().substr(0, 10);
+        this.show();
     },
     methods: {
         loadStats: function() {
-            if (!this.fieldsEnabled) {
-                return;
-            }
-
             var url = '/api/getStats?channelId=' + this.channelId + '&type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
             var self = this;
             self.fieldsEnabled = false;
@@ -270,6 +275,7 @@ const ChannelCustom = Vue.component('channel-custom', {
                     to: this.to
                 }
             });
+            this.loadStats();
         },
         toggleFields: function () {
             this.fieldsShown = !this.fieldsShown;
