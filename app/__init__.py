@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, render_template, request, redirect, url_for
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
+from flask.ext.mail import Mail
+from werkzeug.debug import get_current_traceback
 from app import utils
 from app.channel_types import get_types
 from app.db import DB
@@ -21,6 +23,7 @@ from app.schemas.user import UserSchema
 app = Flask('dashboard', static_folder='static', template_folder='app/templates')
 app.secret_key = config.SECRET_KEY
 app.jinja_env.filters['datetime'] = utils.format_datetime
+mail = Mail(app)
 
 
 @app.context_processor
@@ -41,16 +44,6 @@ login_manager.init_app(app)
 @app.route('/')
 def index():
     return render_template('index.html')
-
-
-@app.route('/device/<int:device_id>')
-def device_details(device_id: int):
-    device = get_device(DB, device_id)
-
-    if device is None:
-        return redirect(url_for('devices_list'))
-
-    return render_template('device_details.html', device=device)
 
 
 @app.route('/device/<int:device_id>/settings')
@@ -173,7 +166,7 @@ def new_notification():
 @app.route('/api/notifications', methods=['GET'])
 def api_notifications():
     if current_user.is_anonymous:
-        return jsonify({}), 403
+        return jsonify(), 403
 
     notifications = get_pending_notifications(DB, current_user.id)
     return jsonify(NotificationSchema().dump(notifications, many=True).data)
@@ -201,7 +194,7 @@ def channel_stats():
             period_start = utils.parse_datetime(request.args.get('from'))
             period_end = utils.parse_datetime(request.args.get('to'))
         except ValueError:
-            pass
+            return jsonify(), 500
         else:
             if (period_end - period_start).total_seconds() > 0:
                 labels, values = zip(*get_channel_stats(DB, channel_id, period_start, period_end))
@@ -236,3 +229,16 @@ def api_update_order():
         data = request.get_json()
         update_channels_order(DB, current_user.id, data['order'])
     return ''
+
+
+@app.errorhandler(500)
+def error_500(e):
+    traceback = get_current_traceback()
+    mail.send_message(subject='Wystąpił błąd przy przetwarzaniu żądania',
+                      body='Path: {url}\nMethod: {method}\n--------------------\n{trace}'.format(
+                          url=request.url,
+                          method=request.method,
+                          trace=traceback.plaintext),
+                      sender=('Panel statystyk', config.SENDER_EMAIL),
+                      recipients=[config.ADMIN_EMAIL])
+    return 'Error 500', 500
