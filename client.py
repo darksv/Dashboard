@@ -1,5 +1,6 @@
 import math
 import traceback
+from urllib.parse import urlencode
 import paho.mqtt.client as mqtt
 import requests
 import config
@@ -35,7 +36,7 @@ def process_watchers(channel_id, value):
                 watcher_id=watcher_id,
                 user_id=user_id,
             )
-            requests.get(config.DASHBOARD_URL + '/api/notification', notification)
+            requests.post(config.DASHBOARD_URL + '/api/notification?' + urlencode(notification))
             users_to_notify.add(user_id)
 
     for user_id in users_to_notify:
