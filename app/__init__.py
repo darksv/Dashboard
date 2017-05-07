@@ -16,6 +16,7 @@ from app.db.notification import create_notification, get_pending_notifications
 from app.db.watchers import get_watchers
 from app.db.users import get_user_by_id, get_user_by_username
 from app.schemas.channel import ChannelSchema
+from app.schemas.device import DeviceSchema
 from app.schemas.watcher import WatcherSchema
 from app.schemas.notification import NotificationSchema
 from app.schemas.user import UserSchema
@@ -53,17 +54,6 @@ def api_auth_required(func):
 @app.route('/')
 def index():
     return render_template('index.html')
-
-
-@app.route('/device/<int:device_id>/settings')
-@flask_login.login_required
-def device_settings(device_id: int):
-    device = get_device(DB, device_id)
-
-    if device is None:
-        return redirect(url_for('devices_list'))
-
-    return render_template('device_settings.html', device=device)
 
 
 @login_manager.unauthorized_handler
@@ -206,6 +196,18 @@ def api_monitors():
     if channel_id:
         watchers = get_watchers(DB, channel_id)
         return jsonify(watchers=WatcherSchema().dump(watchers, many=True).data)
+
+
+@app.route('/api/device/<int:device_id>', methods=['GET'])
+def device_settings(device_id: int):
+    device = get_device(DB, device_id)
+    if not device:
+        return jsonify(), 404
+
+    schema = DeviceSchema()
+    data, _ = schema.dump(device)
+
+    return jsonify(data), 200
 
 
 @app.route('/api/channel/<int:channel_id>', methods=['GET'])
