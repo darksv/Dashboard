@@ -166,11 +166,8 @@ def api_notifications():
     return jsonify(NotificationSchema().dump(notifications, many=True).data)
 
 
-@app.route('/api/getStats')
-def channel_stats():
-    period = request.args.get('type')
-    channel_id = int(request.args.get('channelId'))
-
+@app.route('/api/channel/<int:channel_id>/stats')
+def api_channel_stats(channel_id: int):
     channel = get_channel(DB, channel_id)
     if not channel:
         return jsonify()
@@ -178,6 +175,7 @@ def channel_stats():
     labels = []
     values = []
 
+    period = request.args.get('type', 'recent')
     if period == 'recent':
         period_end = datetime.now()
         period_start = period_end - timedelta(minutes=60)

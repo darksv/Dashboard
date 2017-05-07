@@ -240,7 +240,7 @@ const ChannelRecentPage = Vue.component('channel-recent-page', {
     },
     methods: {
         update: function() {
-            var url = '/api/getStats?type=recent&channelId=' + this.channelId;
+            var url = '/api/channel/' + this.channelId + '/stats?type=recent';
             var self = this;
             axios.get(url).then(function (response) {
                 var data = response.data;
@@ -322,7 +322,7 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
     },
     methods: {
         update: function() {
-            var url = '/api/getStats?channelId=' + this.channelId + '&type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
+            var url = '/api/channel/' + this.channelId + '/stats?type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
             var self = this;
             self.fieldsEnabled = false;
             axios.get(url).then(function (response) {
