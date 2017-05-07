@@ -156,10 +156,8 @@ def new_notification():
 
 
 @app.route('/api/notifications', methods=['GET'])
+@api_auth_required
 def api_notifications():
-    if current_user.is_anonymous:
-        return jsonify(), 403
-
     notifications = get_pending_notifications(DB, current_user.id)
     return jsonify(NotificationSchema().dump(notifications, many=True).data)
 
