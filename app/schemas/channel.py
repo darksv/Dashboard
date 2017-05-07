@@ -19,4 +19,4 @@ class ChannelSchema(Schema):
     @validates('color')
     def validate_color(self, value):
         if not re.fullmatch(r'^#[0-9a-fA-F]{6}$', value):
-            raise ValidationError
+            raise ValidationError('invalid color format')
