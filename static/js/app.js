@@ -128,7 +128,6 @@ const MyChart = Vue.component('chart', {
     },
     watch: {
         labels: function() {
-            console.log(this);
             if (this.maxPoints > 0 && this.labels.length > this.maxPoints) {
                 this.chart.data.labels = this.labels.slice(this.labels.length - this.maxPoints);
             } else {
@@ -175,7 +174,7 @@ const MyChart = Vue.component('chart', {
                         lineTension: 0,
                         pointRadius: 0,
                         data: [],
-                        borderColor: hexToRgba('#FFFFFF', 0.5),
+                        borderColor: hexToRgba(this.color, 0.5),
                         borderWidth: 2.5,
                         label: ''
                     }

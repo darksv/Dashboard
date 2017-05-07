@@ -53,7 +53,7 @@
 
         <script type="x-template" id="channel-recent-page">
             <div class="chart-container">
-                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" />
+                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" :maxPoints="60" />
             </div>
         </script>
 
@@ -67,7 +67,7 @@
                     </div>
                     <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
                 </div>
-                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" />
+                <chart :labels="labels" :values="values" :title="title" :unit="unit" />
             </div>
         </script>
 
