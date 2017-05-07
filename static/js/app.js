@@ -32,7 +32,7 @@ Array.prototype.pushAndShift = function(item) {
 };
 
 function hexToRgba(hex, alpha) {
-    if (hex[0] == '#') {
+    if (hex[0] === '#') {
         hex = hex.slice(1);
     }
 
@@ -47,7 +47,7 @@ function hexToRgba(hex, alpha) {
 function generateGuid() {
     var result = '';
     for (var j = 0; j < 32; j++) {
-        if (j == 8 || j == 12|| j == 16|| j == 20)
+        if (j in [8, 12, 16, 20])
             result += '-';
         result += Math.floor(Math.random() * 16).toString(16).toUpperCase();
     }
