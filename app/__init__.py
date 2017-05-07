@@ -239,13 +239,12 @@ def api_channel_update(channel_id: int):
     return jsonify(), 500
 
 
-@app.route('/api/updateOrder', methods=['POST'])
+@app.route('/api/order', methods=['POST'])
 @api_auth_required
 def api_update_order():
-    if current_user.is_authenticated:
-        data = request.get_json()
-        update_channels_order(DB, current_user.id, data['order'])
-    return ''
+    ids = list(map(int, request.args.get('order', '').split(',')))
+    update_channels_order(DB, current_user.id, ids)
+    return jsonify(), 200
 
 
 @app.errorhandler(500)

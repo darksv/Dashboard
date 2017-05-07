@@ -91,7 +91,7 @@ const ChannelsPage = Vue.component('channels-page', {
                 return x.id;
             });
 
-            axios.post('/api/updateOrder?order=' + newOrder.join(','));
+            axios.post('/api/order?order=' + newOrder.join(','));
         }
     }
 });
