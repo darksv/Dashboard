@@ -1,6 +1,7 @@
 import config
 import os
 from datetime import datetime, timedelta
+from functools import wraps
 from flask import Flask, jsonify, render_template, request, redirect, url_for
 from flask.ext import login as flask_login
 from flask.ext.login import current_user
@@ -38,6 +39,15 @@ def inject_variables():
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
+
+
+def api_auth_required(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return jsonify(), 401
+        return func(*args, **kwargs)
+    return decorated_view
 
 
 @app.route('/')
@@ -210,6 +220,7 @@ def api_channel_settings(channel_id: int):
 
 
 @app.route('/api/channel/<int:channel_id>', methods=['POST'])
+@api_auth_required
 def api_channel_update(channel_id: int):
     channel = get_channel(DB, channel_id)
     if not channel:
@@ -229,6 +240,7 @@ def api_channel_update(channel_id: int):
 
 
 @app.route('/api/updateOrder', methods=['POST'])
+@api_auth_required
 def api_update_order():
     if current_user.is_authenticated:
         data = request.get_json()
