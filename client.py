@@ -21,7 +21,7 @@ def parse_value(val: str) -> float:
 
 
 def process_watchers(channel_id, value):
-    data = requests.get(config.DASHBOARD_URL + '/api/watchers', dict(channel_id=channel_id)).json()
+    data = requests.get('{}/api/channel/{}/watchers'.format(config.DASHBOARD_URL, channel_id)).json()
 
     users_to_notify = set()
     for watcher in data['watchers']:
