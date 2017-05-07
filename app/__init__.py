@@ -7,7 +7,6 @@ from flask.ext.login import current_user
 from flask.ext.mail import Mail
 from werkzeug.debug import get_current_traceback
 from app import utils
-from app.channel_types import get_types
 from app.db import DB
 from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
     get_recent_channel_stats, get_channel_stats, get_all_channels, update_channels_order, get_all_channels_ordered
@@ -55,30 +54,6 @@ def device_settings(device_id: int):
         return redirect(url_for('devices_list'))
 
     return render_template('device_settings.html', device=device)
-
-
-@app.route('/channel/<int:channel_id>/settings', methods=['GET', 'POST'])
-@flask_login.login_required
-def channel_settings(channel_id: int):
-    channel = get_channel(DB, channel_id)
-    if not channel:
-        return redirect('/')
-
-    schema = ChannelSchema()
-
-    if request.method == 'POST':
-        editable_fields = ('name', 'type', 'unit', 'color', 'disabled')
-
-        data, errors = schema.load(request.form, partial=editable_fields)
-        if not errors and update_channel(DB, channel_id, **data):
-            return redirect(url_for('index'))
-    else:
-        data = {}
-
-    channel_data, _ = schema.dump(channel)
-    channel_data.update(**data)
-
-    return render_template('channel_settings.html', channel=channel_data, channel_types=get_types())
 
 
 @login_manager.unauthorized_handler
@@ -221,6 +196,36 @@ def api_monitors():
     if channel_id:
         watchers = get_watchers(DB, channel_id)
         return jsonify(watchers=WatcherSchema().dump(watchers, many=True).data)
+
+
+@app.route('/api/channel/<int:channel_id>', methods=['GET'])
+def api_channel_settings(channel_id: int):
+    channel = get_channel(DB, channel_id)
+    if not channel:
+        return jsonify(), 404
+
+    schema = ChannelSchema()
+    data, _ = schema.dump(channel)
+    return jsonify(data), 200
+
+
+@app.route('/api/channel/<int:channel_id>', methods=['POST'])
+def api_channel_update(channel_id: int):
+    channel = get_channel(DB, channel_id)
+    if not channel:
+        return jsonify(), 404
+
+    schema = ChannelSchema()
+    editable_fields = ('name', 'type', 'unit', 'color', 'disabled')
+
+    data, errors = schema.load(request.args, partial=editable_fields)
+    if errors:
+        return jsonify(errors=errors), 400
+
+    if update_channel(DB, channel_id, **data):
+        return jsonify(), 200
+
+    return jsonify(), 500
 
 
 @app.route('/api/updateOrder', methods=['POST'])
