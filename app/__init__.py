@@ -1,5 +1,6 @@
 import config
 import os
+from base64 import b64decode
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, jsonify, render_template, request, redirect, url_for
@@ -42,12 +43,30 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
 
+def is_authorized(username, password):
+    user = get_user_by_username(DB, username)
+    if not user:
+        return False
+    return user.check_password(password)
+
+
 def api_auth_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if not current_user.is_authenticated:
+        # noinspection PyBroadException
+        try:
+            auth_type, data = request.headers.get('Authorization', '').split(' ')
+            if auth_type != 'Basic':
+                return jsonify(), 401
+
+            username, password = b64decode(data).decode('utf-8').split(':')
+            if not is_authorized(username, password):
+                return jsonify(), 401
+
+            return func(*args, **kwargs)
+        except:
             return jsonify(), 401
-        return func(*args, **kwargs)
+
     return decorated_view
 
 
