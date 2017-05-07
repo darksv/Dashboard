@@ -398,7 +398,7 @@ function channelUpdate(channel, newValue) {
             if (parseInt(app.$route.params.channelId) === channel.id) {
                 var label = new Date().toHourMinute();
                 var currentView = app.$children[0];
-                if (currentView.add !== undefined) {
+                if (currentView !== undefined && currentView.add !== undefined) {
                     currentView.add(label, newValue, true);
                 }
             }
