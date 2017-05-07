@@ -25,12 +25,6 @@ Array.prototype.last = function() {
     return this[this.length - 1];
 };
 
-Array.prototype.pushAndShift = function(item) {
-    var shifted = this.shift();
-    this.push(item);
-    return shifted;
-};
-
 function hexToRgba(hex, alpha) {
     if (hex[0] === '#') {
         hex = hex.slice(1);
@@ -118,21 +112,36 @@ const MyChart = Vue.component('chart', {
             type: String
         },
         color: {
-            required: true,
-            type: String
+            required: false,
+            type: String,
+            default: '#ffffff'
         },
         unit: {
             required: true,
             type: String
+        },
+        maxPoints: {
+            required: false,
+            type: Number,
+            default: 0
         }
     },
     watch: {
         labels: function() {
-            this.chart.data.labels = this.labels;
+            console.log(this);
+            if (this.maxPoints > 0 && this.labels.length > this.maxPoints) {
+                this.chart.data.labels = this.labels.slice(this.labels.length - this.maxPoints);
+            } else {
+                this.chart.data.labels = this.labels;
+            }
             this.chart.update();
         },
         values: function () {
-            this.chart.data.datasets[0].data = this.values;
+            if (this.maxPoints > 0 && this.values.length > this.maxPoints) {
+                this.chart.data.datasets[0].data = this.values.slice(this.values.length - this.maxPoints);
+            } else {
+                this.chart.data.datasets[0].data = this.values;
+            }
             this.chart.update();
         },
         title: function () {
@@ -261,12 +270,12 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
         return {
             items: [],
             title: '',
-            color: '',
             unit: '',
             from: '',
             to: '',
             fieldsEnabled: true,
-            fieldsShown: false
+            fieldsShown: false,
+            maxPoints: 60
         };
     },
     props: {
@@ -323,7 +332,6 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
                 for (var i = 0; i < data.labels.length; ++i) {
                     self.items.push([data.labels[i], data.values[i]]);
                 }
-                self.color = '#FFFFFF';
                 self.title = data.title;
                 self.unit = data.unit;
                 self.fieldsEnabled = true;
