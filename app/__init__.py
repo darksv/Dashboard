@@ -227,10 +227,7 @@ def api_channel_update(channel_id: int):
     if not channel:
         return jsonify(), 404
 
-    schema = ChannelSchema()
-    editable_fields = ('name', 'type', 'unit', 'color', 'disabled')
-
-    data, errors = schema.load(request.args, partial=editable_fields)
+    data, errors = ChannelSchema().load(request.args)
     if errors:
         return jsonify(errors=errors), 400
 

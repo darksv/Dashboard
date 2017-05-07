@@ -5,13 +5,13 @@ from app.channel_types import get_type_ids
 
 
 class ChannelSchema(Schema):
-    id = fields.Integer()
-    uuid = fields.String()
-    device_id = fields.Integer()
+    id = fields.Integer(dump_only=True)
+    uuid = fields.String(dump_only=True)
+    device_id = fields.Integer(dump_only=True)
     name = fields.String(validate=Length(0, 100))
     type = fields.Integer(validate=OneOf(choices=get_type_ids()))
-    value = fields.Float()
-    value_updated = fields.DateTime()
+    value = fields.Float(dump_only=True)
+    value_updated = fields.DateTime(dump_only=True)
     unit = fields.String(validate=Length(0, 10))
     color = fields.String()
     disabled = fields.Boolean()
