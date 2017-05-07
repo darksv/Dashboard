@@ -190,12 +190,11 @@ def api_channels():
     return jsonify(channels=ChannelSchema().dump(channels, many=True).data)
 
 
-@app.route('/api/watchers')
-def api_monitors():
-    channel_id = request.args.get('channel_id')
-    if channel_id:
-        watchers = get_watchers(DB, channel_id)
-        return jsonify(watchers=WatcherSchema().dump(watchers, many=True).data)
+@app.route('/api/channel/<int:channel_id>/watchers', methods=['GET'])
+def api_channel_watchers(channel_id: int):
+    watchers = get_watchers(DB, channel_id)
+
+    return jsonify(watchers=WatcherSchema().dump(watchers, many=True).data)
 
 
 @app.route('/api/device/<int:device_id>', methods=['GET'])
