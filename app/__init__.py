@@ -45,9 +45,7 @@ login_manager.init_app(app)
 
 def is_authorized(username, password):
     user = get_user_by_username(DB, username)
-    if not user:
-        return False
-    return user.check_password(password)
+    return user and user.check_password(password)
 
 
 def api_auth_required(func):
