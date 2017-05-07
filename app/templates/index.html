@@ -22,7 +22,7 @@
     </head>
     <body>
     {% raw %}
-        <script type="x-template" id="channel-item">
+        <script type="x-template" id="channel-tile">
             <div>
                 <span v-if="channel.change === 1" class="fa fa-long-arrow-up indicator"></span>
                 <span v-if="channel.change === -1" class="fa fa-long-arrow-down indicator"></span>
@@ -36,12 +36,12 @@
             </div>
         </script>
 
-        <script type="x-template" id="channel-list">
+        <script type="x-template" id="channels-page">
             <div class="channel-list">
                 <h1 class="page-header">Kanały pomiarowe</h1>
                 <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
                     <div v-for="channel in channels" v-if="!channel.disabled || showDisabled" :title="channel.name" class="channel-tile" :style="{ backgroundColor: channel.color, opacity: channel.disabled ? 0.8 : 1}">
-                        <item :channel="channel" :user="user"></item>
+                        <channel-tile :channel="channel" :user="user" />
                     </div>
                 </draggable>
                 <div class="tile-container-options">
@@ -51,13 +51,13 @@
             </div>
         </script>
 
-        <script type="x-template" id="channel-recent">
+        <script type="x-template" id="channel-recent-page">
             <div class="chart-container">
-                <canvas></canvas>
+                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" />
             </div>
         </script>
 
-        <script type="x-template" id="channel-custom">
+        <script type="x-template" id="channel-custom-page">
             <div class="chart-container">
                 <div class="chart-toolbar">
                     <div class="chart-toolbar-fields" v-if="fieldsShown">
@@ -67,7 +67,7 @@
                     </div>
                     <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
                 </div>
-                <canvas></canvas>
+                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" />
             </div>
         </script>
 

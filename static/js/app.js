@@ -58,45 +58,8 @@ function isValidDate(str) {
     return !isNaN(Date.parse(str));
 }
 
-function createChart(options) {
-    return new Chart(options.target, {
-        type: 'line',
-        data: {
-            labels: options.labels || [],
-            datasets: [
-                {
-                    fill: false,
-                    lineTension: 0,
-                    pointRadius: 0,
-                    data: options.values || [],
-                    borderColor: options.color || hexToRgba('#FFFFFF', 0.5),
-                    borderWidth: 2.5,
-                    label: options.label
-                }
-            ]
-        },
-        options: {
-            animation: false,
-            responsive: true,
-            maintainAspectRatio: false,
-            legend: {
-                display: true
-            },
-            scales: {
-                yAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: !!options.label,
-                        labelString: (options.label + ' [' + options.unit + ']') || ''
-                    }
-                }]
-            }
-        }
-    });
-}
-
-const Item = Vue.component('item', {
-    template: '#channel-item',
+const ChannelTile = Vue.component('channel-tile', {
+    template: '#channel-tile',
     props: {
         channel: {
             required: true
@@ -107,8 +70,8 @@ const Item = Vue.component('item', {
     }
 });
 
-const Home = Vue.component('home', {
-    template: '#channel-list',
+const ChannelsPage = Vue.component('channels-page', {
+    template: '#channels-page',
     props: {
         channels: {
             required: true,
@@ -134,17 +97,106 @@ const Home = Vue.component('home', {
                 return x.id;
             });
 
-            axios.post('/api/updateOrder', {
-                order: newOrder
-            }).then(function() {
-                console.log('saved!');
-            });
+            axios.post('/api/updateOrder?order=' + newOrder.join(','));
         }
     }
 });
 
-const ChannelRecent = Vue.component('channel-recent', {
-    template: '#channel-recent',
+const MyChart = Vue.component('chart', {
+    template: '<canvas>',
+    props: {
+        labels: {
+            required: true,
+            type: Array
+        },
+        values: {
+            required: true,
+            type: Array
+        },
+        title: {
+            required: true,
+            type: String
+        },
+        color: {
+            required: true,
+            type: String
+        },
+        unit: {
+            required: true,
+            type: String
+        }
+    },
+    watch: {
+        labels: function() {
+            this.chart.data.labels = this.labels;
+            this.chart.update();
+        },
+        values: function () {
+            this.chart.data.datasets[0].data = this.values;
+            this.chart.update();
+        },
+        title: function () {
+            this.chart.options.title.text = this.title;
+            this.chart.options.scales.yAxes[0].scaleLabel = {
+                display: !!this.title,
+                labelString: this.title + ' [' + this.unit + ']'
+            };
+            this.chart.update();
+        },
+        color: function () {
+            this.chart.data.datasets[0].borderColor = hexToRgba(this.color, 0.5);
+            this.chart.update();
+        },
+        unit: function () {
+            this.chart.options.scales.yAxes[0].scaleLabel = {
+                display: !!this.title,
+                labelString: this.title + ' [' + this.unit + ']'
+            };
+            this.chart.update();
+        }
+    },
+    mounted: function () {
+        this.chart = new Chart(this.$el, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        fill: false,
+                        lineTension: 0,
+                        pointRadius: 0,
+                        data: [],
+                        borderColor: hexToRgba('#FFFFFF', 0.5),
+                        borderWidth: 2.5,
+                        label: ''
+                    }
+                ]
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    display: false
+                },
+                scales: {
+                    yAxes: [{
+                        display: true
+                    }]
+                },
+                title: {
+                    display: true,
+                    text: '',
+                    fontSize: 24,
+                    padding: 8
+                }
+            }
+        });
+    }
+});
+
+const ChannelRecentPage = Vue.component('channel-recent-page', {
+    template: '#channel-recent-page',
     props: {
         channelId: {
             required: true
@@ -152,64 +204,69 @@ const ChannelRecent = Vue.component('channel-recent', {
     },
     data: function () {
         return {
-            stats: {},
-            chart: null,
-            loading: false
+            items: [],
+            title: '',
+            color: '',
+            unit: ''
         };
     },
-    watch: {
-        stats: function () {
-            this.chart = createChart({
-                target: this.$el.querySelector('canvas'),
-                type: 'recent',
-                labels: this.stats.labels,
-                values: this.stats.values,
-                label: this.stats.title,
-                unit:  this.stats.unit,
-                color: hexToRgba(app.channelById(this.channelId).color, 0.75)
+    computed: {
+        labels: function () {
+            return this.items.map(function(item) {
+                return item[0];
             });
         },
+        values: function () {
+            return this.items.map(function(item) {
+                return item[1];
+            });
+        }
+    },
+    watch: {
         channelId: function() {
-            this.loadStats();
+            this.update();
         }
     },
     created: function () {
-        this.loadStats();
+        this.update();
     },
     methods: {
-        loadStats: function() {
+        update: function() {
             var url = '/api/getStats?type=recent&channelId=' + this.channelId;
             var self = this;
             axios.get(url).then(function (response) {
-                self.stats = response.data;
+                var data = response.data;
+                self.items = [];
+                for (var i = 0; i < data.labels.length; ++i) {
+                    self.add(data.labels[i], data.values[i], true);
+                }
+                self.color = data.color;
+                self.title = data.title;
+                self.unit = data.unit;
             });
         },
-        addPoint: function(label, value, ignoreDuplicatedLabel) {
-            if (this.chart == null || this.chart.data == null) {
+        add: function(label, value, ignoreDuplicatedLabel) {
+            if (this.items.length > 0 && this.items.last()[0] === label && ignoreDuplicatedLabel === true){
                 return;
             }
 
-            if (this.chart.data.labels.last() === label && ignoreDuplicatedLabel) {
-                return;
-            }
-
-            this.chart.data.labels.pushAndShift(label);
-            this.chart.data.datasets[0].data.pushAndShift(value);
-            this.chart.update();
+            this.items.push([label, value]);
         }
     }
 });
 
-const ChannelCustom = Vue.component('channel-custom', {
-    template: '#channel-custom',
+const ChannelCustomPage = Vue.component('channel-custom-page', {
+    template: '#channel-custom-page',
     data: function () {
         return {
-            stats: {},
-            chart: null,
-            from: null,
-            to: null,
-            fieldsShown: false,
-            fieldsEnabled: true
+            items: [],
+            title: '',
+            color: '',
+            unit: '',
+            from: '',
+            to: '',
+            fieldsEnabled: true,
+            fieldsShown: false
         };
     },
     props: {
@@ -223,23 +280,21 @@ const ChannelCustom = Vue.component('channel-custom', {
         },
         formattedTo: function () {
             return this.to.replace(/-/g, '') + '2359';
+        },
+        labels: function () {
+            return this.items.map(function(item) {
+                return item[0];
+            });
+        },
+        values: function () {
+            return this.items.map(function(item) {
+                return item[1];
+            });
         }
     },
     watch: {
-        stats: function () {
-            this.chart = createChart({
-                target: this.$el.querySelector('canvas'),
-                type: 'recent',
-                labels: this.stats.labels,
-                values: this.stats.values,
-                label: this.stats.title,
-                unit:  this.stats.unit,
-                color: hexToRgba(app.channelById(this.channelId).color, 0.75)
-            });
-        },
-        '$route': function () {
-            console.log('$route');
-            this.loadStats();
+        channelId: function() {
+            this.update();
         }
     },
     created: function () {
@@ -258,12 +313,19 @@ const ChannelCustom = Vue.component('channel-custom', {
         this.show();
     },
     methods: {
-        loadStats: function() {
+        update: function() {
             var url = '/api/getStats?channelId=' + this.channelId + '&type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
             var self = this;
             self.fieldsEnabled = false;
             axios.get(url).then(function (response) {
-                self.stats = response.data;
+                var data = response.data;
+                self.items = [];
+                for (var i = 0; i < data.labels.length; ++i) {
+                    self.items.push([data.labels[i], data.values[i]]);
+                }
+                self.color = '#FFFFFF';
+                self.title = data.title;
+                self.unit = data.unit;
                 self.fieldsEnabled = true;
             });
         },
@@ -275,7 +337,7 @@ const ChannelCustom = Vue.component('channel-custom', {
                     to: this.to
                 }
             });
-            this.loadStats();
+            this.update();
         },
         toggleFields: function () {
             this.fieldsShown = !this.fieldsShown;
@@ -285,9 +347,9 @@ const ChannelCustom = Vue.component('channel-custom', {
 
 const router = new VueRouter({
     routes: [
-        { path: '/', component: Home, name: 'home' },
-        { path: '/channel/:channelId/recent', component: ChannelRecent, name: 'channel_recent', props: true },
-        { path: '/channel/:channelId/custom', component: ChannelCustom, name: 'channel_custom', props: true }
+        { path: '/', component: ChannelsPage, name: 'home' },
+        { path: '/channel/:channelId/recent', component: ChannelRecentPage, name: 'channel_recent', props: true },
+        { path: '/channel/:channelId/custom', component: ChannelCustomPage, name: 'channel_custom', props: true }
     ]
 });
 
@@ -300,7 +362,7 @@ const app = new Vue({
     },
     computed: {
         isLogged: function() {
-            return this.user.name != undefined;
+            return this.user.name !== undefined;
         }
     },
     created: function() {
@@ -311,13 +373,6 @@ const app = new Vue({
         axios.get('/api/session').then(function (response) {
            self.user = response.data.user;
         });
-    },
-    methods: {
-        channelById: function(channelId) {
-            return app.channels.find(function(channel) {
-                return channelId == channel.id;
-            });
-        }
     },
     router: router
 });
@@ -333,12 +388,11 @@ function channelUpdate(channel, newValue) {
             break;
 
         case 'channel_recent':
-            if (app.$route.params.channelId == channel.id) {
+            if (parseInt(app.$route.params.channelId) === channel.id) {
                 var label = new Date().toHourMinute();
                 var currentView = app.$children[0];
-
-                if (currentView.addPoint !== undefined) {
-                    currentView.addPoint(label, newValue, true);
+                if (currentView.add !== undefined) {
+                    currentView.add(label, newValue, true);
                 }
             }
             break;
@@ -367,10 +421,10 @@ client.onMessageArrived = function (message) {
     }
 
     var channel = app.channels.find(function(channel) {
-        return channelUuid == channel.uuid;
+        return channelUuid === channel.uuid;
     });
 
-    if (channel == null) {
+    if (channel === null) {
         return;
     }
 
