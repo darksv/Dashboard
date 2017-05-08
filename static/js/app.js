@@ -407,12 +407,30 @@ function channelUpdate(channel, newValue) {
 }
 
 // MQTT Client
-var clientId = generateGuid();
+const clientId = generateGuid();
+const defaultConnectOptions = {
+    onSuccess: function() {
+        client.subscribe('+/+');
+        client.subscribe('notify/+');
+        app.connected = true;
+    }
+};
 
 var client = new Paho.MQTT.Client('wss://' + window.location.host + ':9883/ws', clientId);
 client.onConnectionLost = function (response) {
-    console.log(response);
-    app.connected = false
+    app.connected = false;
+
+    if (response.errorCode === 0) {
+        // client requested disconnection, ignore
+        return;
+    }
+
+    console.log(response.errorMessage);
+
+    var connectOptions = Object.assign(defaultConnectOptions, {
+        cleanSession: false
+    });
+    client.connect(connectOptions);
 };
 
 client.onMessageArrived = function (message) {
@@ -438,10 +456,4 @@ client.onMessageArrived = function (message) {
     channelUpdate(channel, newValue);
 };
 
-client.connect({
-    onSuccess: function() {
-        client.subscribe('+/+');
-        client.subscribe('notify/+');
-        app.connected = true;
-    }
-});
+client.connect(defaultConnectOptions);
