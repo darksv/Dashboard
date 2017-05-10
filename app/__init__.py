@@ -140,7 +140,7 @@ def channel_update():
 
 @app.route('/api/notification', methods=['POST'])
 def new_notification():
-    data, errors = NotificationSchema().load(request.args)
+    data, errors = NotificationSchema().load(request.get_json() or request.args)
     if errors:
         return jsonify(errors=errors)
 
@@ -240,7 +240,7 @@ def api_channel_update(channel_id: int):
     if not channel:
         return jsonify(), 404
 
-    data, errors = ChannelSchema().load(request.args)
+    data, errors = ChannelSchema().load(request.get_json() or request.args)
     if errors:
         return jsonify(errors=errors), 400
 
