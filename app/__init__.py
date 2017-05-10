@@ -60,10 +60,10 @@ def api_auth_required(func):
             username, password = b64decode(data).decode('utf-8').split(':')
             if not is_authorized(username, password):
                 return jsonify(), 401
-
-            return func(*args, **kwargs)
         except:
             return jsonify(), 401
+        else:
+            return func(*args, **kwargs)
 
     return decorated_view
 
