@@ -402,9 +402,25 @@ const ChannelEditPage = Vue.component('channel-edit-page', {
     }
 });
 
+const LoginPage = Vue.component('login-page', {
+    template: '#login-page',
+    data: function () {
+        return {
+            username: '',
+            password: ''
+        };
+    },
+    methods: {
+        login: function () {
+            this.$router.push('/');
+        }
+    }
+});
+
 const router = new VueRouter({
     routes: [
         { path: '/', component: ChannelsPage, name: 'home' },
+        { path: '/login', component: LoginPage, name: 'login' },
         { path: '/channel/:channelId/edit', component: ChannelEditPage, name: 'channel_edit', props: true},
         { path: '/channel/:channelId/recent', component: ChannelRecentPage, name: 'channel_recent', props: true },
         { path: '/channel/:channelId/custom', component: ChannelCustomPage, name: 'channel_custom', props: true }
