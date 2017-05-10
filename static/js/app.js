@@ -303,6 +303,9 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
     watch: {
         channelId: function() {
             this.update();
+        },
+        from: function () {
+            this.periodChanged = true;
         }
     },
     created: function () {
@@ -316,6 +319,7 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
             dateTo = (new Date);
         }
 
+        this.periodChanged = true;
         this.from = dateFrom.toISOString().substr(0, 10);
         this.to = dateTo.toISOString().substr(0, 10);
         this.show();
@@ -337,6 +341,10 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
             });
         },
         show: function () {
+            if (this.periodChanged !== true) {
+                return;
+            }
+
             this.$router.push({
                 name: 'channel_custom',
                 query: {
@@ -344,10 +352,15 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
                     to: this.to
                 }
             });
+            this.periodChanged = false;
             this.update();
         },
         toggleFields: function () {
             this.fieldsShown = !this.fieldsShown;
+
+            if (!this.fieldsShown) {
+                this.show();
+            }
         }
     }
 });
