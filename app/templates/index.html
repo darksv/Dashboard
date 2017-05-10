@@ -30,9 +30,9 @@
                 <router-link :to="{ name: 'channel_recent', params: { channelId: channel.id } }" title="Wykres">
                     <span class="action fa fa-line-chart"></span>
                 </router-link>
-                <a v-if="user.is_authenticated" :href="'/channel/' + channel.id + '/settings'" title="Edytuj">
+                <router-link :to="{ name: 'channel_edit', params: { channelId: channel.id } }" title="Edytuj" v-if="user.is_authenticated">
                     <span class="action fa fa-edit"></span>
-                </a>
+                </router-link>
             </div>
         </script>
 
@@ -68,6 +68,18 @@
                     <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
                 </div>
                 <chart :labels="labels" :values="values" :title="title" :unit="unit" />
+            </div>
+        </script>
+
+        <script type="x-template" id="channel-edit-page">
+            <div>
+                <form v-on:submit.prevent="save">
+                    <input type="text" v-model="channel.name" placeholder="Nazwa"><br>
+                    <input type="text" v-model="channel.unit" placeholder="Jednostka"><br>
+                    <input type="checkbox" v-model="channel.disabled" placeholder="Wyłączony"><br>
+                    <input type="color" v-model="channel.color" placeholder="Kolor"><br>
+                    <input type="submit" value="Zapisz">
+                </form>
             </div>
         </script>
 

@@ -52,6 +52,11 @@ function isValidDate(str) {
     return !isNaN(Date.parse(str));
 }
 
+const apiClient = axios.create({
+    baseURL: window.location.origin + '/api',
+    headers: {'Authorization': 'Basic '}
+});
+
 const ChannelTile = Vue.component('channel-tile', {
     template: '#channel-tile',
     props: {
@@ -91,7 +96,7 @@ const ChannelsPage = Vue.component('channels-page', {
                 return x.id;
             });
 
-            axios.post('/api/order?order=' + newOrder.join(','));
+            apiClient.post('/order?order=' + newOrder.join(','));
         }
     }
 });
@@ -240,9 +245,8 @@ const ChannelRecentPage = Vue.component('channel-recent-page', {
     },
     methods: {
         update: function() {
-            var url = '/api/channel/' + this.channelId + '/stats?type=recent';
             var self = this;
-            axios.get(url).then(function (response) {
+            apiClient.get('/channel/' + this.channelId + '/stats?type=recent').then(function (response) {
                 var data = response.data;
                 self.items = [];
                 for (var i = 0; i < data.labels.length; ++i) {
@@ -326,10 +330,10 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
     },
     methods: {
         update: function() {
-            var url = '/api/channel/' + this.channelId + '/stats?type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
+            var url = '/channel/' + this.channelId + '/stats?type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
             var self = this;
             self.fieldsEnabled = false;
-            axios.get(url).then(function (response) {
+            apiClient.get(url).then(function (response) {
                 var data = response.data;
                 self.items = [];
                 for (var i = 0; i < data.labels.length; ++i) {
@@ -365,9 +369,43 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
     }
 });
 
+const ChannelEditPage = Vue.component('channel-edit-page', {
+    template: '#channel-edit-page',
+    data: function () {
+        return {
+            channel: {}
+        };
+    },
+    props: {
+        channelId: {
+            required: true
+        }
+    },
+    watch: {
+        channelId: function () {
+            this.update();
+        }
+    },
+    created: function () {
+        this.update();
+    },
+    methods: {
+        update: function() {
+            var self = this;
+            apiClient.get('/channel/' + this.channelId).then(function (response) {
+                self.channel = response.data;
+            });
+        },
+        save: function () {
+            apiClient.post('/channel/' + this.channelId, this.channel);
+        }
+    }
+});
+
 const router = new VueRouter({
     routes: [
         { path: '/', component: ChannelsPage, name: 'home' },
+        { path: '/channel/:channelId/edit', component: ChannelEditPage, name: 'channel_edit', props: true},
         { path: '/channel/:channelId/recent', component: ChannelRecentPage, name: 'channel_recent', props: true },
         { path: '/channel/:channelId/custom', component: ChannelCustomPage, name: 'channel_custom', props: true }
     ]
@@ -387,10 +425,10 @@ const app = new Vue({
     },
     created: function() {
         var self = this;
-        axios.get('/api/channels').then(function (response) {
+        apiClient.get('channels').then(function (response) {
             self.channels = response.data.channels;
         });
-        axios.get('/api/session').then(function (response) {
+        apiClient.get('session').then(function (response) {
            self.user = response.data.user;
         });
     },
