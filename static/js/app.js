@@ -310,6 +310,9 @@ const ChannelCustomPage = Vue.component('channel-custom-page', {
         },
         from: function () {
             this.periodChanged = true;
+        },
+        to: function () {
+            this.periodChanged = true;
         }
     },
     created: function () {
