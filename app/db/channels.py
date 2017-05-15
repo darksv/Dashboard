@@ -191,10 +191,21 @@ def get_channel_stats(db: Database, channel_id: int, period_start: datetime, per
 
 
 def update_channels_order(db: Database, user_id: int, channels: List[int]) -> None:
-    query = delete(CHANNELS_ORDER).where(CHANNELS_ORDER.c.user_id == user_id)
-    db.execute(query)
+    """
+    Update order of channels on dashboard for specified user.
+    """
+    trans = db.conn.begin()
+    try:
+        new_items = [dict(user_id=user_id, channel_id=channel_id, order=order)
+                     for order, channel_id in enumerate(channels, 1)]
 
-    query = insert(CHANNELS_ORDER)
-    db.execute(query, [
-        dict(user_id=user_id, channel_id=channel_id, order=order) for order, channel_id in enumerate(channels, 1)
-    ])
+        query = delete(CHANNELS_ORDER).where(CHANNELS_ORDER.c.user_id == user_id)
+        db.conn.execute(query)
+
+        query = insert(CHANNELS_ORDER)
+        db.conn.execute(query, new_items)
+
+        trans.commit()
+    except:
+        trans.rollback()
+        raise
