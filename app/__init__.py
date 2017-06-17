@@ -8,6 +8,7 @@ from flask.ext import login as flask_login
 from flask.ext.login import current_user
 from flask.ext.mail import Mail
 from werkzeug.debug import get_current_traceback
+from werkzeug.routing import Rule
 from app import utils
 from app.db import DB
 from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
@@ -25,6 +26,7 @@ from app.schemas.user import UserSchema
 app = Flask('dashboard', static_folder='static', template_folder='app/templates')
 app.secret_key = config.SECRET_KEY
 app.jinja_env.filters['datetime'] = utils.format_datetime
+app.url_map.add(Rule('/api/<path:path>', endpoint='nonexistent_api_endpoint'))
 mail = Mail(app)
 
 
@@ -48,22 +50,27 @@ def is_authorized(username, password):
     return user and user.check_password(password)
 
 
+def error(message, status):
+    return jsonify(error=dict(message=message, status=status)), status
+
+
 def api_auth_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
         # noinspection PyBroadException
         try:
             auth_type, data = request.headers.get('Authorization', '').split(' ')
-            if auth_type != 'Basic':
-                return jsonify(), 401
+            assert auth_type == 'Basic'
 
             username, password = b64decode(data).decode('utf-8').split(':')
-            if not is_authorized(username, password):
-                return jsonify(), 401
+            if is_authorized(username, password):
+                return func(*args, **kwargs)
+            else:
+                return error('Authorization failed: invalid username and/or password', 401)
         except:
-            return jsonify(), 401
-        else:
-            return func(*args, **kwargs)
+            pass
+
+        return error('Authorization required', 401)
 
     return decorated_view
 
@@ -109,6 +116,11 @@ def logout():
 @login_manager.user_loader
 def user_loader(user_id):
     return get_user_by_id(DB, user_id)
+
+
+@app.endpoint('nonexistent_api_endpoint')
+def api_nonexistent_endpoint(path):
+    return error('Invalid endpoint or unsupported method', 400)
 
 
 @app.route('/api/session')
