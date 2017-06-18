@@ -141,10 +141,9 @@ def channel_update():
     if channel.type.name == 'float':
         value = float(raw_value)
 
-        if update_channel_value(DB, channel.id, value):
-            return str(channel.id), 200
-        else:
-            return 'ERROR', 500
+        update_channel_value(DB, channel.id, value)
+        return str(channel.id), 200
+
     elif channel.type.name == 'color':
         value = utils.parse_color(raw_value)
         return ' ' .join(map(str, value))

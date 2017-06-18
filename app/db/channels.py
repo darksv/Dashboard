@@ -96,38 +96,42 @@ def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: 
     return channel
 
 
-def update_channel_value(db: Database, channel_id: Union[int, str], value: float) -> bool:
+def update_channel_value(db: Database, channel_id: Union[int, str], value: float) -> None:
     """
     Update channel's value.
     """
     channel = get_channel(db, channel_id)
     if channel is None:
-        return False
+        return
 
-    now = datetime.now()
+    trans = db.conn.begin()
+    try:
+        now = datetime.now()
 
-    if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
-        # add entry to channel history
-        query = insert(ENTRIES).values(
-            channel_id=channel.id,
-            value=channel.value,
-            timestamp=channel.value_updated
-        )
+        if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
+            query = insert(ENTRIES)\
+                .values(
+                    channel_id=channel.id,
+                    value=channel.value,
+                    timestamp=channel.value_updated)
 
-        try:
-            db.execute(query)
-        except IntegrityError:
-            # ignore entry duplication errors
-            pass
+            try:
+                db.execute(query)
+            except IntegrityError as e:
+                # suppress duplication error
+                pass
 
-    query = update(CHANNELS).values(
-        value=value,
-        value_updated=now
-    ).where(CHANNELS.c.id == channel.id)
+        query = update(CHANNELS)\
+            .values(
+                value=value,
+                value_updated=now)\
+            .where(CHANNELS.c.id == channel.id)
+        db.execute(query)
 
-    db.execute(query)
-
-    return True
+        trans.commit()
+    except:
+        trans.rollback()
+        raise
 
 
 def update_channel(db: Database, channel_id: int, **values) -> bool:
