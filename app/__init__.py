@@ -50,7 +50,7 @@ def is_authorized(username, password):
     return user and user.check_password(password)
 
 
-def error(message, status):
+def error(message, status=404):
     return jsonify(error=dict(message=message, status=status)), status
 
 
@@ -162,7 +162,7 @@ def new_notification():
 
     notification_id = create_notification(DB, user_id, message, watcher_id)
     if not notification_id:
-        return jsonify({}), 500
+        return error('Internal error, please try again later.', 500)
 
     return jsonify(id=notification_id)
 
@@ -194,7 +194,7 @@ def api_channel_stats(channel_id: int):
             period_start = utils.parse_datetime(request.args.get('from'))
             period_end = utils.parse_datetime(request.args.get('to'))
         except ValueError:
-            return jsonify(), 500
+            return error('Bad request', 400)
         else:
             if (period_end - period_start).total_seconds() > 0:
                 labels, values = zip(*get_channel_stats(DB, channel_id, period_start, period_end))
@@ -207,7 +207,7 @@ def api_channel_stats(channel_id: int):
 
 @app.route('/api/channels')
 def api_channels():
-    if current_user.is_anonymous:
+    if not current_user.is_anonymous:
         channels = get_all_channels(DB)
     else:
         channels = get_all_channels_ordered(DB, current_user.id)
@@ -238,11 +238,11 @@ def device_settings(device_id: int):
 def api_channel_settings(channel_id: int):
     channel = get_channel(DB, channel_id)
     if not channel:
-        return jsonify(), 404
+        return error('Channel not found')
 
     schema = ChannelSchema()
     data, _ = schema.dump(channel)
-    return jsonify(data), 200
+    return jsonify(data)
 
 
 @app.route('/api/channel/<int:channel_id>', methods=['POST'])
