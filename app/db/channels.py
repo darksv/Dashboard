@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict, namedtuple
 from datetime import datetime
 from typing import Optional, Union, List
 from sqlalchemy import select, delete, insert, update, func, and_, between
@@ -96,6 +96,19 @@ def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: 
     return channel
 
 
+def filter_value(values: List[Union[int, float]]) -> Optional[float]:
+    # ignore the smallest and the greatest values when possible
+    if len(values) > 4:
+        values.sort()
+        values = values[1:-1]
+
+    return sum(values) / len(values) if values else None
+
+
+Entry = namedtuple('Entry', 'timestamp value')
+cached_entries = defaultdict(list)
+
+
 def update_channel_value(db: Database, channel_id: Union[int, str], value: float) -> None:
     """
     Update channel's value.
@@ -106,25 +119,31 @@ def update_channel_value(db: Database, channel_id: Union[int, str], value: float
 
     trans = db.conn.begin()
     try:
-        now = datetime.now()
+        entries = cached_entries[channel.id]
 
-        if channel.value is not None and (channel.value_updated is None or channel.value_updated.minute != now.minute):
+        timestamp = datetime.now().replace(microsecond=0, second=0)
+        previous_timestamp = entries[-1].timestamp if entries else None
+        if previous_timestamp and previous_timestamp != timestamp:
+            values = [entry.value for entry in entries if entry.timestamp == previous_timestamp]
+
+            average = round(filter_value(values), 2)
+            previous_timestamp = previous_timestamp.replace(second=30)
+
             query = insert(ENTRIES)\
-                .values(
-                    channel_id=channel.id,
-                    value=channel.value,
-                    timestamp=channel.value_updated)
+                .values(channel_id=channel.id, value=average, timestamp=previous_timestamp)
 
             try:
                 db.execute(query)
-            except IntegrityError as e:
+            except IntegrityError:
                 # suppress duplication error
                 pass
 
+            cached_entries[channel.id].clear()
+
+        cached_entries[channel.id].append(Entry(timestamp, value))
+
         query = update(CHANNELS)\
-            .values(
-                value=value,
-                value_updated=now)\
+            .values(value=value, value_updated=datetime.now())\
             .where(CHANNELS.c.id == channel.id)
         db.execute(query)
 
