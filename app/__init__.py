@@ -22,6 +22,7 @@ from app.schemas.device import DeviceSchema
 from app.schemas.watcher import WatcherSchema
 from app.schemas.notification import NotificationSchema
 from app.schemas.user import UserSchema
+from app.channel_type import ChannelType
 
 app = Flask('dashboard', static_folder='static', template_folder='app/templates')
 app.secret_key = config.SECRET_KEY
@@ -138,13 +139,13 @@ def channel_update():
 
     raw_value = request.args.get('value')
 
-    if channel.type.name == 'float':
+    if channel.type is ChannelType.FLOATING:
         value = float(raw_value)
 
         update_channel_value(DB, channel.id, value)
         return str(channel.id), 200
 
-    elif channel.type.name == 'color':
+    elif channel.type is ChannelType.COLOR:
         value = utils.parse_color(raw_value)
         return ' ' .join(map(str, value))
 
