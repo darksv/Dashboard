@@ -176,7 +176,7 @@ const MyChart = Vue.component('chart', {
                 datasets: [
                     {
                         fill: false,
-                        lineTension: 0,
+                        lineTension: 0.3,
                         pointRadius: 0,
                         data: [],
                         borderColor: hexToRgba(this.color, 0.5),
