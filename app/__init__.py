@@ -206,7 +206,7 @@ def api_channel_stats(channel_id: int):
 
 @app.route('/api/channels')
 def api_channels():
-    if not current_user.is_anonymous:
+    if current_user.is_anonymous:
         channels = get_all_channels(DB)
     else:
         channels = get_all_channels_ordered(DB, current_user.id)
