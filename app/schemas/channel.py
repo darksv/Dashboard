@@ -1,7 +1,7 @@
 import re
 from marshmallow import Schema, fields, ValidationError, validates
 from marshmallow.validate import Length
-from channel_type import ChannelType
+from app.channel_type import ChannelType
 
 
 class ChannelSchema(Schema):

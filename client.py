@@ -20,8 +20,8 @@ def parse_value(val: str) -> float:
     return result
 
 
-def process_watchers(channel_id, value):
-    data = requests.get('{}/api/channel/{}/watchers'.format(config.DASHBOARD_URL, channel_id)).json()
+def process_watchers(channel_id, value, client):
+    data = requests.get(config.DASHBOARD_URL + '/api/channel/{}/watchers'.format(channel_id)).json()
 
     users_to_notify = set()
     for watcher in data['watchers']:
@@ -44,41 +44,45 @@ def process_watchers(channel_id, value):
 
 
 def on_message(client, userdata, msg):
+    # noinspection PyBroadException
     try:
         device_uuid, channel_uuid = msg.topic.split('/')
         value = parse_value(msg.payload.decode('ascii'))
 
-        # quick fix
+        # quick fix for DS18B20 driver error for negative temperatures
         if value > 4000:
             value -= 4096
 
-    except Exception as e:
-        print(msg.topic, msg.payload, e)
-    else:
         print('Received channel update: device={0} channel={1} value={2}'.format(device_uuid, channel_uuid, value))
 
-        try:
-            req = requests.get(config.DASHBOARD_URL + '/updateChannel',
-                               dict(deviceUuid=device_uuid, channelUuid=channel_uuid, value=value))
+        response = requests.get(config.DASHBOARD_URL + '/updateChannel', dict(
+            deviceUuid=device_uuid,
+            channelUuid=channel_uuid,
+            value=value
+        ))
 
-            if req.status_code != 200:
-                print('Update unsuccessful', req.status_code, req.content)
-                return
+        if response.status_code != 200:
+            print('Update unsuccessful', response.status_code, response.content)
+            return
 
-            channel_id = int(req.content)
-            process_watchers(channel_id, value)
+        channel_id = int(response.content)
+        process_watchers(channel_id, value, client)
 
-        except SystemError as e:
-            print('Exception occurred: ', e)
+    except:
+        print('Exception occurred when processing message (topic={0}, payload={1})'.format(msg.topic, msg.payload))
+        print(traceback.format_exc())
 
+
+def main():
+    # noinspection PyBroadException
+    try:
+        client = mqtt.Client()
+        client.on_connect = on_connect
+        client.on_message = on_message
+        client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
+        client.loop_forever()
+    except:
+        print(traceback.format_exc())
 
 if __name__ == '__main__':
-    while True:
-        try:
-            client = mqtt.Client()
-            client.on_connect = on_connect
-            client.on_message = on_message
-            client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
-            client.loop_forever()
-        except Exception as e:
-            print(traceback.format_exc())
+    main()
