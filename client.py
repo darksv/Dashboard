@@ -55,12 +55,13 @@ def on_message(client, userdata, msg):
 
         print('Received channel update: device={0} channel={1} value={2}'.format(device_uuid, channel_uuid, value))
 
-        response = requests.get(config.DASHBOARD_URL + '/updateChannel', dict(
-            deviceUuid=device_uuid,
-            channelUuid=channel_uuid,
+        data = dict(
+            device_uuid=device_uuid,
+            channel_uuid=channel_uuid,
             value=value
-        ))
+        )
 
+        response = requests.post(config.DASHBOARD_URL + '/channelUpdate', data)
         if response.status_code != 200:
             print('Update unsuccessful', response.status_code, response.content)
             return

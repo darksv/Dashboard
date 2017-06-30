@@ -129,15 +129,14 @@ def session():
     return jsonify(user=UserSchema().dump(current_user).data)
 
 
-@app.route('/updateChannel')
+@app.route('/channelUpdate', methods=['POST'])
 def channel_update():
-    device_uuid = request.args.get('deviceUuid')
-    channel_uuid = request.args.get('channelUuid')
+    device_uuid = request.form.get('device_uuid')
+    channel_uuid = request.form.get('channel_uuid')
+    raw_value = request.form.get('value')
 
     device = get_or_create_device(DB, device_uuid)
     channel = get_or_create_channel(DB, channel_uuid, device_id=device.id)
-
-    raw_value = request.args.get('value')
 
     if channel.type is ChannelType.FLOATING:
         value = float(raw_value)
