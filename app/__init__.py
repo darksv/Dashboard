@@ -36,12 +36,6 @@ def inject_utils():
     return dict(path_with_mtime=lambda path: '{0}?{1}'.format(path, int(os.path.getmtime('./static' + path))))
 
 
-@app.context_processor
-def inject_variables():
-    return dict(
-        user=current_user
-    )
-
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 

@@ -96,8 +96,5 @@
         </div>
     {% endraw %}
         <script src="/static{{ path_with_mtime('/js/app.js') }}" defer="defer"></script>
-        <script>
-            app.page_data = {{ (data or {}) | tojson | safe }};
-        </script>
     </body>
 </html>
