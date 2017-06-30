@@ -66,6 +66,12 @@ const ChannelTile = Vue.component('channel-tile', {
         user: {
             required: true
         }
+    },
+    computed: {
+        online: function () {
+            var diff = (Date.now() - Date.parse(this.channel.value_updated));
+            return diff <= 5 * 50 * 1000;
+        }
     }
 });
 
@@ -504,26 +510,30 @@ client.onConnectionLost = function (response) {
 };
 
 client.onMessageArrived = function (message) {
-    var topic = message.destinationName;
-    var payload = message.payloadString;
+    try {
+        var topic = message.destinationName;
+        var payload = message.payloadString;
 
-    var channelUuid = topic.split('/')[1];
-    var newValue = parseFloat(payload);
+        var channelUuid = topic.split('/')[1];
+        var newValue = parseFloat(payload);
 
-    // temporary fix for invalid negative values
-    if (newValue > 4000) {
-        newValue -= 4096;
+        // temporary fix for invalid negative values
+        if (newValue > 4000) {
+            newValue -= 4096;
+        }
+
+        var channel = app.channels.find(function(channel) {
+            return channelUuid === channel.uuid;
+        });
+
+        if (channel === null) {
+            return;
+        }
+
+        channelUpdate(channel, newValue);
+    } catch(e) {
+        console.error(e);
     }
-
-    var channel = app.channels.find(function(channel) {
-        return channelUuid === channel.uuid;
-    });
-
-    if (channel === null) {
-        return;
-    }
-
-    channelUpdate(channel, newValue);
 };
 
 client.connect(defaultConnectOptions);

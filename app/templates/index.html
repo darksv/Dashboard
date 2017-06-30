@@ -26,7 +26,7 @@
             <div>
                 <span v-if="channel.change === 1" class="fa fa-long-arrow-up indicator"></span>
                 <span v-if="channel.change === -1" class="fa fa-long-arrow-down indicator"></span>
-                <span :data-unit="channel.unit" :title="channel.value_updated" class="value">{{ channel.value.toFixed(2) }}</span>
+                <span :data-unit="channel.unit" :title="channel.value_updated" class="value">{{ online ? channel.value.toFixed(2) : '-' }}</span>
                 <router-link :to="{ name: 'channel_recent', params: { channelId: channel.id } }" title="Wykres">
                     <span class="action fa fa-line-chart"></span>
                 </router-link>
