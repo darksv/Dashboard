@@ -23,5 +23,3 @@ class User(UserMixin):
     def check_password(self, password: str):
         return ws.check_password_hash(self.hash, password)
 
-    def save(self):
-        pass

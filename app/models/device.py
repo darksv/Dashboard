@@ -21,9 +21,6 @@ class Device:
     def name(self):
         return self._name
 
-    def save(self):
-        pass
-
     @property
     def channels(self):
         return get_device_channels(DB, self.id)

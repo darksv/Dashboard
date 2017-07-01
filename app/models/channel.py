@@ -67,6 +67,3 @@ class Channel:
     @property
     def disabled(self):
         return self._disabled
-
-    def save(self):
-        pass
