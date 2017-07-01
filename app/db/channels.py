@@ -52,7 +52,7 @@ def get_all_channels_ordered(db: Database, user_id: int) -> List[Channel]:
     """
     query = select(CHANNELS.c)\
         .select_from(CHANNELS.outerjoin(CHANNELS_ORDER, CHANNELS_ORDER.c.channel_id == CHANNELS.c.id))\
-        .where(or_(CHANNELS_ORDER.c.user_id == user_id, CHANNELS_ORDER.c.user_id != None))\
+        .where(or_(CHANNELS_ORDER.c.user_id == user_id, CHANNELS_ORDER.c.user_id.is_(None)))\
         .order_by(func.isnull(CHANNELS_ORDER.c.order))\
         .order_by(CHANNELS_ORDER.c.order)
 

@@ -35,6 +35,6 @@ def get_pending_notifications(db: Database, user_id: int) -> List[Notification]:
     """
     Get all pending notifications for specified user.
     """
-    query = select(NOTIFICATIONS.c, and_(NOTIFICATIONS.c.user_id == user_id, NOTIFICATIONS.c.received == None))
+    query = select(NOTIFICATIONS.c, and_(NOTIFICATIONS.c.user_id == user_id, NOTIFICATIONS.c.received.is_(None)))
     result = db.execute(query)
     return [map_object(Notification, row) for row in result]
