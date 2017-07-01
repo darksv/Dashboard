@@ -4,8 +4,8 @@ from base64 import b64decode
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, jsonify, render_template, request, redirect, url_for
+from flask.ext.login import LoginManager
 from flask.ext import login as flask_login
-from flask.ext.login import current_user
 from flask.ext.mail import Mail
 from werkzeug.debug import get_current_traceback
 from werkzeug.routing import Rule
@@ -28,7 +28,9 @@ app = Flask('dashboard', static_folder='static', template_folder='app/templates'
 app.secret_key = config.SECRET_KEY
 app.jinja_env.filters['datetime'] = utils.format_datetime
 app.url_map.add(Rule('/api/<path:path>', endpoint='nonexistent_api_endpoint'))
+login_manager = LoginManager(app)
 mail = Mail(app)
+api_user = None
 
 
 @app.context_processor
@@ -36,36 +38,37 @@ def inject_utils():
     return dict(path_with_mtime=lambda path: '{0}?{1}'.format(path, int(os.path.getmtime('./static' + path))))
 
 
-login_manager = flask_login.LoginManager()
-login_manager.init_app(app)
+@app.before_request
+def before_api_request():
+    global api_user
 
+    auth = request.headers.get('Authorization', None)
+    if not auth:
+        api_user = None
+        return
 
-def is_authorized(username, password):
-    user = get_user_by_username(DB, username)
-    return user and user.check_password(password)
+    auth_type, data = auth.split(' ')
+    username, password = b64decode(data).decode('utf-8').split(':')
+    api_user = get_user_by_username(DB, username)
+    if not api_user:
+        return error('Authorization failed, invalid username and/or password', 401)
 
 
 def error(message, status=404):
     return jsonify(error=dict(message=message, status=status)), status
 
 
+def internal_error():
+    return error('Internal error occurred, please try again later', 500)
+
+
 def api_auth_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        # noinspection PyBroadException
-        try:
-            auth_type, data = request.headers.get('Authorization', '').split(' ')
-            assert auth_type == 'Basic'
+        if not api_user:
+            return error('Authorization required', 401)
 
-            username, password = b64decode(data).decode('utf-8').split(':')
-            if is_authorized(username, password):
-                return func(*args, **kwargs)
-            else:
-                return error('Authorization failed: invalid username and/or password', 401)
-        except:
-            pass
-
-        return error('Authorization required', 401)
+        return func(*args, **kwargs)
 
     return decorated_view
 
@@ -118,11 +121,6 @@ def api_nonexistent_endpoint(path):
     return error('Invalid endpoint or unsupported method', 400)
 
 
-@app.route('/api/session')
-def session():
-    return jsonify(user=UserSchema().dump(current_user).data)
-
-
 @app.route('/channelUpdate', methods=['POST'])
 def channel_update():
     device_uuid = request.form.get('device_uuid')
@@ -155,16 +153,16 @@ def new_notification():
 
     notification_id = create_notification(DB, user_id, message, watcher_id)
     if not notification_id:
-        return error('Internal error, please try again later.', 500)
+        return internal_error()
 
-    return jsonify(id=notification_id)
+    return jsonify()
 
 
 @app.route('/api/notifications', methods=['GET'])
 @api_auth_required
 def api_notifications():
-    notifications = get_pending_notifications(DB, current_user.id)
-    return jsonify(NotificationSchema().dump(notifications, many=True).data)
+    notifications = get_pending_notifications(DB, api_user.id)
+    return jsonify(notifications=NotificationSchema().dump(notifications, many=True).data)
 
 
 @app.route('/api/channel/<int:channel_id>/stats')
@@ -198,33 +196,28 @@ def api_channel_stats(channel_id: int):
     return jsonify(title=title, unit=unit, labels=labels, values=values)
 
 
-@app.route('/api/channels')
+@app.route('/api/channels', methods=['GET'])
 def api_channels():
-    if current_user.is_anonymous:
-        channels = get_all_channels(DB)
-    else:
-        channels = get_all_channels_ordered(DB, current_user.id)
-
-    return jsonify(channels=ChannelSchema().dump(channels, many=True).data)
+    channels = get_all_channels_ordered(DB, api_user.id) if api_user else get_all_channels(DB)
+    data, errors = ChannelSchema().dump(channels, many=True)
+    return jsonify(channels=data) if not errors else internal_error()
 
 
 @app.route('/api/channel/<int:channel_id>/watchers', methods=['GET'])
 def api_channel_watchers(channel_id: int):
     watchers = get_watchers(DB, channel_id)
-
-    return jsonify(watchers=WatcherSchema().dump(watchers, many=True).data)
+    data, errors = WatcherSchema().dump(watchers, many=True)
+    return jsonify(watchers=data) if not errors else internal_error()
 
 
 @app.route('/api/device/<int:device_id>', methods=['GET'])
 def device_settings(device_id: int):
     device = get_device(DB, device_id)
     if not device:
-        return jsonify(), 404
+        return error('Device not found')
 
-    schema = DeviceSchema()
-    data, _ = schema.dump(device)
-
-    return jsonify(data), 200
+    data, errors = DeviceSchema().dump(device)
+    return jsonify(data) if not errors else internal_error()
 
 
 @app.route('/api/channel/<int:channel_id>', methods=['GET'])
@@ -233,9 +226,8 @@ def api_channel_settings(channel_id: int):
     if not channel:
         return error('Channel not found')
 
-    schema = ChannelSchema()
-    data, _ = schema.dump(channel)
-    return jsonify(data)
+    data, errors = ChannelSchema().dump(channel)
+    return jsonify(data) if not errors else internal_error()
 
 
 @app.route('/api/channel/<int:channel_id>', methods=['POST'])
@@ -250,7 +242,7 @@ def api_channel_update(channel_id: int):
         return jsonify(errors=errors), 400
 
     if update_channel(DB, channel_id, **data):
-        return jsonify(), 200
+        return jsonify()
 
     return jsonify(), 500
 
@@ -259,8 +251,8 @@ def api_channel_update(channel_id: int):
 @api_auth_required
 def api_update_order():
     ids = list(map(int, request.args.get('order', '').split(',')))
-    update_channels_order(DB, current_user.id, ids)
-    return jsonify(), 200
+    update_channels_order(DB, api_user.id, ids)
+    return jsonify()
 
 
 @app.errorhandler(500)
