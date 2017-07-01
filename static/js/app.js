@@ -89,10 +89,10 @@ const ChannelTile = Vue.component('channel-tile', {
             return diff <= 5 * 50 * 1000;
         },
         backColor: function() {
-            return this.channel.color;
+            return this.channel.color || '#000000';
         },
         fontColor: function () {
-            return contrastColor(this.channel.color);
+            return contrastColor(this.backColor);
         }
     }
 });
