@@ -4,7 +4,7 @@ from typing import Optional, Union, List
 from sqlalchemy import select, delete, insert, update, func, and_, between
 from sqlalchemy.exc import IntegrityError
 from app.db import Database, CHANNELS, ENTRIES, CHANNELS_ORDER, USERS
-from app.utils import extract_keys, minutes_between_dates, datetimes_between
+from app.utils import map_object, minutes_between_dates, datetimes_between
 from app.models.channel import Channel
 
 
@@ -23,11 +23,7 @@ def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
     result = db.execute(query)
 
     row = result.fetchone()
-
-    if row is None:
-        return None
-
-    return Channel(**extract_keys(row, ['id', 'uuid', 'device_id', 'type', 'name', 'value', 'value_updated', 'unit', 'color', 'disabled']))
+    return map_object(Channel, row) if row else None
 
 
 def get_device_channels(db: Database, device_id: int) -> List[Channel]:
@@ -37,7 +33,7 @@ def get_device_channels(db: Database, device_id: int) -> List[Channel]:
     query = select(CHANNELS.c).select_from(CHANNELS).where(CHANNELS.c.device_id == device_id)
     result = db.execute(query)
 
-    return [Channel(*row) for row in result]
+    return [map_object(Channel, row) for row in result]
 
 
 def get_all_channels(db: Database) -> List[Channel]:
@@ -47,7 +43,7 @@ def get_all_channels(db: Database) -> List[Channel]:
     query = select(CHANNELS.c).select_from(CHANNELS)
     result = db.execute(query)
 
-    return [Channel(*row) for row in result]
+    return [map_object(Channel, row) for row in result]
 
 
 def get_all_channels_ordered(db: Database, user_id: int) -> List[Channel]:
@@ -62,8 +58,7 @@ def get_all_channels_ordered(db: Database, user_id: int) -> List[Channel]:
         .where(USERS.c.id == user_id)\
         .order_by(CHANNELS_ORDER.c.order)
     result = db.execute(query)
-
-    return [Channel(*row) for row in result]
+    return [map_object(Channel, row) for row in result]
 
 
 def create_channel(db: Database, device_id: int, channel_uuid: str, channel_type: int=0, channel_name: str='') -> Optional[Channel]:

@@ -1,6 +1,7 @@
+import inspect
+import re
 from datetime import datetime, timedelta
 from typing import Any, Callable, Optional, Tuple
-import re
 from iso8601 import parse_date, ParseError
 from tzlocal import get_localzone
 
@@ -156,3 +157,10 @@ def datetimes_between(start: datetime, end: datetime, interval: int):
     for seconds in range(0, int(delta.total_seconds()), interval):
         date = start + timedelta(seconds=seconds)
         yield date.replace(**parts_to_replace)
+
+
+def map_object(cls, dct):
+    """
+    Maps dict to object of given class.
+    """
+    return cls(**extract_keys(dct, [x for x in inspect.signature(cls).parameters]))

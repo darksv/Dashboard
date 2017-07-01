@@ -3,10 +3,10 @@ import werkzeug.security as ws
 
 
 class User(UserMixin):
-    def __init__(self, user_id: int = None, name: str = None, pwd_hash: str = None):
-        self._id = user_id
+    def __init__(self, id: int = None, name: str = None, hash: str = None):
+        self._id = id
         self._name = name
-        self._hash = pwd_hash
+        self._hash = hash
 
     @property
     def id(self):

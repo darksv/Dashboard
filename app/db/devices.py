@@ -1,7 +1,7 @@
 from typing import Optional, Union, List
 from sqlalchemy import select, insert, func
 from app.db import Database, DEVICES
-from app.utils import extract_keys
+from app.utils import map_object
 from app.models.device import Device
 
 
@@ -17,13 +17,9 @@ def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
         return None
 
     query = select(DEVICES.c).select_from(DEVICES).where(condition)
-    rows = db.execute(query)
-
-    row = rows.fetchone()
-    if row is None:
-        return None
-
-    return Device(**extract_keys(row, ['id', 'uuid', 'name']))
+    result = db.execute(query)
+    row = result.fetchone()
+    return map_object(Device, row) if row else None
 
 
 def get_all_devices(db: Database) -> List[Device]:
@@ -31,9 +27,8 @@ def get_all_devices(db: Database) -> List[Device]:
     Get all devices.
     """
     query = select(DEVICES.c).select_from(DEVICES)
-    rows = db.execute(query)
-
-    return [Device(**extract_keys(row, ['id', 'uuid', 'name'])) for row in rows]
+    result = db.execute(query)
+    return [map_object(Device, row) for row in result]
 
 
 def create_device(db: Database, device_uuid: str, device_name: str='') -> Optional[Device]:
@@ -45,7 +40,6 @@ def create_device(db: Database, device_uuid: str, device_name: str='') -> Option
         name=device_name
     )
     result = db.execute(query)
-
     return get_device(db, device_id=result.lastrowid)
 
 
@@ -58,7 +52,6 @@ def get_or_create_device(db: Database, device_id: Union[int, str]) -> Optional[D
         return device
 
     device = create_device(db, device_id)
-    if device is None:
+    if not device:
         raise SystemError('Could not create device')
-
     return device

@@ -4,6 +4,7 @@ from typing import Optional, List
 from sqlalchemy import insert, select
 from app.db import Database, NOTIFICATIONS
 from app.models.notification import Notification
+from app.utils import map_object
 
 
 def create_notification(db: Database, user_id: int, message: str, watcher_id: int = None) -> Optional[int]:
@@ -17,7 +18,6 @@ def create_notification(db: Database, user_id: int, message: str, watcher_id: in
         created=datetime.now()
     )
     result = db.execute(query)
-
     return result.lastrowid
 
 
@@ -27,8 +27,8 @@ def get_notification(db: Database, notification_id: int) -> Optional[Notificatio
     """
     query = select(NOTIFICATIONS.c, NOTIFICATIONS.c.id == notification_id)
     result = db.execute(query)
-
-    return Notification(*result.fetchone())
+    row = result.fetchone()
+    return map_object(Notification, row) if row else None
 
 
 def get_pending_notifications(db: Database, user_id: int) -> List[Notification]:
@@ -37,5 +37,4 @@ def get_pending_notifications(db: Database, user_id: int) -> List[Notification]:
     """
     query = select(NOTIFICATIONS.c, and_(NOTIFICATIONS.c.user_id == user_id, NOTIFICATIONS.c.received == None))
     result = db.execute(query)
-
-    return [Notification(*row) for row in result]
+    return [map_object(Notification, row) for row in result]
