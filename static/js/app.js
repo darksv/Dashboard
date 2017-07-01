@@ -25,17 +25,33 @@ Array.prototype.last = function() {
     return this[this.length - 1];
 };
 
-function hexToRgba(hex, alpha) {
+function hexSplit(hex) {
     if (hex[0] === '#') {
         hex = hex.slice(1);
     }
 
-    var r = parseInt(hex.slice(0, 2), 16),
-        g = parseInt(hex.slice(2, 4), 16),
-        b = parseInt(hex.slice(4, 6), 16),
-        a = alpha || 1.0;
+    return [hex.slice(0, 2), hex.slice(2, 4), hex.slice(4, 6)].map(function (x) {
+        return parseInt(x, 16);
+    });
+}
 
-    return 'rgba(' + [r, g, b, a].join(', ') + ')';
+function hexJoin(r, g, b) {
+    return '#' + [r, g, b].map(function(x) {
+        return (x < 16 ? '0' : '') + x.toString(16);
+    }).join('');
+}
+
+function hexToRgba(hex, alpha) {
+    var rgb = hexSplit(hex);
+    return 'rgba(' + rgb.concat([alpha || 1.0]).join(', ') + ')';
+}
+
+function contrastColor(color) {
+    var c = hexSplit(color);
+    // https://stackoverflow.com/questions/1855884/determine-font-color-based-on-background-color
+    // Counting the perceptive luminance - human eye favors green color...
+    var a = 1 - ( 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+    return (a < 0.5) ? '#000000' : '#FFFFFF';
 }
 
 function generateGuid() {
@@ -71,6 +87,12 @@ const ChannelTile = Vue.component('channel-tile', {
         online: function () {
             var diff = (Date.now() - Date.parse(this.channel.value_updated));
             return diff <= 5 * 50 * 1000;
+        },
+        backColor: function() {
+            return this.channel.color;
+        },
+        fontColor: function () {
+            return contrastColor(this.channel.color);
         }
     }
 });

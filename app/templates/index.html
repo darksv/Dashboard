@@ -23,16 +23,18 @@
     <body>
     {% raw %}
         <script type="x-template" id="channel-tile">
-            <div>
-                <span v-if="channel.change === 1" class="fa fa-long-arrow-up indicator"></span>
-                <span v-if="channel.change === -1" class="fa fa-long-arrow-down indicator"></span>
-                <span :data-unit="channel.unit" :title="channel.value_updated" class="value">{{ online ? channel.value.toFixed(2) : '-' }}</span>
-                <router-link :to="{ name: 'channel_recent', params: { channelId: channel.id } }" title="Wykres">
-                    <span class="action fa fa-line-chart"></span>
-                </router-link>
-                <router-link :to="{ name: 'channel_edit', params: { channelId: channel.id } }" title="Edytuj" v-if="user.is_authenticated">
-                    <span class="action fa fa-edit"></span>
-                </router-link>
+            <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor, opacity: channel.disabled ? 0.8 : 1}">
+                <div>
+                    <span v-if="channel.change === 1" class="fa fa-long-arrow-up indicator"></span>
+                    <span v-if="channel.change === -1" class="fa fa-long-arrow-down indicator"></span>
+                    <span :data-unit="channel.unit" :title="channel.value_updated" class="value">{{ online ? channel.value.toFixed(2) : '-' }}</span>
+                    <router-link :to="{ name: 'channel_recent', params: { channelId: channel.id } }" title="Wykres">
+                        <span class="action fa fa-line-chart"></span>
+                    </router-link>
+                    <router-link :to="{ name: 'channel_edit', params: { channelId: channel.id } }" title="Edytuj" v-if="user.is_authenticated">
+                        <span class="action fa fa-edit"></span>
+                    </router-link>
+                </div>
             </div>
         </script>
 
@@ -40,9 +42,7 @@
             <div class="channel-list">
                 <h1 class="page-header">Kanały pomiarowe</h1>
                 <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
-                    <div v-for="channel in channels" v-if="!channel.disabled || showDisabled" :title="channel.name" class="channel-tile" :style="{ backgroundColor: channel.color, opacity: channel.disabled ? 0.8 : 1}">
-                        <channel-tile :channel="channel" :user="user" />
-                    </div>
+                    <channel-tile v-for="channel in channels" v-if="!channel.disabled || showDisabled" :channel="channel" :user="user" ></channel-tile>
                 </draggable>
                 <div class="tile-container-options">
                     <label v-if="user.is_authenticated"><input type="checkbox" v-model="enableSort"> Zezwalaj na sortowanie kanałów</label>
@@ -53,7 +53,7 @@
 
         <script type="x-template" id="channel-recent-page">
             <div class="chart-container">
-                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" :maxPoints="60" />
+                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" :maxPoints="60" ></chart>
             </div>
         </script>
 
@@ -67,7 +67,7 @@
                     </div>
                     <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
                 </div>
-                <chart :labels="labels" :values="values" :title="title" :unit="unit" />
+                <chart :labels="labels" :values="values" :title="title" :unit="unit" ></chart>
             </div>
         </script>
 
