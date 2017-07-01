@@ -4,7 +4,7 @@ from base64 import b64decode
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, jsonify, render_template, request, redirect, url_for
-from flask.ext.login import LoginManager
+from flask.ext.login import LoginManager, current_user
 from flask.ext import login as flask_login
 from flask.ext.mail import Mail
 from werkzeug.debug import get_current_traceback
@@ -119,6 +119,11 @@ def user_loader(user_id):
 @app.endpoint('nonexistent_api_endpoint')
 def api_nonexistent_endpoint(path):
     return error('Invalid endpoint or unsupported method', 400)
+
+
+@app.route('/api/session')
+def session():
+    return jsonify(user=UserSchema().dump(current_user).data)
 
 
 @app.route('/channelUpdate', methods=['POST'])
