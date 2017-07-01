@@ -526,11 +526,9 @@ client.onMessageArrived = function (message) {
             return channelUuid === channel.uuid;
         });
 
-        if (channel === null) {
-            return;
+        if (channel !== undefined) {
+            channelUpdate(channel, newValue);
         }
-
-        channelUpdate(channel, newValue);
     } catch(e) {
         console.error(e);
     }
