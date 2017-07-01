@@ -1,9 +1,9 @@
 from collections import OrderedDict, defaultdict, namedtuple
 from datetime import datetime
 from typing import Optional, Union, List
-from sqlalchemy import select, delete, insert, update, func, and_, between
+from sqlalchemy import select, delete, insert, update, func, and_, between, or_
 from sqlalchemy.exc import IntegrityError
-from app.db import Database, CHANNELS, ENTRIES, CHANNELS_ORDER, USERS
+from app.db import Database, CHANNELS, ENTRIES, CHANNELS_ORDER
 from app.utils import map_object, minutes_between_dates, datetimes_between
 from app.models.channel import Channel
 
@@ -50,13 +50,12 @@ def get_all_channels_ordered(db: Database, user_id: int) -> List[Channel]:
     """
     Get all channels sorted by specified user's order.
     """
-    joined = CHANNELS.outerjoin(CHANNELS_ORDER, CHANNELS_ORDER.c.channel_id == CHANNELS.c.id)\
-        .join(USERS)
-
     query = select(CHANNELS.c)\
-        .select_from(joined)\
-        .where(USERS.c.id == user_id)\
+        .select_from(CHANNELS.outerjoin(CHANNELS_ORDER, CHANNELS_ORDER.c.channel_id == CHANNELS.c.id))\
+        .where(or_(CHANNELS_ORDER.c.user_id == user_id, CHANNELS_ORDER.c.user_id != None))\
+        .order_by(func.isnull(CHANNELS_ORDER.c.order))\
         .order_by(CHANNELS_ORDER.c.order)
+
     result = db.execute(query)
     return [map_object(Channel, row) for row in result]
 
