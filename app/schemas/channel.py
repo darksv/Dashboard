@@ -9,7 +9,7 @@ class ChannelSchema(Schema):
     uuid = fields.String(dump_only=True)
     device_id = fields.Integer(dump_only=True)
     name = fields.String(validate=Length(0, 100))
-    type = fields.Integer()
+    type = fields.Function(lambda x: x.type.value, lambda x: ChannelType(x.type.value))
     value = fields.Float(dump_only=True)
     value_updated = fields.DateTime(dump_only=True)
     unit = fields.String(validate=Length(0, 10))
