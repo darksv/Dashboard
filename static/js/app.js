@@ -93,6 +93,9 @@ const ChannelTile = Vue.component('channel-tile', {
         },
         fontColor: function () {
             return contrastColor(this.backColor);
+        },
+        hasValues: function() {
+            return this.channel.values.filter(function(x) { return x !== null; }).length > 0;
         }
     }
 });
@@ -129,8 +132,83 @@ const ChannelsPage = Vue.component('channels-page', {
     }
 });
 
+const MySmallChart = Vue.component('small-chart', {
+    template: '<canvas></canvas>',
+    props: {
+        channel: {
+            required: true,
+            type: Object
+        },
+        color: {
+            required: false,
+            type: String,
+            default: '#ffffff'
+        },
+        maxPoints: {
+            required: false,
+            type: Number,
+            default: 0
+        }
+    },
+    watch: {
+        'channel.values': function () {
+            var values = [];
+            if (this.maxPoints > 0 && this.channel.values.length > this.maxPoints) {
+                values = this.channel.values.slice(this.channel.values.length - this.maxPoints);
+            } else {
+                values = this.channel.values;
+            }
+
+            this.chart.data.datasets[0].data = values;
+            this.chart.data.labels = values.map(function(x, i) { return i; });
+            this.chart.update();
+        },
+        color: function () {
+            this.chart.data.datasets[0].borderColor = this.color;
+            this.chart.update();
+        }
+    },
+    mounted: function () {
+        this.chart = new Chart(this.$el, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        fill: false,
+                        lineTension: 0,
+                        pointRadius: 0,
+                        borderColor: this.color,
+                        data: this.values,
+                        label: ''
+                    }
+                ]
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        display: false
+                    }],
+                    yAxes: [{
+                        display: false
+                    }]
+                },
+                title: {
+                    display: false
+                }
+            }
+        });
+    }
+});
+
 const MyChart = Vue.component('chart', {
-    template: '<canvas>',
+    template: '<canvas></canvas>',
     props: {
         labels: {
             required: true,
@@ -473,7 +551,13 @@ const app = new Vue({
     created: function() {
         var self = this;
         apiClient.get('channels').then(function (response) {
-            self.channels = response.data.channels;
+            self.channels = response.data.channels.map(function(channel) {
+                channel.values = [1];
+                apiClient.get('/channel/' + channel.id + '/stats?type=recent').then(function (response) {
+                    channel.values = response.data.values;
+                });
+                return channel;
+            });
         });
         apiClient.get('session').then(function (response) {
            self.user = response.data.user;

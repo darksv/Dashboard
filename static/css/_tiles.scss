@@ -9,6 +9,7 @@
 }
 
 .channel-tile {
+  position: relative;
   width: 340px;
   height: 170px;
   margin: 0.5em 0.5em;
@@ -17,6 +18,33 @@
   justify-items: center;
   flex-direction: column;
   justify-content: center;
+  cursor: default;
+
+  .minichart {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 340px;
+    height: 170px;
+    padding: 1em;
+    box-sizing: border-box;
+    display: none !important;
+  }
+
+  .status {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 340px;
+    height: 170px;
+    padding: 1em;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   a {
     text-decoration: none;
@@ -35,22 +63,21 @@
   .value:after {
     content: attr(data-unit);
     margin-left: 5px;
+    font-size: 0.75em;
   }
 
   .sorting-enabled & {
-    cursor: move;
+    cursor: move !important;
   }
 
   .sorting-disabled & {
     &:hover {
-      span {
+      .action, .indicator, .value{
          display: none
       }
 
-      .action {
-        display: inline-block;
-        cursor: pointer;
-        padding: 0 0.2em;
+      .minichart {
+        display: block !important;
       }
     }
   }
