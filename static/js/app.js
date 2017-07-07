@@ -152,13 +152,9 @@ const MySmallChart = Vue.component('small-chart', {
     },
     watch: {
         'channel.values': function () {
-            var values = [];
-            if (this.maxPoints > 0 && this.channel.values.length > this.maxPoints) {
-                values = this.channel.values.slice(this.channel.values.length - this.maxPoints);
-            } else {
-                values = this.channel.values;
-            }
-
+            var values = this.channel.values,
+                redundantPoints = Math.max(0, values.length - this.maxPoints);
+            values = this.maxPoints === 0 ? values : values.splice(redundantPoints);
             this.chart.data.datasets[0].data = values;
             this.chart.data.labels = values.map(function(x, i) { return i; });
             this.chart.update();
@@ -567,24 +563,20 @@ const app = new Vue({
 });
 
 function channelUpdate(channel, newValue) {
-    switch (app.$route.name)
-    {
-        case 'home':
-            var oldValue = channel.value;
-            channel.value = newValue;
-            channel.value_updated = new Date().toISOString();
-            channel.change = Math.sign(newValue - oldValue);
-            break;
+    var oldValue = channel.value;
+    channel.value = newValue;
+    channel.value_updated = new Date().toISOString();
+    channel.change = Math.sign(newValue - oldValue);
+    channel.values.push(newValue);
 
-        case 'channel_recent':
-            if (parseInt(app.$route.params.channelId) === channel.id) {
-                var label = new Date().toHourMinute();
-                var currentView = app.$children[0];
-                if (currentView !== undefined && currentView.add !== undefined) {
-                    currentView.add(label, newValue, true);
-                }
+    if (app.$route.name === 'channel_recent') {
+        if (parseInt(app.$route.params.channelId) === channel.id) {
+            var label = new Date().toHourMinute();
+            var currentView = app.$children[0];
+            if (currentView !== undefined && currentView.add !== undefined) {
+                currentView.add(label, newValue, true);
             }
-            break;
+        }
     }
 }
 
