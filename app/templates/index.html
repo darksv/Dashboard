@@ -12,89 +12,9 @@
         <title>Panel statystyk</title>
         <link href="/static/css/styles.css" rel="stylesheet" />
         <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" />
-        <script src="/static/js/lib/axios.min.js" defer="defer"></script>
-        <script src="/static/js/lib/vue.min.js" defer="defer"></script>
-        <script src="/static/js/lib/vue-router.min.js" defer="defer"></script>
-        <script src="/static/js/lib/Sortable.min.js" defer="defer"></script>
-        <script src="/static/js/lib/vuedraggable.min.js" defer="defer"></script>
-        <script src="/static/js/lib/Chart.min.js" defer="defer"></script>
-        <script src="/static/js/lib/mqttws31.min.js" defer="defer"></script>
     </head>
     <body>
-    {% raw %}
-        <script type="x-template" id="channel-tile">
-            <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor, opacity: channel.disabled ? 0.8 : 1}">
-                <small-chart class="minichart" v-if="hasValues" :color="fontColor" :channel="channel"></small-chart>
-                <span class="status fa fa-exclamation-triangle" v-if="!hasValues"></span>
-                <div v-if="hasValues">
-                    <span v-if="channel.change === 1" class="fa fa-arrow-up indicator"></span>
-                    <span v-if="channel.change === -1" class="fa fa-arrow-down indicator"></span>
-                    <span :data-unit="channel.unit" :title="channel.value_updated" class="value">{{ channel.value.toFixed(2) }}</span>
-                </div>
-            </div>
-        </script>
-
-        <script type="x-template" id="channels-page">
-            <div class="channel-list">
-                <h1 class="page-header">Kanały pomiarowe</h1>
-                <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
-                    <channel-tile v-for="channel in channels" :key="channel.id" v-if="!channel.disabled || showDisabled" :channel="channel" :user="user" ></channel-tile>
-                </draggable>
-                <div class="tile-container-options">
-                    <label v-if="user.is_authenticated"><input type="checkbox" v-model="enableSort"> Zezwalaj na sortowanie kanałów</label>
-                    <label><input type="checkbox" v-model="showDisabled"> Wyświetlaj wyłączone kanały</label>
-                </div>
-            </div>
-        </script>
-
-        <script type="x-template" id="channel-recent-page">
-            <div class="chart-container">
-                <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" :maxPoints="60" ></chart>
-            </div>
-        </script>
-
-        <script type="x-template" id="channel-custom-page">
-            <div class="chart-container">
-                <div class="chart-toolbar">
-                    <div class="chart-toolbar-fields" v-if="fieldsShown">
-                        <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="!fieldsEnabled">
-                        -
-                        <input type="date" class="input" v-model="to" v-on:keyup.enter="show" :readonly="!fieldsEnabled">
-                    </div>
-                    <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
-                </div>
-                <chart :labels="labels" :values="values" :title="title" :unit="unit" ></chart>
-            </div>
-        </script>
-
-        <script type="x-template" id="channel-edit-page">
-            <div>
-                <form v-on:submit.prevent="save">
-                    <input type="text" v-model="channel.name" placeholder="Nazwa"><br>
-                    <input type="text" v-model="channel.unit" placeholder="Jednostka"><br>
-                    <input type="checkbox" v-model="channel.disabled" placeholder="Wyłączony"><br>
-                    <input type="color" v-model="channel.color" placeholder="Kolor"><br>
-                    <input type="submit" value="Zapisz">
-                </form>
-            </div>
-        </script>
-
-        <div id="app">
-            <transition name="fade" mode="out-in" class="page-content">
-                <router-view class="view" :channels="channels" :user="user"></router-view>
-            </transition>
-            <footer>
-                <span v-if="connected" class="fa fa-check-circle text-success" title="Połączony z serwerem"></span>
-                <span v-if="!connected" class="fa fa-times-circle text-danger" title="Brak połączenia"></span>
-                <a v-if="isLogged" href="/logout">
-                    <span class="fa fa-user text-success" :title="'Zalogowany jako ' + user.name"></span>
-                </a>
-                <a v-if="!isLogged" href="/login">
-                    <span class="fa fa-user text-danger" title="Niezalogowany"></span>
-                </a>
-            </footer>
-        </div>
-    {% endraw %}
-        <script src="/static{{ path_with_mtime('/js/app.js') }}" defer="defer"></script>
+        <div id="app"></div>
+        <script src="/static{{ path_with_mtime('/bundle.js') }}"></script>
     </body>
 </html>
