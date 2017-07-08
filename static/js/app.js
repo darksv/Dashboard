@@ -182,8 +182,14 @@ const MySmallChart = Vue.component('small-chart', {
             },
             options: {
                 animation: false,
-                responsive: true,
+                responsive: false,
                 maintainAspectRatio: false,
+                tooltips: {
+                    enabled: false
+                },
+                hover: {
+                    mode: null
+                },
                 legend: {
                     display: false
                 },
