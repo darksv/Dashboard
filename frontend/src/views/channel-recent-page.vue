@@ -34,6 +34,9 @@
         components: {
             Chart: Chart
         },
+        mounted: function () {
+            this.update();
+        },
         methods: {
             update: function () {
                 if (!this.channel) {
