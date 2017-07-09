@@ -6,6 +6,8 @@
     import Chart from 'chart.js';
     import tinycolor from 'tinycolor2';
 
+    Chart.defaults.global.defaultFontColor = 'rgba(255, 255, 255, 0.75)';
+
     export default {
         props: {
             labels: {
@@ -19,11 +21,6 @@
             title: {
                 required: true,
                 type: String
-            },
-            color: {
-                required: false,
-                type: String,
-                default: '#ffffff'
             },
             unit: {
                 required: true,
@@ -83,7 +80,6 @@
                             lineTension: 0.3,
                             pointRadius: 0,
                             data: [],
-                            borderColor: Color.hexToRgba(this.color, 0.5),
                             borderWidth: 2.5,
                             label: ''
                         }
