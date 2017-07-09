@@ -1,13 +1,15 @@
 <template>
     <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor }">
         <preview-chart v-if="hasValues" class="chart" :color="fontColor" :channel="channel"></preview-chart>
-        <span v-if="!hasValues" class="status fa fa-exclamation-triangle"></span>
-        <span v-if="hasValues" class="value" :data-unit="channel.unit" :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
+        <loader v-if="!ready" :color="fontColor"></loader>
+        <span v-if="ready && !hasValues" class="status fa fa-exclamation-triangle"></span>
+        <span v-if="ready && hasValues" class="value" :data-unit="channel.unit" :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
     </div>
 </template>
 
 <script>
     import PreviewChart from './preview-chart.vue';
+    import Loader from './loader.vue';
     import tinycolor from 'tinycolor2';
 
     export default {
@@ -28,10 +30,14 @@
             },
             hasValues: function() {
                 return this.channel.items.filter(function(x) { return x[1] !== null; }).length > 0;
+            },
+            ready: function() {
+                return this.channel.items.length !== 0;
             }
         },
         components: {
-            PreviewChart: PreviewChart
+            PreviewChart: PreviewChart,
+            Loader: Loader
         }
     }
 </script>
@@ -60,6 +66,15 @@
             box-sizing: border-box;
             display: none !important;
             cursor: pointer;
+        }
+
+        .loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
         }
 
         .status {
