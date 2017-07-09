@@ -1,12 +1,12 @@
 <template>
     <div class="channel-list">
-        <h1 class="page-header">Kanały pomiarowe</h1>
+        <h1 class="page-header">Measuring channels</h1>
         <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
             <tile v-for="channel in channels" :key="channel.id" v-if="!channel.disabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showRecent(channel)"></tile>
         </draggable>
         <div class="tile-container-options">
-            <label v-if="user.is_authenticated"><input type="checkbox" v-model="enableSort"> Zezwalaj na sortowanie kanałów</label>
-            <label><input type="checkbox" v-model="showDisabled"> Wyświetlaj wyłączone kanały</label>
+            <label v-if="user.is_authenticated"><input type="checkbox" v-model="enableSort"> Enable channel sorting</label>
+            <label><input type="checkbox" v-model="showDisabled"> Show disabled channels</label>
         </div>
     </div>
 </template>

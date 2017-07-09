@@ -4,13 +4,13 @@
             <router-view class="view" :channels="channels" :user="user"></router-view>
         </transition>
         <footer>
-            <span v-if="connected" class="fa fa-check-circle text-success" title="Połączony z serwerem"></span>
-            <span v-if="!connected" class="fa fa-times-circle text-danger" title="Brak połączenia"></span>
+            <span v-if="connected" class="fa fa-check-circle text-success" title="Connected with server"></span>
+            <span v-if="!connected" class="fa fa-times-circle text-danger" title="Not connected"></span>
             <a v-if="isLogged" href="/logout">
-                <span class="fa fa-user text-success" :title="'Zalogowany jako ' + user.name"></span>
+                <span class="fa fa-user text-success" :title="'Logged as ' + user.name"></span>
             </a>
             <a v-if="!isLogged" href="/login">
-                <span class="fa fa-user text-danger" title="Niezalogowany"></span>
+                <span class="fa fa-user text-danger" title="Not logged in"></span>
             </a>
         </footer>
     </div>
