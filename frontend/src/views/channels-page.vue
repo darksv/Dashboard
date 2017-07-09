@@ -2,7 +2,7 @@
     <div class="channel-list">
         <h1 class="page-header">Kanały pomiarowe</h1>
         <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
-            <tile v-for="channel in channels" :key="channel.id" v-if="!channel.disabled || showDisabled" :channel="channel" :user="user"></tile>
+            <tile v-for="channel in channels" :key="channel.id" v-if="!channel.disabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showRecent(channel)"></tile>
         </draggable>
         <div class="tile-container-options">
             <label v-if="user.is_authenticated"><input type="checkbox" v-model="enableSort"> Zezwalaj na sortowanie kanałów</label>
@@ -48,6 +48,20 @@
         components: {
             draggable: Draggable,
             tile: Tile
+        },
+        methods: {
+            showRecent: function(channel) {
+                if (!channel) {
+                    return;
+                }
+
+                this.$router.push({
+                    name: 'channel_recent',
+                    params: {
+                        channelId: channel.id
+                    }
+                });
+            }
         }
     };
 </script>
