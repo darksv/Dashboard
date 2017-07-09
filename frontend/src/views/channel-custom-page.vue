@@ -61,7 +61,7 @@
             }
         },
         watch: {
-            channelId: function() {
+            channel: function() {
                 this.update();
             },
             from: function () {
@@ -116,7 +116,10 @@
                     }
                 });
                 this.periodChanged = false;
-                this.update();
+
+                if (this.channel) {
+                    this.update();
+                }
             },
             toggleFields: function () {
                 this.fieldsShown = !this.fieldsShown;
