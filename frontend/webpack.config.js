@@ -7,7 +7,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: {
-        'vendor': ['vue', 've-router', 'vuedraggable', 'axios', 'chart.js', 'mqtt', 'tinycolor2'],
+        'vendor': ['vue', 'vue-router', 'vuedraggable', 'axios', 'chart.js', 'mqtt', 'tinycolor2'],
         'app': ['./src/index.js', './src/styles.scss']
     },
     devtool: 'source-map',
