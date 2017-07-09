@@ -1,25 +1,36 @@
 const path = require('path');
 const webpack = require('webpack');
-const DefinePlugin = webpack.DefinePlugin
+const DefinePlugin = webpack.DefinePlugin;
 const CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: {
-        'app': './src/index.js',
-        'vendor': ['vue', 'vue-router', 'vuedraggable', 'axios', 'chart.js', 'mqtt']
+        'vendor': ['vue', 've-router', 'vuedraggable', 'axios', 'chart.js', 'mqtt', 'tinycolor2'],
+        'app': ['./src/index.js', './src/styles.scss']
     },
-    devtool: "source-map",
+    devtool: 'source-map',
     output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, '../static')
+        path: path.resolve(__dirname, '../static'),
+        filename: '[name].js'
     },
     module: {
         rules: [
             {
                 test: /\.vue$/,
                 loader: 'vue-loader',
-            }
+                options: {
+                    extractCSS: true
+                }
+            },
+            {
+                test: /\.scss$/,
+                loader: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: 'css-loader!sass-loader'
+                })
+            },
         ]
     },
     plugins: [
@@ -35,6 +46,7 @@ module.exports = {
         new UglifyJSPlugin({
             include: /\.min\.js$/,
             minimize: true
-        })
+        }),
+        new ExtractTextPlugin('styles.css')
     ]
 };

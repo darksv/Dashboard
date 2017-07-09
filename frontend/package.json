@@ -8,7 +8,7 @@
     "vue-loader": "^13.0.0",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",
-    "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony"
+    "style-loader": "^0.18.2"
   },
   "devDependencies": {
     "axios": "^0.16.2",

@@ -88,3 +88,18 @@
         }
     };
 </script>
+
+<style lang="scss">
+    .minichart {
+        z-index: 1;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 340px;
+        height: 170px;
+        padding: 1em;
+        box-sizing: border-box;
+        display: none !important;
+        cursor: pointer;
+    }
+</style>

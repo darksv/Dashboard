@@ -65,3 +65,14 @@
         }
     };
 </script>
+
+<style lang="scss">
+    .tile-container-options {
+        text-align: center;
+        margin: 1em 0 0 0;
+
+        label {
+            padding: 0.1em;
+        }
+    }
+</style>
