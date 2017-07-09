@@ -20,7 +20,7 @@
             };
         },
         props: {
-            channelId: {
+            channel: {
                 required: true
             }
         },

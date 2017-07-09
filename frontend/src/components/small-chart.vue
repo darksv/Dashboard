@@ -23,12 +23,19 @@
             }
         },
         watch: {
-            'channel.values': function () {
-                var values = this.channel.values,
-                    redundantPoints = Math.max(0, values.length - this.maxPoints);
-                values = this.maxPoints === 0 ? values : values.splice(redundantPoints);
-                this.chart.data.datasets[0].data = values;
-                this.chart.data.labels = values.map(function(x, i) { return i; });
+            'channel.items': function () {
+                var items = this.channel.items,
+                    redundantPoints = Math.max(0, items.length - this.maxPoints);
+                items = this.maxPoints === 0 ? items : items.splice(redundantPoints);
+
+                this.chart.data.datasets[0].data = items.map(function(x) {
+                    return x[1];
+                });
+
+                this.chart.data.labels = items.map(function(x) {
+                    return x[0];
+                });
+
                 this.chart.update();
             },
             color: function () {

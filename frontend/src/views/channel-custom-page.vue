@@ -38,7 +38,7 @@
             };
         },
         props: {
-            channelId: {
+            channel: {
                 required: true
             }
         },
@@ -89,7 +89,7 @@
         },
         methods: {
             update: function() {
-                var url = '/channel/' + this.channelId + '/stats?type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
+                var url = '/channel/' + this.channel.id + '/stats?type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
                 var self = this;
                 self.fieldsEnabled = false;
                 ApiClient.get(url).then(function (response) {

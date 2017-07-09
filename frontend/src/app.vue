@@ -40,6 +40,10 @@
         return this.getHours().zfill(2) + ':' + this.getMinutes().zfill(2);
     };
 
+    Array.prototype.last = function() {
+        return this[this.length - 1];
+    };
+
     export default {
         computed: {
             isLogged: function() {
@@ -71,7 +75,6 @@
 
                     var channelUuid = topic.split('/')[1];
                     var newValue = parseFloat(payload);
-
                     // temporary fix for invalid negative values
                     if (newValue > 4000) {
                         newValue -= 4096;
@@ -81,21 +84,18 @@
                         return channelUuid === channel.uuid;
                     });
 
-                    if (channel !== undefined) {
-                        var oldValue = channel.value;
-                        channel.value = newValue;
-                        channel.value_updated = new Date().toISOString();
-                        channel.change = Math.sign(newValue - oldValue);
+                    if (channel === undefined) {
+                        return;
+                    }
 
-                        if (self.$route.name === 'channel_recent') {
-                            if (parseInt(self.$route.params.channelId) === channel.id) {
-                                    var label = new Date().toHourMinute();
-                                    var currentView = self.$children[0];
-                                    if (currentView !== undefined && currentView.add !== undefined) {
-                                        currentView.add(label, newValue, true);
-                                    }
-                                }
-                        }
+                    var oldValue = channel.value;
+                    channel.value = newValue;
+                    channel.value_updated = new Date().toISOString();
+                    channel.change = Math.sign(newValue - oldValue);
+
+                    var label = new Date().toHourMinute();
+                    if (channel.items.length === 0 || channel.items.last()[0] !== label) {
+                        channel.items.push([label, newValue]);
                     }
                 } catch(e) {
                     console.error(e);
@@ -110,9 +110,11 @@
             var self = this;
             ApiClient.get('channels').then(function (response) {
                 self.channels = response.data.channels.map(function(channel) {
-                    channel.values = [1];
+                    channel.items = [];
                     ApiClient.get('/channel/' + channel.id + '/stats?type=recent').then(function (response) {
-                        channel.values = response.data.values;
+                        channel.items = response.data.values.map(function (x, i) {
+                            return [response.data.labels[i], x];
+                        });
                     });
                     return channel;
                 });

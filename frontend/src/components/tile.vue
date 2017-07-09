@@ -35,7 +35,7 @@
                 return Color.contrast(this.backColor);
             },
             hasValues: function() {
-                return this.channel.values.filter(function(x) { return x !== null; }).length > 0;
+                return this.channel.items.filter(function(x) { return x[1] !== null; }).length > 0;
             }
         },
         components: {

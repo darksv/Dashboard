@@ -8,68 +8,48 @@
     import Chart from '../components/chart.vue';
     import ApiClient from '../api-client.js';
 
-    Array.prototype.last = function() {
-        return this[this.length - 1];
-    };
-
     export default {
         props: {
-            channelId: {
+            channel: {
                 required: true
             }
         },
-        data: function () {
-            return {
-                items: [],
-                title: '',
-                color: '',
-                unit: ''
-            };
-        },
-        computed: {
-            labels: function () {
-                return this.items.map(function(item) {
-                    return item[0];
-                });
-            },
-            values: function () {
-                return this.items.map(function(item) {
-                    return item[1];
-                });
-            }
-        },
         watch: {
-            channelId: function() {
-                this.update();
-            }
-        },
-        created: function () {
-            this.update();
-        },
-        methods: {
-            update: function() {
-                var self = this;
-                ApiClient.get('/channel/' + this.channelId + '/stats?type=recent').then(function (response) {
-                    var data = response.data;
-                    self.items = [];
-                    for (var i = 0; i < data.labels.length; ++i) {
-                        self.add(data.labels[i], data.values[i], true);
-                    }
-                    self.color = data.color;
-                    self.title = data.title;
-                    self.unit = data.unit;
-                });
-            },
-            add: function(label, value, ignoreDuplicatedLabel) {
-                if (this.items.length > 0 && this.items.last()[0] === label && ignoreDuplicatedLabel === true){
-                    return;
+            channel: {
+                deep: true,
+                handler: function () {
+                    this.update();
                 }
-
-                this.items.push([label, value]);
             }
+        },
+        data: function() {
+            return {
+                title: '',
+                color: '#FFFFFF',
+                unit: '',
+                labels: [],
+                values: []
+            };
         },
         components: {
             Chart: Chart
+        },
+        methods: {
+            update: function () {
+                if (!this.channel) {
+                    return;
+                }
+
+                this.title = this.channel.name;
+                this.color = this.channel.color;
+                this.unit = this.channel.unit;
+                this.labels = this.channel.items.map(function(item) {
+                    return item[0];
+                });
+                this.values = this.channel.items.map(function(item) {
+                    return item[1];
+                });
+            }
         }
     }
 </script>
