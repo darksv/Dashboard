@@ -1,12 +1,8 @@
 <template>
-    <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor, opacity: channel.disabled ? 0.8 : 1}">
-        <small-chart class="minichart" v-if="hasValues" :color="fontColor" :channel="channel"></small-chart>
-        <span class="status fa fa-exclamation-triangle" v-if="!hasValues"></span>
-        <div v-if="hasValues">
-            <span v-if="channel.change === 1" class="fa fa-arrow-up indicator"></span>
-            <span v-if="channel.change === -1" class="fa fa-arrow-down indicator"></span>
-            <span :data-unit="channel.unit" :title="channel.value_updated" class="value">{{ channel.value.toFixed(2) }}</span>
-        </div>
+    <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor }">
+        <small-chart v-if="hasValues" class="minichart" :color="fontColor" :channel="channel"></small-chart>
+        <span v-if="!hasValues" class="status fa fa-exclamation-triangle"></span>
+        <span v-if="hasValues" class="value" :data-unit="channel.unit" :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
     </div>
 </template>
 
@@ -24,10 +20,6 @@
             }
         },
         computed: {
-            online: function () {
-                var diff = (Date.now() - Date.parse(this.channel.value_updated));
-                return diff <= 5 * 50 * 1000;
-            },
             backColor: function() {
                 return this.channel.color || '#000000';
             },
