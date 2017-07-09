@@ -1,13 +1,13 @@
 <template>
     <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor }">
-        <small-chart v-if="hasValues" class="minichart" :color="fontColor" :channel="channel"></small-chart>
+        <preview-chart v-if="hasValues" class="chart" :color="fontColor" :channel="channel"></preview-chart>
         <span v-if="!hasValues" class="status fa fa-exclamation-triangle"></span>
         <span v-if="hasValues" class="value" :data-unit="channel.unit" :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
     </div>
 </template>
 
 <script>
-    import SmallChart from './small-chart.vue';
+    import PreviewChart from './preview-chart.vue';
     import tinycolor from 'tinycolor2';
 
     export default {
@@ -31,22 +31,12 @@
             }
         },
         components: {
-            SmallChart: SmallChart
+            PreviewChart: PreviewChart
         }
     }
 </script>
 
 <style lang="scss">
-    .tile-container {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        flex-flow: row wrap;
-        align-content: center;
-        justify-content: center;
-        user-select: none;
-    }
-
     .channel-tile {
         position: relative;
         width: 340px;
@@ -58,6 +48,19 @@
         flex-direction: column;
         justify-content: center;
         cursor: default;
+
+        .chart {
+            z-index: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 340px;
+            height: 170px;
+            padding: 1em;
+            box-sizing: border-box;
+            display: none !important;
+            cursor: pointer;
+        }
 
         .status {
             z-index: 1;
@@ -103,7 +106,7 @@
                     display: none
                 }
 
-                .minichart {
+                .chart {
                     display: block !important;
                 }
             }

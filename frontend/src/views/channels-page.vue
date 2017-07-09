@@ -67,6 +67,21 @@
 </script>
 
 <style lang="scss">
+    .page-header {
+        text-align: center;
+        margin: 0.5em;
+    }
+
+    .tile-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        flex-flow: row wrap;
+        align-content: center;
+        justify-content: center;
+        user-select: none;
+    }
+
     .tile-container-options {
         text-align: center;
         margin: 1em 0 0 0;

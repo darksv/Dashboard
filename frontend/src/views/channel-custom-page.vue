@@ -134,3 +134,40 @@
         }
     };
 </script>
+
+<style lang="scss">
+    .chart-options {
+        margin: 0.5em;
+    }
+
+    .chart-container {
+        flex: 2;
+        margin: 1em 1em 0 1em;
+        height: 100%;
+        position: relative;
+        user-select: none;
+    }
+
+    .chart-toolbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: block;
+        height: 32px;
+
+        .input {
+            font-size: 1em;
+        }
+    }
+
+    .chart-toolbar-fields {
+        display: inline-block;
+    }
+
+    .chart-toolbar-button {
+        display: inline-block;
+        cursor: pointer;
+        vertical-align: middle;
+        margin: 0 0 0 0.25em;
+    }
+</style>

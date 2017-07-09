@@ -125,3 +125,21 @@
         },
     };
 </script>
+
+<style lang="scss">
+    .main {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+    & > footer {
+        flex: 0 1;
+        text-align: center;
+        display: block;
+        width: 100%;
+        bottom: 0;
+        padding: 0;
+        margin: 0 0 0.25em 0;
+    }
+}
+</style>
