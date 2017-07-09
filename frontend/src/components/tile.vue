@@ -8,7 +8,7 @@
 
 <script>
     import SmallChart from './small-chart.vue';
-    import Color from '../color.js';
+    import tinycolor from 'tinycolor2';
 
     export default {
         props: {
@@ -24,7 +24,7 @@
                 return this.channel.color || '#000000';
             },
             fontColor: function () {
-                return Color.contrast(this.backColor);
+                return tinycolor(this.backColor).isDark() ? '#FFFFFF' : '#000000';
             },
             hasValues: function() {
                 return this.channel.items.filter(function(x) { return x[1] !== null; }).length > 0;

@@ -4,7 +4,7 @@
 
 <script>
     import Chart from 'chart.js';
-    import Color from '../color';
+    import tinycolor from 'tinycolor2';
 
     export default {
         props: {
@@ -61,7 +61,7 @@
                 this.chart.update();
             },
             color: function () {
-                this.chart.data.datasets[0].borderColor = Color.hexToRgba(this.color, 0.5);
+                this.chart.data.datasets[0].borderColor = tinycolor(this.color).setAlpha(0.5);
                 this.chart.update();
             },
             unit: function () {
