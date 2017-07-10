@@ -5,6 +5,7 @@
 <script>
     import Chart from 'chart.js';
     import tinycolor from 'tinycolor2';
+    import { clampArray } from '../utils.js';
 
     Chart.defaults.global.defaultFontColor = 'rgba(255, 255, 255, 0.75)';
 
@@ -32,79 +33,58 @@
                 default: 0
             }
         },
+        computed: {
+            config: function () {
+                return {
+                    type: 'line',
+                    data: {
+                        labels: clampArray(this.labels, this.maxPoints),
+                        datasets: [
+                            {
+                                fill: false,
+                                lineTension: 0.3,
+                                pointRadius: 0,
+                                data: clampArray(this.values, this.maxPoints),
+                                borderWidth: 2.5,
+                                borderColor: '#ffffff',
+                                label: ''
+                            }
+                        ]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display: false
+                        },
+                        scales: {
+                            yAxes: [{
+                                scaleLabel: {
+                                    display: !!this.title,
+                                    labelString: this.title + ' [' + this.unit + ']'
+                                }
+                            }]
+                        },
+                        title: {
+                            display: true,
+                            text: this.title,
+                            fontSize: 24,
+                            padding: 8
+                        }
+                    }
+                };
+            }
+        },
         watch: {
-            labels: function() {
-                if (this.maxPoints > 0 && this.labels.length > this.maxPoints) {
-                    this.chart.data.labels = this.labels.slice(this.labels.length - this.maxPoints);
-                } else {
-                    this.chart.data.labels = this.labels;
-                }
-                this.chart.update();
-            },
-            values: function () {
-                if (this.maxPoints > 0 && this.values.length > this.maxPoints) {
-                    this.chart.data.datasets[0].data = this.values.slice(this.values.length - this.maxPoints);
-                } else {
-                    this.chart.data.datasets[0].data = this.values;
-                }
-                this.chart.update();
-            },
-            title: function () {
-                this.chart.options.title.text = this.title;
-                this.chart.options.scales.yAxes[0].scaleLabel = {
-                    display: !!this.title,
-                    labelString: this.title + ' [' + this.unit + ']'
-                };
-                this.chart.update();
-            },
-            color: function () {
-                this.chart.data.datasets[0].borderColor = tinycolor(this.color).setAlpha(0.5);
-                this.chart.update();
-            },
-            unit: function () {
-                this.chart.options.scales.yAxes[0].scaleLabel = {
-                    display: !!this.title,
-                    labelString: this.title + ' [' + this.unit + ']'
-                };
+            config: function (config) {
+                this.chart.config.data = config.data;
+                this.chart.config.options = config.options;
                 this.chart.update();
             }
         },
         mounted: function () {
-            this.chart = new Chart(this.$el, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [
-                        {
-                            fill: false,
-                            lineTension: 0.3,
-                            pointRadius: 0,
-                            data: [],
-                            borderWidth: 2.5,
-                            label: ''
-                        }
-                    ]
-                },
-                options: {
-                    animation: false,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    legend: {
-                        display: false
-                    },
-                    scales: {
-                        yAxes: [{
-                            display: true
-                        }]
-                    },
-                    title: {
-                        display: true,
-                        text: '',
-                        fontSize: 24,
-                        padding: 8
-                    }
-                }
-            });
+            this.chart = new Chart(this.$el, this.config);
         }
     };
 </script>

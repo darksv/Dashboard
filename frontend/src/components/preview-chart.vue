@@ -4,6 +4,7 @@
 
 <script>
     import Chart from 'chart.js';
+    import { clampArray } from '../utils.js';
 
     export default {
         props: {
@@ -24,9 +25,7 @@
         },
         watch: {
             'channel.items': function () {
-                var items = this.channel.items,
-                    redundantPoints = Math.max(0, items.length - this.maxPoints);
-                items = this.maxPoints === 0 ? items : items.splice(redundantPoints);
+                var items = clampArray(this.channel.items, this.maxPoints);
 
                 this.chart.data.datasets[0].data = items.map(function(x) {
                     return x[1];
