@@ -8,9 +8,9 @@
 
     export default {
         props: {
-            channel: {
+            items: {
                 required: true,
-                type: Object
+                type: Array
             },
             color: {
                 required: false,
@@ -69,12 +69,12 @@
                 };
             },
             labels: function() {
-                return clampArray(this.channel.items, this.maxPoints).map(function(x) {
+                return clampArray(this.items, this.maxPoints).map(function(x) {
                     return x[0];
                 });
             },
             values: function() {
-                return clampArray(this.channel.items, this.maxPoints).map(function(x) {
+                return clampArray(this.items, this.maxPoints).map(function(x) {
                     return x[1];
                 });
             }

@@ -1,6 +1,6 @@
 <template>
     <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor }">
-        <preview-chart v-if="hasValues" class="chart" :color="fontColor" :channel="channel"></preview-chart>
+        <preview-chart v-if="hasValues" class="chart" :color="fontColor" :items="channel.items"></preview-chart>
         <loader v-if="!ready" :color="fontColor"></loader>
         <span v-if="ready && !hasValues" class="status fa fa-exclamation-triangle"></span>
         <span v-if="ready && hasValues" class="value" :data-unit="channel.unit" :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
