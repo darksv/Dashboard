@@ -8,7 +8,7 @@
             </div>
             <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
         </div>
-        <chart :labels="labels" :values="values" :title="title" :unit="unit" ></chart>
+        <chart :points="points" :title="title" :unit="unit" ></chart>
     </div>
 </template>
 
@@ -27,7 +27,7 @@
     export default {
         data: function () {
             return {
-                items: [],
+                points: [],
                 title: '',
                 unit: '',
                 from: '',
@@ -48,16 +48,6 @@
             },
             formattedTo: function () {
                 return this.to.replace(/-/g, '') + '2359';
-            },
-            labels: function () {
-                return this.items.map(function(item) {
-                    return item[0];
-                });
-            },
-            values: function () {
-                return this.items.map(function(item) {
-                    return item[1];
-                });
             }
         },
         watch: {

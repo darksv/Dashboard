@@ -1,6 +1,6 @@
 <template>
     <div class="chart-container">
-        <chart :labels="labels" :values="values" :title="title" :yTitle="yTitle" :color="color" :unit="unit" :maxPoints="60" ></chart>
+        <chart :points="points" :title="title" :yTitle="yTitle" :color="color" :unit="unit" :maxPoints="60" ></chart>
     </div>
 </template>
 
@@ -27,8 +27,7 @@
                 title: '',
                 color: '#FFFFFF',
                 unit: '',
-                labels: [],
-                values: []
+                points: []
             };
         },
         computed: {
@@ -53,12 +52,7 @@
                 this.title = this.channel.name;
                 this.color = this.channel.color;
                 this.unit = this.channel.unit;
-                this.labels = this.channel.items.map(function(item) {
-                    return item[0];
-                });
-                this.values = this.channel.items.map(function(item) {
-                    return item[1];
-                });
+                this.points = this.channel.items;
             }
         }
     }

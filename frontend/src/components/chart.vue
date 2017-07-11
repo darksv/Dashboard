@@ -11,11 +11,7 @@
 
     export default {
         props: {
-            labels: {
-                required: true,
-                type: Array
-            },
-            values: {
+            points: {
                 required: true,
                 type: Array
             },
@@ -49,13 +45,13 @@
                 return {
                     type: 'line',
                     data: {
-                        labels: clampArray(this.labels, this.maxPoints),
+                        labels: this.labels,
                         datasets: [
                             {
                                 fill: false,
                                 lineTension: 0.3,
                                 pointRadius: 0,
-                                data: clampArray(this.values, this.maxPoints),
+                                data: this.values,
                                 borderWidth: 2.5,
                                 borderColor: '#ffffff',
                                 label: ''
@@ -91,6 +87,16 @@
                         }
                     }
                 };
+            },
+            labels: function() {
+                return clampArray(this.points, this.maxPoints).map(function(point) {
+                    return point[0];
+                });
+            },
+            values: function() {
+                return clampArray(this.points, this.maxPoints).map(function(point) {
+                    return point[1];
+                });
             }
         },
         watch: {
