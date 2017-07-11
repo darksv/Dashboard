@@ -84,9 +84,9 @@
                 self.fieldsEnabled = false;
                 ApiClient.get(url).then(function (response) {
                     var data = response.data;
-                    self.items = [];
+                    self.points = [];
                     for (var i = 0; i < data.labels.length; ++i) {
-                        self.items.push([data.labels[i], data.values[i]]);
+                        self.points.push([data.labels[i], data.values[i]]);
                     }
                     self.title = data.title;
                     self.unit = data.unit;
