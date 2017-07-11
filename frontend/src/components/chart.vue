@@ -23,15 +23,26 @@
                 required: true,
                 type: String
             },
-            unit: {
-                required: true,
-                type: String
+            xTitle: {
+                required: false,
+                type: String,
+                default: ''
+            },
+            yTitle: {
+                required: false,
+                type: String,
+                default: ''
             },
             maxPoints: {
                 required: false,
                 type: Number,
                 default: 0
             }
+        },
+        data: function() {
+            return {
+                chart: null
+            };
         },
         computed: {
             config: function () {
@@ -59,10 +70,16 @@
                             display: false
                         },
                         scales: {
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: !!this.xTitle,
+                                    labelString: this.xTitle
+                                }
+                            }],
                             yAxes: [{
                                 scaleLabel: {
-                                    display: !!this.title,
-                                    labelString: this.title + ' [' + this.unit + ']'
+                                    display: !!this.yTitle,
+                                    labelString: this.yTitle
                                 }
                             }]
                         },

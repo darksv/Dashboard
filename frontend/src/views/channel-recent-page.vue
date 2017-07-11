@@ -1,6 +1,6 @@
 <template>
     <div class="chart-container">
-        <chart :labels="labels" :values="values" :title="title" :color="color" :unit="unit" :maxPoints="60" ></chart>
+        <chart :labels="labels" :values="values" :title="title" :yTitle="yTitle" :color="color" :unit="unit" :maxPoints="60" ></chart>
     </div>
 </template>
 
@@ -30,6 +30,13 @@
                 labels: [],
                 values: []
             };
+        },
+        computed: {
+            yTitle: function() {
+                return this.title && this.unit
+                    ? this.title + ' [' + this.unit + ']'
+                    : this.title;
+            }
         },
         components: {
             Chart: Chart
