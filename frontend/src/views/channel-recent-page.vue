@@ -1,6 +1,6 @@
 <template>
     <div class="chart-container">
-        <chart :points="points" :title="title" :yTitle="yTitle" :color="color" :unit="unit" :maxPoints="60" ></chart>
+        <chart :responsive="true" :points="points" :title="title" :yTitle="yTitle" color="rgba(255, 255, 255, 0.75)" :unit="unit" :maxPoints="60" ></chart>
     </div>
 </template>
 

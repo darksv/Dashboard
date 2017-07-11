@@ -8,7 +8,7 @@
             </div>
             <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
         </div>
-        <chart :points="points" :title="title" :unit="unit" ></chart>
+        <chart :responsive="true" :points="points" :title="title" :unit="unit" ></chart>
     </div>
 </template>
 
