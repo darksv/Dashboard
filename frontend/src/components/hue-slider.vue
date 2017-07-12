@@ -6,16 +6,7 @@
 
 <script>
     import tinycolor from 'tinycolor2';
-
-    function clamp(min, max, value) {
-        if (value < min) {
-            return min;
-        } else if (value > max) {
-            return max;
-        } else {
-            return value;
-        }
-    }
+    import { clamp } from '../math-utils.js';
 
     export default {
         props: {
