@@ -12,6 +12,7 @@ const router = new VueRouter({
     routes: [
         { path: '/', component: view('channels'), name: 'home' },
         { path: '/login', component: view('login'), name: 'login' },
+        { path: '/test', component: view('test'), name: 'test' },
         {
             path: '/channel/:channelId',
             component: view('channel'),
