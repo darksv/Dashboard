@@ -2,18 +2,20 @@
     <div class="chart-container">
         <div class="chart-toolbar">
             <div class="chart-toolbar-fields" v-if="fieldsShown">
-                <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="!fieldsEnabled">
+                <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="isLoading">
                 -
-                <input type="date" class="input" v-model="to" v-on:keyup.enter="show" :readonly="!fieldsEnabled">
+                <input type="date" class="input" v-model="to" v-on:keyup.enter="show" :readonly="isLoading">
             </div>
             <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
         </div>
-        <chart :responsive="true" :points="points" :title="title" :unit="unit" ></chart>
+        <chart :responsive="true" :points="points" :title="title" :unit="unit" v-if="!isLoading"></chart>
+        <loader v-if="isLoading"></loader>
     </div>
 </template>
 
 <script>
     import Chart from '../components/chart.vue';
+    import Loader from '../components/loader.vue';
     import ApiClient from '../api-client.js';
 
     function isValidDate(str) {
@@ -32,8 +34,8 @@
                 unit: '',
                 from: '',
                 to: '',
-                fieldsEnabled: true,
                 fieldsShown: false,
+                isLoading: true,
                 maxPoints: 60
             };
         },
@@ -82,6 +84,7 @@
                 var url = '/channel/' + this.channel.id + '/stats?type=custom&from=' + this.formattedFrom + '&to=' + this.formattedTo;
                 var self = this;
                 self.fieldsEnabled = false;
+                self.isLoading = true;
                 ApiClient.get(url).then(function (response) {
                     var data = response.data;
                     self.points = [];
@@ -91,6 +94,7 @@
                     self.title = data.title;
                     self.unit = data.unit;
                     self.fieldsEnabled = true;
+                    self.isLoading = false;
                 });
             },
             show: function () {
@@ -120,7 +124,8 @@
             }
         },
         components: {
-            chart: Chart
+            Chart: Chart,
+            Loader: Loader
         }
     };
 </script>
@@ -136,6 +141,13 @@
         height: 100%;
         position: relative;
         user-select: none;
+
+        .loader {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+        }
     }
 
     .chart-toolbar {
