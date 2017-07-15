@@ -1,11 +1,13 @@
 <template>
     <div class="chart-container">
-        <chart :responsive="true" :points="points" :title="title" :yTitle="yTitle" color="rgba(255, 255, 255, 0.75)" :unit="unit" :maxPoints="60" ></chart>
+        <chart v-if="!isLoading" :responsive="true" :points="points" :title="title" :yTitle="yTitle" color="rgba(255, 255, 255, 0.75)" :unit="unit" :maxPoints="60" ></chart>
+        <loader v-if="isLoading"></loader>
     </div>
 </template>
 
 <script>
     import Chart from '../components/chart.vue';
+    import Loader from '../components/loader.vue';
     import ApiClient from '../api-client.js';
 
     export default {
@@ -27,7 +29,8 @@
                 title: '',
                 color: '#FFFFFF',
                 unit: '',
-                points: []
+                points: [],
+                isLoading: true
             };
         },
         computed: {
@@ -38,7 +41,8 @@
             }
         },
         components: {
-            Chart: Chart
+            Chart: Chart,
+            Loader: Loader
         },
         mounted: function () {
             this.update();
@@ -46,9 +50,10 @@
         methods: {
             update: function () {
                 if (!this.channel) {
+                    this.isLoading = true;
                     return;
                 }
-
+                this.isLoading = false;
                 this.title = this.channel.name;
                 this.color = this.channel.color;
                 this.unit = this.channel.unit;
