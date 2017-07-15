@@ -4,10 +4,6 @@
         <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
             <tile v-for="channel in channels" :key="channel.id" v-if="!channel.disabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showRecent(channel)"></tile>
         </draggable>
-        <div class="tile-container-options">
-            <label v-if="user.is_authenticated"><input type="checkbox" v-model="enableSort"> Enable channel sorting</label>
-            <label><input type="checkbox" v-model="showDisabled"> Show disabled channels</label>
-        </div>
     </div>
 </template>
 
@@ -80,14 +76,5 @@
         align-content: center;
         justify-content: center;
         user-select: none;
-    }
-
-    .tile-container-options {
-        text-align: center;
-        margin: 1em 0 0 0;
-
-        label {
-            padding: 0.1em;
-        }
     }
 </style>
