@@ -1,6 +1,7 @@
 import config
 import os
 from base64 import b64decode
+from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, jsonify, render_template, request, redirect, url_for
@@ -11,9 +12,10 @@ from werkzeug.debug import get_current_traceback
 from werkzeug.routing import Rule
 from app import utils
 from app.db import DB
-from app.db.channels import get_channel, get_or_create_channel, update_channel,\
-    get_recent_channel_stats, get_channel_stats, get_all_channels, update_channels_order, get_all_channels_ordered
-from app.db.channel_update import process_channel_update
+from app.db.channels import get_channel, get_or_create_channel, update_channel, \
+    get_recent_channel_stats, get_channel_stats, get_all_channels, update_channels_order, get_all_channels_ordered, \
+    log_channel_value
+from app.db.channel_update import AverageCalculator
 from app.db.devices import get_device, get_or_create_device
 from app.db.notification import create_notification, get_pending_notifications
 from app.db.watchers import get_watchers
@@ -127,6 +129,12 @@ def session():
     return jsonify(user=UserSchema().dump(current_user).data)
 
 
+calculators = defaultdict(lambda: AverageCalculator(
+    period=config.MEASUREMENT_AVERAGING_PERIOD,
+    start_at=datetime.now().replace(second=0, microsecond=0)
+))
+
+
 @app.route('/channelUpdate', methods=['POST'])
 def channel_update():
     device_uuid = request.form.get('device_uuid')
@@ -139,12 +147,21 @@ def channel_update():
     if channel.type is ChannelType.FLOATING:
         value = float(raw_value)
 
-        process_channel_update(DB, channel.id, value)
-        return str(channel.id), 200
+        update_channel(DB, channel.id, value=value, value_updated=datetime.now())
 
-    elif channel.type is ChannelType.COLOR:
-        value = utils.parse_color(raw_value)
-        return ' ' .join(map(str, value))
+        calculator = calculators[channel.id]
+        calculator.push_value(value)
+        if calculator.has_average:
+            value, timestamp = calculator.pop_average()
+            log_channel_value(DB, channel.id, value, timestamp, ignore_duplicates=True)
+
+            return jsonify(
+                channel_id=channel.id,
+                value=value,
+                timestamp=timestamp.isoformat()
+            )
+
+    return jsonify(channel_id=channel.id)
 
 
 @app.route('/api/notification', methods=['POST'])

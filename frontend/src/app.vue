@@ -65,38 +65,41 @@
 
             client.on('connect', function () {
                 client.subscribe('+/+');
+                client.subscribe('+/+/log');
                 client.subscribe('notify/+');
                 self.connected = true;
             });
 
             client.on('message', function (topic, message) {
                 try {
-                    var payload = message.toString();
+                    var payload = message.toString(),
+                        channelUuid = topic.split('/')[1],
+                        channel = self.channels.find(function(channel) {
+                            return channelUuid === channel.uuid;
+                        });
 
-                    var channelUuid = topic.split('/')[1];
+                    if (channel === undefined) {
+                        return;
+                    }
+
+                    if (topic.endsWith('/log')) {
+                        var data = JSON.parse(payload),
+                            label = new Date(data.timestamp).toHourMinute();
+
+                        channel.items.push([label, data.value]);
+                        return;
+                    }
+
                     var newValue = parseFloat(payload);
                     // temporary fix for invalid negative values
                     if (newValue > 4000) {
                         newValue -= 4096;
                     }
 
-                    var channel = self.channels.find(function(channel) {
-                        return channelUuid === channel.uuid;
-                    });
-
-                    if (channel === undefined) {
-                        return;
-                    }
-
                     var oldValue = channel.value;
                     channel.value = newValue;
                     channel.value_updated = new Date().toISOString();
                     channel.change = Math.sign(newValue - oldValue);
-
-                    var label = new Date().toHourMinute();
-                    if (channel.items.length === 0 || channel.items.last()[0] !== label) {
-                        channel.items.push([label, newValue]);
-                    }
                 } catch(e) {
                     console.error(e);
                 }

@@ -1,3 +1,4 @@
+import json
 import math
 import traceback
 from urllib.parse import urlencode
@@ -9,7 +10,7 @@ import config
 def on_connect(client, userdata, flags, rc):
     print('Connected (status={0})'.format(rc))
 
-    client.subscribe('#')
+    client.subscribe('+/+')
 
 
 def parse_value(val: str) -> float:
@@ -66,7 +67,14 @@ def on_message(client, userdata, msg):
             print('Update unsuccessful', response.status_code, response.content)
             return
 
-        channel_id = int(response.content)
+        data = response.json()
+        channel_id = data.get('channel_id', None)
+        value = data.get('value', None)
+        timestamp = data.get('timestamp', None)
+        if value is not None:
+            payload = json.dumps(dict(value=value, timestamp=timestamp))
+            client.publish(msg.topic + '/log', payload, 2)
+
         process_watchers(channel_id, value, client)
 
     except:

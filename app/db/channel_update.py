@@ -1,8 +1,5 @@
 import math
-from collections import defaultdict
 from datetime import datetime, timedelta
-from app import get_channel, update_channel
-from app.db.channels import log_channel_value
 
 
 def average(values):
@@ -14,34 +11,6 @@ def average(values):
         values = values[1:-1]
 
     return sum(values) / len(values) if values else None
-
-
-calculators = defaultdict(lambda: AverageCalculator(
-    period=60,
-    start_at=datetime.now().replace(second=0, microsecond=0)
-))
-
-
-def process_channel_update(db, channel_id, new_value):
-    """
-    Handle .
-    """
-    channel = get_channel(db, channel_id)
-    if channel is None:
-        return
-
-    trans = db.conn.begin()
-    try:
-        calculator = calculators[channel.id]
-        calculator.push_value(new_value)
-        if calculator.has_average:
-            value, timestamp = calculator.pop_average()
-            log_channel_value(db, channel.id, value, timestamp, ignore_duplicates=True)
-        update_channel(db, channel.id, value=new_value, value_updated=datetime.now())
-        trans.commit()
-    except:
-        trans.rollback()
-        raise
 
 
 class AverageCalculator:
