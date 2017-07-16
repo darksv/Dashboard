@@ -11,8 +11,9 @@ from werkzeug.debug import get_current_traceback
 from werkzeug.routing import Rule
 from app import utils
 from app.db import DB
-from app.db.channels import get_channel, get_or_create_channel, update_channel, update_channel_value,\
+from app.db.channels import get_channel, get_or_create_channel, update_channel,\
     get_recent_channel_stats, get_channel_stats, get_all_channels, update_channels_order, get_all_channels_ordered
+from app.db.channel_update import process_channel_update
 from app.db.devices import get_device, get_or_create_device
 from app.db.notification import create_notification, get_pending_notifications
 from app.db.watchers import get_watchers
@@ -138,7 +139,7 @@ def channel_update():
     if channel.type is ChannelType.FLOATING:
         value = float(raw_value)
 
-        update_channel_value(DB, channel.id, value)
+        process_channel_update(DB, channel.id, value)
         return str(channel.id), 200
 
     elif channel.type is ChannelType.COLOR:
