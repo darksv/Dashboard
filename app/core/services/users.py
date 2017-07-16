@@ -1,8 +1,9 @@
 from typing import Optional
 from sqlalchemy import select
-from app.db import Database, USERS
-from app.models.user import User
-from app.utils import map_object
+from core import Database
+from core.models import USERS
+from core.models.user import User
+from core.utils import map_object
 
 
 def get_user_by_id(db: Database, user_id: int) -> Optional[User]:

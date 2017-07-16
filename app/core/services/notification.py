@@ -2,9 +2,10 @@ from datetime import datetime
 from operator import and_
 from typing import Optional, List
 from sqlalchemy import insert, select
-from app.db import Database, NOTIFICATIONS
-from app.models.notification import Notification
-from app.utils import map_object
+from core import Database
+from core.models import NOTIFICATIONS
+from core.models.notification import Notification
+from core.utils import map_object
 
 
 def create_notification(db: Database, user_id: int, message: str, watcher_id: int = None) -> Optional[int]:

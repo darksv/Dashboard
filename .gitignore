@@ -143,5 +143,4 @@ fabric.properties
 # config
 config.py
 
-# automatically built css
-static/css/*.css
+web/node_modules/*

@@ -3,9 +3,10 @@ from datetime import datetime
 from typing import Optional, Union, List
 from sqlalchemy import select, delete, insert, update, func, and_, between, or_
 from sqlalchemy.exc import IntegrityError
-from app.db import Database, CHANNELS, ENTRIES, CHANNELS_ORDER
-from app.utils import map_object, minutes_between_dates, datetimes_between
-from app.models.channel import Channel
+from core import Database
+from core.models import CHANNELS, CHANNELS_ORDER, ENTRIES
+from core.models.channel import Channel
+from core.utils import map_object, minutes_between_dates, datetimes_between
 
 
 def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:

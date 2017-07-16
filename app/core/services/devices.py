@@ -1,8 +1,9 @@
 from typing import Optional, Union, List
 from sqlalchemy import select, insert, func
-from app.db import Database, DEVICES
-from app.utils import map_object
-from app.models.device import Device
+from core import Database
+from core.models import DEVICES
+from core.models.device import Device
+from core.utils import map_object
 
 
 def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:

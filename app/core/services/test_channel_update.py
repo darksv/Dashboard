@@ -1,7 +1,9 @@
-import pytest
 from datetime import datetime, timedelta
 from unittest import TestCase
-from db.channel_update import AverageCalculator, average
+
+import pytest
+
+from core.services.channel_update import AverageCalculator, average
 
 
 class TestAverageCalculator(TestCase):

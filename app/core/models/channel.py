@@ -1,6 +1,6 @@
 from binascii import hexlify
 from datetime import datetime
-from app.channel_type import ChannelType
+from core.models.channel_type import ChannelType
 
 
 class Channel:

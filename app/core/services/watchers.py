@@ -1,8 +1,9 @@
 from typing import List
 from sqlalchemy import select
-from app.db import Database, WATCHERS
-from app.models.watcher import Watcher
-from app.utils import map_object
+from core import Database
+from core.models import WATCHERS
+from core.models.watcher import Watcher
+from core.utils import map_object
 
 
 def get_watchers(db: Database, channel_id: int) -> List[Watcher]:

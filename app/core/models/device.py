@@ -1,6 +1,4 @@
 from binascii import hexlify
-from app import DB
-from app.db.channels import get_device_channels
 
 
 class Device:
@@ -20,7 +18,3 @@ class Device:
     @property
     def name(self):
         return self._name
-
-    @property
-    def channels(self):
-        return get_device_channels(DB, self.id)

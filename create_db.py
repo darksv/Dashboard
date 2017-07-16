@@ -1,3 +1,3 @@
-from app.db import DB
+from api import DB
 
 DB.create()

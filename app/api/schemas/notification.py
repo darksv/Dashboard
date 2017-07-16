@@ -2,8 +2,9 @@ from marshmallow import Schema, fields
 from marshmallow import ValidationError
 from marshmallow import validates
 from marshmallow.validate import Length
-from app import DB
-from app.db.users import get_user_by_id
+
+from api import DB
+from api import get_user_by_id
 
 
 class NotificationSchema(Schema):
