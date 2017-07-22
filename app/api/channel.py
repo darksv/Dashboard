@@ -1,16 +1,10 @@
-from collections import defaultdict
 from datetime import timedelta, datetime
 from flask import jsonify, request
-import config
 from api import error, api_auth_required, internal_error, app
 from api.schemas.channel import ChannelSchema
 from api.schemas.watcher import WatcherSchema
 from core import DB, utils
-from core.models.channel_type import ChannelType
-from core.services.channel_update import AverageCalculator
-from core.services.channels import get_channel, get_or_create_channel, update_channel, get_recent_channel_stats, \
-    get_channel_stats, log_channel_value
-from core.services.devices import get_or_create_device
+from core.services.channels import get_channel, update_channel, get_recent_channel_stats, get_channel_stats
 from core.services.watchers import get_watchers
 
 
@@ -81,39 +75,3 @@ def api_channel_update(channel_id: int):
             return jsonify()
 
         return jsonify(), 500
-
-
-calculators = defaultdict(lambda: AverageCalculator(
-    period=config.MEASUREMENT_AVERAGING_PERIOD,
-    start_at=datetime.now().replace(second=0, microsecond=0)
-))
-
-
-@app.route('/channelUpdate', methods=['POST'])
-def channel_update():
-    with DB.connect() as db:
-        device_uuid = request.form.get('device_uuid')
-        channel_uuid = request.form.get('channel_uuid')
-        raw_value = request.form.get('value')
-
-        device = get_or_create_device(db, device_uuid)
-        channel = get_or_create_channel(db, channel_uuid, device_id=device.id)
-
-        if channel.type is ChannelType.FLOATING:
-            value = float(raw_value)
-
-            update_channel(db, channel.id, value=value, value_updated=datetime.now())
-
-            calculator = calculators[channel.id]
-            calculator.push_value(value)
-            if calculator.has_average:
-                value, timestamp = calculator.pop_average()
-                log_channel_value(db, channel.id, value, timestamp, ignore_duplicates=True)
-
-                return jsonify(
-                    channel_id=channel.id,
-                    value=value,
-                    timestamp=timestamp.isoformat()
-                )
-
-        return jsonify(channel_id=channel.id)
