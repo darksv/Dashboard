@@ -51,8 +51,6 @@ async def mqtt_task():
             if value > 4000:
                 value -= 4096
 
-            print('Received channel update: device={0} channel={1} value={2}'.format(device_uuid, channel_uuid, value))
-
             with DB.connect() as db:
                 device = get_or_create_device(db, device_uuid)
                 channel = get_or_create_channel(db, channel_uuid, device_id=device.id)
