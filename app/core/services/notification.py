@@ -2,13 +2,13 @@ from datetime import datetime
 from operator import and_
 from typing import Optional, List
 from sqlalchemy import insert, select
-from core import Database
+from sqlalchemy.engine import Connection
 from core.models import NOTIFICATIONS
 from core.models.notification import Notification
 from core.utils import map_object
 
 
-def create_notification(db: Database, user_id: int, message: str, watcher_id: int = None) -> Optional[int]:
+def create_notification(db: Connection, user_id: int, message: str, watcher_id: int = None) -> Optional[int]:
     """
     Create new notification.
     """
@@ -22,7 +22,7 @@ def create_notification(db: Database, user_id: int, message: str, watcher_id: in
     return result.lastrowid
 
 
-def get_notification(db: Database, notification_id: int) -> Optional[Notification]:
+def get_notification(db: Connection, notification_id: int) -> Optional[Notification]:
     """
     Get notification by id.
     """
@@ -32,7 +32,7 @@ def get_notification(db: Database, notification_id: int) -> Optional[Notificatio
     return map_object(Notification, row) if row else None
 
 
-def get_pending_notifications(db: Database, user_id: int) -> List[Notification]:
+def get_pending_notifications(db: Connection, user_id: int) -> List[Notification]:
     """
     Get all pending notifications for specified user.
     """

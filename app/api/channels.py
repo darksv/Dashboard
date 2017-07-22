@@ -7,6 +7,7 @@ from core.services.channels import get_all_channels_ordered, get_all_channels
 
 @app.route('/api/channels', methods=['GET'])
 def api_channels():
-    channels = get_all_channels_ordered(DB, api_user.id) if api_user else get_all_channels(DB)
-    data, errors = ChannelSchema().dump(channels, many=True)
-    return jsonify(channels=data) if not errors else internal_error()
+    with DB.connect() as db:
+        channels = get_all_channels_ordered(db, api_user.id) if api_user else get_all_channels(db)
+        data, errors = ChannelSchema().dump(channels, many=True)
+        return jsonify(channels=data) if not errors else internal_error()

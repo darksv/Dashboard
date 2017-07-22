@@ -1,12 +1,12 @@
 from typing import Optional, Union, List
 from sqlalchemy import select, insert, func
-from core import Database
+from sqlalchemy.engine import Connection
 from core.models import DEVICES
 from core.models.device import Device
 from core.utils import map_object
 
 
-def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
+def get_device(db: Connection, device_id: Union[int, str]) -> Optional[Device]:
     """
     Get device by ID or UUID.
     """
@@ -23,7 +23,7 @@ def get_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
     return map_object(Device, row) if row else None
 
 
-def get_all_devices(db: Database) -> List[Device]:
+def get_all_devices(db: Connection) -> List[Device]:
     """
     Get all devices.
     """
@@ -32,7 +32,7 @@ def get_all_devices(db: Database) -> List[Device]:
     return [map_object(Device, row) for row in result]
 
 
-def create_device(db: Database, device_uuid: str, device_name: str='') -> Optional[Device]:
+def create_device(db: Connection, device_uuid: str, device_name: str='') -> Optional[Device]:
     """
     Create new device.
     """
@@ -44,7 +44,7 @@ def create_device(db: Database, device_uuid: str, device_name: str='') -> Option
     return get_device(db, device_id=result.lastrowid)
 
 
-def get_or_create_device(db: Database, device_id: Union[int, str]) -> Optional[Device]:
+def get_or_create_device(db: Connection, device_id: Union[int, str]) -> Optional[Device]:
     """
     Get device by ID or create.
     """

@@ -1,12 +1,12 @@
 from typing import Optional
 from sqlalchemy import select
-from core import Database
+from sqlalchemy.engine import Connection
 from core.models import USERS
 from core.models.user import User
 from core.utils import map_object
 
 
-def get_user_by_id(db: Database, user_id: int) -> Optional[User]:
+def get_user_by_id(db: Connection, user_id: int) -> Optional[User]:
     """
     Get user by ID.
     """
@@ -16,7 +16,7 @@ def get_user_by_id(db: Database, user_id: int) -> Optional[User]:
     return map_object(User, row) if row else None
 
 
-def get_user_by_username(db: Database, name: str) -> Optional[User]:
+def get_user_by_username(db: Connection, name: str) -> Optional[User]:
     """
     Get user by username.
     """

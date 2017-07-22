@@ -7,9 +7,10 @@ from core.services.devices import get_device
 
 @app.route('/api/device/<int:device_id>', methods=['GET'])
 def device_settings(device_id: int):
-    device = get_device(DB, device_id)
-    if not device:
-        return error('Device not found')
+    with DB.connect() as db:
+        device = get_device(db, device_id)
+        if not device:
+            return error('Device not found')
 
-    data, errors = DeviceSchema().dump(device)
-    return jsonify(data) if not errors else internal_error()
+        data, errors = DeviceSchema().dump(device)
+        return jsonify(data) if not errors else internal_error()

@@ -1,12 +1,12 @@
 from typing import List
 from sqlalchemy import select
-from core import Database
+from sqlalchemy.engine import Connection
 from core.models import WATCHERS
 from core.models.watcher import Watcher
 from core.utils import map_object
 
 
-def get_watchers(db: Database, channel_id: int) -> List[Watcher]:
+def get_watchers(db: Connection, channel_id: int) -> List[Watcher]:
     """
     Get monitors for given channel.
     """

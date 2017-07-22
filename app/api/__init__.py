@@ -1,4 +1,3 @@
-import os
 from base64 import b64decode
 from functools import wraps
 from flask_login import LoginManager
@@ -19,25 +18,21 @@ mail = Mail(app)
 api_user = None
 
 
-@app.context_processor
-def inject_utils():
-    return dict(path_with_mtime=lambda path: '{0}?{1}'.format(path, int(os.path.getmtime('./static' + path))))
-
-
 @app.before_request
 def before_api_request():
-    global api_user
+    with DB.connect() as db:
+        global api_user
 
-    auth = request.headers.get('Authorization', None)
-    if not auth:
-        api_user = None
-        return
+        auth = request.headers.get('Authorization', None)
+        if not auth:
+            api_user = None
+            return
 
-    auth_type, data = auth.split(' ')
-    username, password = b64decode(data).decode('utf-8').split(':')
-    api_user = get_user_by_username(DB, username)
-    if not api_user:
-        return error('Authorization failed, invalid username and/or password', 401)
+        auth_type, data = auth.split(' ')
+        username, password = b64decode(data).decode('utf-8').split(':')
+        api_user = get_user_by_username(db, username)
+        if not api_user:
+            return error('Authorization failed, invalid username and/or password', 401)
 
 
 def error(message, status=404):
@@ -71,7 +66,8 @@ def unauthorized():
 
 @login_manager.user_loader
 def user_loader(user_id):
-    return get_user_by_id(DB, user_id)
+    with DB.connect() as c:
+        return get_user_by_id(c, user_id)
 
 
 @app.endpoint('nonexistent_api_endpoint')

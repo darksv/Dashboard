@@ -9,23 +9,24 @@ from . import app, api_auth_required, api_user
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    message = None
-    next_page = request.args.get('next', None)
+    with DB.connect() as db:
+        message = None
+        next_page = request.args.get('next', None)
 
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
 
-        user = get_user_by_username(DB, username)
+            user = get_user_by_username(db, username)
 
-        if user and user.check_password(password):
-            flask_login.login_user(user)
+            if user and user.check_password(password):
+                flask_login.login_user(user)
 
-            return redirect(next_page or url_for('index'))
-        else:
-            message = ('error', 'Nieprawidłowe dane!')
+                return redirect(next_page or url_for('index'))
+            else:
+                message = ('error', 'Nieprawidłowe dane!')
 
-    return render_template('login.html', message=message, next=next_page)
+        return render_template('login.html', message=message, next=next_page)
 
 
 @app.route('/logout')
@@ -43,6 +44,7 @@ def session():
 @app.route('/api/order', methods=['POST'])
 @api_auth_required
 def api_update_order():
-    ids = list(map(int, request.args.get('order', '').split(',')))
-    update_channels_order(DB, api_user.id, ids)
-    return jsonify()
+    with DB.connect() as db:
+        ids = list(map(int, request.args.get('order', '').split(',')))
+        update_channels_order(db, api_user.id, ids)
+        return jsonify()

@@ -2,14 +2,14 @@ from collections import OrderedDict
 from datetime import datetime
 from typing import Optional, Union, List
 from sqlalchemy import select, delete, insert, update, func, and_, between, or_
+from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError
-from core import Database
 from core.models import CHANNELS, CHANNELS_ORDER, ENTRIES
 from core.models.channel import Channel
 from core.utils import map_object, minutes_between_dates, datetimes_between
 
 
-def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
+def get_channel(db: Connection, channel_id: Union[int, str]) -> Optional[Channel]:
     """
     Get channel by ID or UUID.
     """
@@ -27,7 +27,7 @@ def get_channel(db: Database, channel_id: Union[int, str]) -> Optional[Channel]:
     return map_object(Channel, row) if row else None
 
 
-def get_device_channels(db: Database, device_id: int) -> List[Channel]:
+def get_device_channels(db: Connection, device_id: int) -> List[Channel]:
     """
     Get device channels.
     """
@@ -37,7 +37,7 @@ def get_device_channels(db: Database, device_id: int) -> List[Channel]:
     return [map_object(Channel, row) for row in result]
 
 
-def get_all_channels(db: Database) -> List[Channel]:
+def get_all_channels(db: Connection) -> List[Channel]:
     """
     Get all channels.
     """
@@ -47,7 +47,7 @@ def get_all_channels(db: Database) -> List[Channel]:
     return [map_object(Channel, row) for row in result]
 
 
-def get_all_channels_ordered(db: Database, user_id: int) -> List[Channel]:
+def get_all_channels_ordered(db: Connection, user_id: int) -> List[Channel]:
     """
     Get all channels sorted by specified user's order.
     """
@@ -61,7 +61,7 @@ def get_all_channels_ordered(db: Database, user_id: int) -> List[Channel]:
     return [map_object(Channel, row) for row in result]
 
 
-def create_channel(db: Database, device_id: int, channel_uuid: str, channel_type: int=0, channel_name: str='') -> Optional[Channel]:
+def create_channel(db: Connection, device_id: int, channel_uuid: str, channel_type: int=0, channel_name: str='') -> Optional[Channel]:
     """
     Create new channel.
     """
@@ -76,7 +76,7 @@ def create_channel(db: Database, device_id: int, channel_uuid: str, channel_type
     return get_channel(db, channel_id=result.lastrowid)
 
 
-def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: int=None) -> Optional[Channel]:
+def get_or_create_channel(db: Connection, channel_id: Union[int, str], device_id: int=None) -> Optional[Channel]:
     """
     Get channel by ID or create.
     """
@@ -91,7 +91,7 @@ def get_or_create_channel(db: Database, channel_id: Union[int, str], device_id: 
     return channel
 
 
-def update_channel(db: Database, channel_id: int, **values) -> bool:
+def update_channel(db: Connection, channel_id: int, **values) -> bool:
     """
     Update channel's name.
     """
@@ -107,7 +107,7 @@ def update_channel(db: Database, channel_id: int, **values) -> bool:
     return True
 
 
-def get_recent_channel_stats(db: Database, channel_id: int, period_start: datetime, period_end: datetime) -> List:
+def get_recent_channel_stats(db: Connection, channel_id: int, period_start: datetime, period_end: datetime) -> List:
     """
     Get recent channels's stats.
     """
@@ -127,7 +127,7 @@ def get_recent_channel_stats(db: Database, channel_id: int, period_start: dateti
     return [(time.strftime('%H:%M'), value) for time, value in all_datetimes.items()]
 
 
-def get_channel_stats(db: Database, channel_id: int, period_start: datetime, period_end: datetime,
+def get_channel_stats(db: Connection, channel_id: int, period_start: datetime, period_end: datetime,
                       average_interval: int = 60) -> List:
     """
     Get channel's stats for specified period.
@@ -151,7 +151,7 @@ def get_channel_stats(db: Database, channel_id: int, period_start: datetime, per
     return [(time.strftime('%d.%m.%Y %H:00'), value) for time, value in all_datetimes.items()]
 
 
-def update_channels_order(db: Database, user_id: int, channels: List[int]) -> None:
+def update_channels_order(db: Connection, user_id: int, channels: List[int]) -> None:
     """
     Update order of channels on dashboard for specified user.
     """

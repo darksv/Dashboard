@@ -17,5 +17,6 @@ class NotificationSchema(Schema):
 
     @validates('user_id')
     def validate_user_id(self, value):
-        if get_user_by_id(DB, value) is None:
-            raise ValidationError('User with given ID does not exist')
+        with DB.connect() as db:
+            if get_user_by_id(db, value) is None:
+                raise ValidationError('User with given ID does not exist')
