@@ -2,7 +2,7 @@
     <div class="channel-list">
         <h1 class="page-header">Measuring channels</h1>
         <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
-            <tile v-for="channel in channels" :key="channel.id" v-if="!channel.disabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showRecent(channel)"></tile>
+            <tile v-for="channel in channels" :key="channel.id" v-if="channel.enabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showRecent(channel)"></tile>
         </draggable>
     </div>
 </template>

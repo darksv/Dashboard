@@ -14,7 +14,7 @@ class ChannelSchema(Schema):
     value_updated = fields.DateTime(dump_only=True)
     unit = fields.String(validate=Length(0, 10))
     color = fields.String()
-    disabled = fields.Boolean()
+    enabled = fields.Boolean()
 
     @validates('color')
     def validate_color(self, value):

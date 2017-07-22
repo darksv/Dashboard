@@ -18,7 +18,7 @@ CHANNELS = Table('channels', meta,
     Column('value_updated', DateTime(timezone=True)),
     Column('unit', String(10), nullable=True, default=None),
     Column('color', String(7), nullable=True, default=None),
-    Column('disabled', Boolean, default=False)
+    Column('enabled', Boolean, default=True)
 )
 
 CHANNELS_ORDER = Table('channels_order', meta,
