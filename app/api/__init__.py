@@ -6,12 +6,11 @@ from werkzeug.debug import get_current_traceback
 from werkzeug.routing import Rule
 import config
 from flask import Flask, jsonify, render_template, request, redirect, url_for
-from core import utils, DB
+from core import DB
 from core.services.users import get_user_by_username, get_user_by_id
 
 app = Flask('dashboard', static_folder='frontend/dist', template_folder='app/templates')
 app.secret_key = config.SECRET_KEY
-app.jinja_env.filters['datetime'] = utils.format_datetime
 app.url_map.add(Rule('/api/<path:path>', endpoint='nonexistent_api_endpoint'))
 login_manager = LoginManager(app)
 mail = Mail(app)
