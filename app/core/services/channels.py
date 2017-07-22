@@ -155,16 +155,16 @@ def update_channels_order(db: Connection, user_id: int, channels: List[int]) -> 
     """
     Update order of channels on dashboard for specified user.
     """
-    trans = db.conn.begin()
+    trans = db.begin()
     try:
         new_items = [dict(user_id=user_id, channel_id=channel_id, order=order)
                      for order, channel_id in enumerate(channels, 1)]
 
         query = delete(CHANNELS_ORDER).where(CHANNELS_ORDER.c.user_id == user_id)
-        db.conn.execute(query)
+        db.execute(query)
 
         query = insert(CHANNELS_ORDER)
-        db.conn.execute(query, new_items)
+        db.execute(query, new_items)
 
         trans.commit()
     except:
