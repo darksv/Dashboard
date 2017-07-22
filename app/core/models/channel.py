@@ -5,7 +5,8 @@ from core.models.channel_type import ChannelType
 
 class Channel:
     def __init__(self, id: int = None, uuid: bytes = None, device_id: int = None, type: int = None, name: str = None,
-                 value: float = None, value_updated: datetime = None, unit: str = None, color: str = None, enabled: bool = None):
+                 value: float = None, value_updated: datetime = None, unit: str = None, color: str = None,
+                 enabled: bool = None, logging_enabled: bool = None):
         self._id = id
         self._uuid = uuid
         self._device_id = device_id
@@ -16,6 +17,7 @@ class Channel:
         self._unit = unit
         self._color = color
         self._enabled = enabled
+        self._logging_enabled = logging_enabled
 
     @property
     def id(self):
@@ -67,3 +69,7 @@ class Channel:
     @property
     def enabled(self):
         return self._enabled
+
+    @property
+    def logging_enabled(self):
+        return self._logging_enabled

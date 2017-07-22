@@ -114,11 +114,13 @@
             ApiClient.get('channels').then(function (response) {
                 self.channels = response.data.channels.map(function(channel) {
                     channel.items = [];
-                    ApiClient.get('/channel/' + channel.id + '/stats?type=recent').then(function (response) {
-                        channel.items = response.data.values.map(function (x, i) {
-                            return [response.data.labels[i], x];
+                    if (channel.enabled && channel.logging_enabled) {
+                        ApiClient.get('/channel/' + channel.id + '/stats?type=recent').then(function (response) {
+                            channel.items = response.data.values.map(function (x, i) {
+                                return [response.data.labels[i], x];
+                            });
                         });
-                    });
+                    }
                     return channel;
                 });
             });

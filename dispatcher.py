@@ -59,7 +59,7 @@ async def mqtt_task():
 
                 calculator = calculators[channel.id]
                 calculator.push_value(value)
-                if calculator.has_average:
+                if channel.logging_enabled and calculator.has_average:
                     value, timestamp = calculator.pop_average()
                     log_channel_value(db, channel.id, value, timestamp, ignore_duplicates=True)
 

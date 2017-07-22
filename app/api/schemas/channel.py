@@ -15,6 +15,7 @@ class ChannelSchema(Schema):
     unit = fields.String(validate=Length(0, 10))
     color = fields.String()
     enabled = fields.Boolean()
+    logging_enabled = fields.Boolean()
 
     @validates('color')
     def validate_color(self, value):
