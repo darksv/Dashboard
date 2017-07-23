@@ -15,9 +15,11 @@
         computed: {
             channel: function() {
                 var channelId = parseInt(this.channelId);
-                return this.channels.find(function (channel) {
+                var channel = this.channels.find(function (channel) {
                     return channel.id === channelId;
-                })
+                });
+
+                return channel || {};
             }
         }
     };

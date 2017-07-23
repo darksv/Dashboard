@@ -1,0 +1,35 @@
+.text-input {
+  background: transparent;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  font-size: 1.15em;
+  color: #fff;
+  padding: 8px 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.text-input:focus {
+  box-shadow: 0 0 4px #fff;
+  outline: none;
+}
+
+.text-input[readonly] {
+  color: #ddd;
+}
+
+.button {
+  padding: 0.6em 0.8em;
+  border-radius: 4px;
+  outline: none;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  color: #000;
+  background: lightskyblue;
+}
+
+.button[readonly], .button[disabled] {
+  color: #333;
+  background: #ddd;
+}
