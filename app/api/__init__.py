@@ -34,6 +34,14 @@ def before_api_request():
             return error('Authorization failed, invalid username and/or password', 401)
 
 
+@app.after_request
+def after_api_request(response):
+    response.headers['Access-Control-Allow-Origin'] = 'http://127.0.0.1:5000'
+    response.headers['Access-Control-Allow-Headers'] = 'Authorization'
+
+    return response
+
+
 def error(message, status=404):
     return jsonify(error=dict(message=message, status=status)), status
 
