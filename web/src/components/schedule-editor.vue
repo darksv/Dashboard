@@ -75,55 +75,18 @@
             this.mouseDown = function(e) {
                 e.preventDefault();
                 self.isMouseDown = true;
-
                 self.selectionOrigin = {
                     day: parseInt(e.target.dataset.day),
                     hour: parseInt(e.target.dataset.hour)
                 };
+                self.updateSelection(e);
             };
 
             this.mouseMove = function(e) {
-                e.preventDefault();
-
-                if (!self.isMouseDown || e.button !== 0) {
-                    return;
+                if (self.isMouseDown && e.button === 0) {
+                    e.preventDefault();
+                    self.updateSelection(e);
                 }
-
-                var day, hour;
-                if (e.target.className.indexOf('hour') === -1) {
-                    // Find bounding rectangle of the all selectors based on first and the last selector rectangles.
-                    var selectors = self.$el.querySelectorAll('.hour'),
-                        firstSelector = selectors[0],
-                        lastSelector = selectors[selectors.length - 1],
-                        firstSelectorRect = firstSelector.getBoundingClientRect(),
-                        lastSelectorRect = lastSelector.getBoundingClientRect(),
-                        selectorsRect = {
-                            top: firstSelectorRect.top,
-                            left: firstSelectorRect.left,
-                            width: lastSelectorRect.left + lastSelectorRect.width - firstSelectorRect.left,
-                            height: lastSelectorRect.top + lastSelectorRect.height - firstSelectorRect.top
-                        };
-
-                    // Calculate potential selectors that might be selected.
-                    // We are assuming that all selectors have equal dimensions.
-                    hour = clamp(0, 23, Math.floor((e.clientX - selectorsRect.left) / ((selectorsRect.width / self.hours.length))));
-                    day = clamp(0, 6, Math.floor((e.clientY - selectorsRect.top) / ((selectorsRect.height / self.days.length))));
-
-                    console.log(e.target.className, day, hour);
-
-                } else {
-                    var data = e.target.dataset;
-                    day = parseInt(data.day);
-                    hour = parseInt(data.hour);
-                }
-
-                var start = self.selectionOrigin,
-                    left = Math.min(start.hour, hour),
-                    top = Math.min(start.day, day),
-                    right = Math.max(start.hour, hour),
-                    bottom = Math.max(start.day, day);
-                self.clearSelection();
-                self.selectRectangle({day: top, hour: left}, bottom - top + 1, right - left + 1, self.include);
             };
 
             document.addEventListener('mouseup', this.mouseUp);
@@ -176,6 +139,43 @@
                         selector.needsCommit = false;
                     }
                 }
+            },
+            updateSelection: function(e) {
+                var day, hour;
+                if (e.target.className.indexOf('hour') === -1) {
+                    // Find bounding rectangle of the all selectors based on first and the last selector rectangles.
+                    var selectors = this.$el.querySelectorAll('.hour'),
+                        firstSelector = selectors[0],
+                        lastSelector = selectors[selectors.length - 1],
+                        firstSelectorRect = firstSelector.getBoundingClientRect(),
+                        lastSelectorRect = lastSelector.getBoundingClientRect(),
+                        selectorsRect = {
+                            top: firstSelectorRect.top,
+                            left: firstSelectorRect.left,
+                            width: lastSelectorRect.left + lastSelectorRect.width - firstSelectorRect.left,
+                            height: lastSelectorRect.top + lastSelectorRect.height - firstSelectorRect.top
+                        };
+
+                    // Calculate potential selectors that might be selected.
+                    // We are assuming that all selectors have equal dimensions.
+                    hour = clamp(0, 23, Math.floor((e.clientX - selectorsRect.left) / ((selectorsRect.width / this.hours.length))));
+                    day = clamp(0, 6, Math.floor((e.clientY - selectorsRect.top) / ((selectorsRect.height / this.days.length))));
+
+                    console.log(e.target.className, day, hour);
+
+                } else {
+                    var data = e.target.dataset;
+                    day = parseInt(data.day);
+                    hour = parseInt(data.hour);
+                }
+
+                var start = this.selectionOrigin,
+                    left = Math.min(start.hour, hour),
+                    top = Math.min(start.day, day),
+                    right = Math.max(start.hour, hour),
+                    bottom = Math.max(start.day, day);
+                this.clearSelection();
+                this.selectRectangle({day: top, hour: left}, bottom - top + 1, right - left + 1, this.include);
             }
         }
     };
