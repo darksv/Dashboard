@@ -160,9 +160,6 @@
                     // We are assuming that all selectors have equal dimensions.
                     hour = clamp(0, 23, Math.floor((e.clientX - selectorsRect.left) / ((selectorsRect.width / this.hours.length))));
                     day = clamp(0, 6, Math.floor((e.clientY - selectorsRect.top) / ((selectorsRect.height / this.days.length))));
-
-                    console.log(e.target.className, day, hour);
-
                 } else {
                     var data = e.target.dataset;
                     day = parseInt(data.day);
