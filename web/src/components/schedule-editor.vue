@@ -3,7 +3,7 @@
         <div class="schedule-editor-widget">
             <div class="day">
                 <div class="label">&nbsp;&nbsp;&nbsp;</div>
-                <div v-for="hour in hours" v-bind:key="hour" class="label">{{hour}}</div>
+                <div v-for="hour in hours" v-bind:key="hour" class="label">{{formatHour(hour)}}</div>
             </div>
             <div v-for="day in days" v-bind:key="day" class="day">
                 <div class="label">{{ day.substr(0, 3) }}</div>
@@ -28,6 +28,15 @@
     import { clamp } from '../math-utils.js';
 
     export default {
+        props: {
+            hourFormat: {
+                required: false,
+                default: '24h',
+                validator: function(value) {
+                    return ['12h', '24h'].indexOf(value) >= 0;
+                }
+            }
+        },
         data: function() {
             var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
                 hours = Array.from(Array(24).keys());
@@ -135,6 +144,21 @@
             },
             getSelector: function(day, hour) {
                 return this.selection[this.getIndexOfDay(day)][parseInt(hour)];
+            },
+            formatHour: function(hour) {
+                if (this.hourFormat === '24h') {
+                    return hour;
+                }
+
+                if (hour === 0) {
+                    return '12am';
+                } else if (hour < 12) {
+                    return hour + 'am';
+                } else if (hour === 12) {
+                    return '12pm';
+                } else {
+                    return (hour - 12) + 'pm';
+                }
             },
             selectRectangle: function(origin, width, height, select) {
                 for (var i = 0; i < width; ++i) {
