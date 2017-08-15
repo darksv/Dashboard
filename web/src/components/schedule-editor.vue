@@ -27,6 +27,15 @@
 <script>
     import { clamp } from '../math-utils.js';
 
+    function hasParentWithClass(element, className) {
+        while (element = element.parentNode) {
+            if (element.classList !== undefined && element.classList.contains(className)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     export default {
         props: {
             hourFormat: {
@@ -79,9 +88,16 @@
                 self.isPressed = false;
                 self.selectionOrigin = null;
                 self.commitSelection();
+
+                document.removeEventListener('mouseup', self.mouseUp);
+                document.removeEventListener('mousemove', self.mouseMove);
             };
 
             this.mouseDown = function(e) {
+                if (e.target !== null && self.isElementPartOfOtherInstance(e.target)) {
+                    return;
+                }
+
                 e.preventDefault();
                 self.isPressed = true;
                 self.selectionOrigin = {
@@ -89,6 +105,9 @@
                     hour: parseInt(e.target.dataset.hour)
                 };
                 self.updateSelection(e.target, e.clientX, e.clientY);
+
+                document.addEventListener('mouseup', self.mouseUp);
+                document.addEventListener('mousemove', self.mouseMove);
             };
 
             this.mouseMove = function(e) {
@@ -99,12 +118,19 @@
             };
 
             this.touchStart = function(e) {
+                if (e.target !== null && self.isElementPartOfOtherInstance(e.target)) {
+                    return;
+                }
+
                 self.isPressed = true;
                 self.selectionOrigin = {
                     day: parseInt(e.target.dataset.day),
                     hour: parseInt(e.target.dataset.hour)
                 };
                 self.updateSelection(e.target, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+
+                document.addEventListener('touchmove', self.touchMove);
+                document.addEventListener('touchend', self.touchEnd);
             };
 
             this.touchMove = function(e) {
@@ -121,22 +147,17 @@
                 self.isPressed = false;
                 self.selectionOrigin = null;
                 self.commitSelection();
+
+                document.removeEventListener('touchmove', self.touchMove);
+                document.removeEventListener('touchend', self.touchEnd);
             };
 
-            document.addEventListener('mouseup', this.mouseUp);
             document.addEventListener('mousedown', this.mouseDown);
-            document.addEventListener('mousemove', this.mouseMove);
             document.addEventListener('touchstart', this.touchStart);
-            document.addEventListener('touchmove', this.touchMove);
-            document.addEventListener('touchend', this.touchEnd);
         },
         destroy: function() {
-            document.removeEventListener('mouseup', this.mouseUp);
             document.removeEventListener('mousedown', this.mouseDown);
-            document.removeEventListener('mousemove', this.mouseMove);
             document.removeEventListener('touchstart', this.touchStart);
-            document.removeEventListener('touchmove', this.touchMove);
-            document.removeEventListener('touchend', this.touchEnd);
         },
         methods: {
             getIndexOfDay: function(day) {
@@ -197,7 +218,7 @@
             },
             updateSelection: function(target, clientX, clientY) {
                 var day, hour;
-                if (target === null || target.className.indexOf('hour') === -1) {
+                if (target === null || target === document || this.isElementPartOfOtherInstance(target) || target.className.indexOf('hour') === -1) {
                     // Find bounding rectangle of the all selectors based on first and the last selector rectangles.
                     var selectors = this.$el.querySelectorAll('.hour'),
                         firstSelector = selectors[0],
@@ -228,6 +249,9 @@
                     bottom = Math.max(start.day, day);
                 this.clearSelection();
                 this.selectRectangle({day: top, hour: left}, bottom - top + 1, right - left + 1, this.include);
+            },
+            isElementPartOfOtherInstance: function (element) {
+                return hasParentWithClass(element, 'schedule-editor') && !this.$el.contains(element);
             }
         }
     };
