@@ -35,7 +35,7 @@
             return {
                 days: days,
                 hours: hours,
-                isMouseDown: false,
+                isPressed: false,
                 include: false,
                 selection: days.map(function() {
                     return hours.map(function() {
@@ -67,36 +67,67 @@
 
             this.mouseUp = function(e) {
                 e.preventDefault();
-                self.isMouseDown = false;
+                self.isPressed = false;
                 self.selectionOrigin = null;
                 self.commitSelection();
             };
 
             this.mouseDown = function(e) {
                 e.preventDefault();
-                self.isMouseDown = true;
+                self.isPressed = true;
                 self.selectionOrigin = {
                     day: parseInt(e.target.dataset.day),
                     hour: parseInt(e.target.dataset.hour)
                 };
-                self.updateSelection(e);
+                self.updateSelection(e.target, e.clientX, e.clientY);
             };
 
             this.mouseMove = function(e) {
-                if (self.isMouseDown && e.button === 0) {
+                if (self.isPressed && e.button === 0) {
                     e.preventDefault();
-                    self.updateSelection(e);
+                    self.updateSelection(e.target, e.clientX, e.clientY);
                 }
+            };
+
+            this.touchStart = function(e) {
+                self.isPressed = true;
+                self.selectionOrigin = {
+                    day: parseInt(e.target.dataset.day),
+                    hour: parseInt(e.target.dataset.hour)
+                };
+                self.updateSelection(e.target, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            };
+
+            this.touchMove = function(e) {
+                if (self.isPressed) {
+                    var clientX = e.changedTouches[0].clientX,
+                        clientY = e.changedTouches[0].clientY,
+                        target = document.elementFromPoint(clientX, clientY);
+
+                    self.updateSelection(target, clientX, clientY);
+                }
+            };
+
+            this.touchEnd = function(e) {
+                self.isPressed = false;
+                self.selectionOrigin = null;
+                self.commitSelection();
             };
 
             document.addEventListener('mouseup', this.mouseUp);
             document.addEventListener('mousedown', this.mouseDown);
             document.addEventListener('mousemove', this.mouseMove);
+            document.addEventListener('touchstart', this.touchStart);
+            document.addEventListener('touchmove', this.touchMove);
+            document.addEventListener('touchend', this.touchEnd);
         },
         destroy: function() {
             document.removeEventListener('mouseup', this.mouseUp);
             document.removeEventListener('mousedown', this.mouseDown);
             document.removeEventListener('mousemove', this.mouseMove);
+            document.removeEventListener('touchstart', this.touchStart);
+            document.removeEventListener('touchmove', this.touchMove);
+            document.removeEventListener('touchend', this.touchEnd);
         },
         methods: {
             getIndexOfDay: function(day) {
@@ -140,9 +171,9 @@
                     }
                 }
             },
-            updateSelection: function(e) {
+            updateSelection: function(target, clientX, clientY) {
                 var day, hour;
-                if (e.target.className.indexOf('hour') === -1) {
+                if (target === null || target.className.indexOf('hour') === -1) {
                     // Find bounding rectangle of the all selectors based on first and the last selector rectangles.
                     var selectors = this.$el.querySelectorAll('.hour'),
                         firstSelector = selectors[0],
@@ -158,10 +189,10 @@
 
                     // Calculate potential selectors that might be selected.
                     // We are assuming that all selectors have equal dimensions.
-                    hour = clamp(0, 23, Math.floor((e.clientX - selectorsRect.left) / ((selectorsRect.width / this.hours.length))));
-                    day = clamp(0, 6, Math.floor((e.clientY - selectorsRect.top) / ((selectorsRect.height / this.days.length))));
+                    hour = clamp(0, 23, Math.floor((clientX - selectorsRect.left) / ((selectorsRect.width / this.hours.length))));
+                    day = clamp(0, 6, Math.floor((clientY - selectorsRect.top) / ((selectorsRect.height / this.days.length))));
                 } else {
-                    var data = e.target.dataset;
+                    var data = target.dataset;
                     day = parseInt(data.day);
                     hour = parseInt(data.hour);
                 }
@@ -182,6 +213,7 @@
     .schedule-editor {
         display: flex;
         user-select: none;
+        touch-action: none;
     }
 
     .schedule-editor-toolbar {
