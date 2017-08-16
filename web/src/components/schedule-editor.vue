@@ -44,6 +44,10 @@
                 validator: function(value) {
                     return ['12h', '24h'].indexOf(value) >= 0;
                 }
+            },
+            selection: {
+                required: false,
+                default: {}
             }
         },
         data: function() {
@@ -55,7 +59,7 @@
                 hours: hours,
                 isPressed: false,
                 include: false,
-                selection: days.map(function() {
+                selectors: days.map(function() {
                     return hours.map(function() {
                         return {
                             isSelected: true,
@@ -69,7 +73,7 @@
         },
         computed: {
             selected: function() {
-                return this.selection.map(function(day) {
+                return this.selectors.map(function(day) {
                     return day.map(function(x, i) {
                         return {hour: i, isSelected: x.isSelected};
                     }).filter(function(x) {
@@ -78,6 +82,15 @@
                         return x.hour;
                     });
                 });
+            }
+        },
+        watch: {
+            selection: function() {
+                for (var day = 0; day < this.days.length; ++day) {
+                    for (var hour = 0; hour < this.hours.length; ++hour) {
+                        this.selectors[day][hour].isSelected = this.selection[day].indexOf(hour) !== -1;
+                    }
+                }
             }
         },
         mounted: function() {
@@ -164,7 +177,7 @@
                 return this.days.indexOf(day);
             },
             getSelector: function(day, hour) {
-                return this.selection[this.getIndexOfDay(day)][parseInt(hour)];
+                return this.selectors[this.getIndexOfDay(day)][parseInt(hour)];
             },
             formatHour: function(hour) {
                 if (this.hourFormat === '24h') {
@@ -184,7 +197,7 @@
             selectRectangle: function(origin, width, height, select) {
                 for (var i = 0; i < width; ++i) {
                     for (var j = 0; j < height; ++j) {
-                        var selector = this.selection[origin.day + i][origin.hour + j];
+                        var selector = this.selectors[origin.day + i][origin.hour + j];
                         selector.hasPreview = true;
                         if (selector.isSelected === select) {
                             selector.needsCommit = false;
@@ -196,9 +209,9 @@
                 }
             },
             clearSelection: function() {
-                for (var i = 0; i < this.selection.length; ++i) {
-                    for (var j = 0; j < this.selection[i].length; ++j) {
-                        var selector = this.selection[i][j];
+                for (var i = 0; i < this.selectors.length; ++i) {
+                    for (var j = 0; j < this.selectors[i].length; ++j) {
+                        var selector = this.selectors[i][j];
                         selector.isSelected = selector.needsCommit
                             ? !selector.isSelected
                             : selector.isSelected;
@@ -208,13 +221,24 @@
                 }
             },
             commitSelection: function() {
-                for (var i = 0; i < this.selection.length; ++i) {
-                    for (var j = 0; j < this.selection[i].length; ++j) {
-                        var selector = this.selection[i][j];
+                for (var i = 0; i < this.selectors.length; ++i) {
+                    for (var j = 0; j < this.selectors[i].length; ++j) {
+                        var selector = this.selectors[i][j];
                         selector.hasPreview = false;
                         selector.needsCommit = false;
                     }
                 }
+
+                this.$emit('update:selection', this.selectors.map(function(x) {
+                    var values = [];
+                    for (var i = 0; i < x.length; ++i) {
+                        if (x[i].isSelected) {
+                            values.push(i);
+                        }
+                    }
+
+                    return values;
+                }));
             },
             updateSelection: function(target, clientX, clientY) {
                 var day, hour;

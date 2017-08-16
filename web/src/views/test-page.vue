@@ -1,7 +1,11 @@
 <template>
     <div :style="{ color: d, background: c, height: '100%', margin: '2em'}">
         <span style="margin: 1em">{{ c }}</span>
-        <schedule-editor></schedule-editor>
+        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
         <hue-slider :hue.sync="h"></hue-slider>
         <color-palette :hue.sync="h" :saturation.sync="s" :value.sync="v"></color-palette>
     </div>
@@ -18,7 +22,8 @@
             return {
                 h: 0x90,
                 s: 0x00,
-                v: 0x30
+                v: 0x30,
+                selection: {}
             }
         },
         computed: {
