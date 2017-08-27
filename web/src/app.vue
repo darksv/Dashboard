@@ -18,7 +18,7 @@
 
 <script>
     import mqtt from 'mqtt';
-    import ApiClient from './api-client.js';
+    import { client as ApiClient } from './api-client.js';
     import guid from './guid';
 
     String.prototype.zfill = function(width) {
@@ -133,7 +133,6 @@
 
 <style lang="scss">
     .main {
-        height: 100%;
         display: flex;
         flex-direction: column;
 

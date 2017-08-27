@@ -53,7 +53,7 @@
 </template>
 
 <script>
-    import ApiClient from '../api-client.js';
+    import { client as ApiClient } from '../api-client.js';
     import ScheduleEditor from '../components/schedule-editor.vue';
 
     export default {

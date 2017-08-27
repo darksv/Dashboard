@@ -8,7 +8,7 @@
 <script>
     import Chart from '../components/chart.vue';
     import Loader from '../components/loader.vue';
-    import ApiClient from '../api-client.js';
+    import { client as ApiClient } from '../api-client.js';
 
     export default {
         props: {
