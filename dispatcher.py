@@ -8,8 +8,6 @@ import math
 from typing import Optional
 from collections import defaultdict
 from datetime import datetime
-from hbmqtt.client import MQTTClient
-from hbmqtt.mqtt.constants import QOS_1, QOS_2
 from core import DB
 from core.services.channel_update import AverageCalculator
 from core.services.channels import get_or_create_channel, update_channel, log_channel_value
@@ -37,10 +35,7 @@ calculators = defaultdict(lambda: AverageCalculator(
 ))
 
 
-async def process_message(client, message):
-    packet = message.publish_packet
-    topic = packet.variable_header.topic_name
-    payload = packet.payload.data.decode('ascii')
+def process_message(client, topic, payload):
     logger.debug('received message topic: %s payload: %s', topic, payload)
 
     device_uuid, channel_uuid = topic.split('/', 2)
@@ -66,39 +61,27 @@ async def process_message(client, message):
             value, timestamp = calculator.pop_average()
             log_channel_value(db, channel.id, value, timestamp, ignore_duplicates=True)
 
-            topic = message.topic + '/log'
+            topic = topic + '/log'
             payload = json.dumps(dict(value=value, timestamp=timestamp.isoformat())).encode('ascii')
-            await client.publish(topic, payload, QOS_2)
-            logger.info('published message at %s with %s (QOS: %d)', topic, payload, QOS_2)
+            client.publish(topic, payload, qos=2)
+            logger.info('published message at %s with %s (QOS=2)', topic, payload)
 
 
-# noinspection PyBroadException
-async def mqtt_task():
-    client_config = dict(
-        auto_reconnect=False,
-        keep_alive=5,
-        ping_delay=1
-    )
+def mqtt_client():
+    import paho.mqtt.client as mqtt
 
-    client = MQTTClient(config=client_config)
-    await client.connect('mqtt://home.spoder.pl/')
-    await client.subscribe([
-        ('+/+', QOS_1)
-    ])
+    def on_connect(client, userdata, flags, rc):
+        client.subscribe('+/+')
 
-    while True:
-        try:
-            message = await client.deliver_message(timeout=10)
-        except asyncio.TimeoutError:
-            break
+    def on_message(client, userdata, msg):
+        process_message(client, msg.topic, msg.payload.decode('ascii'))
 
-        try:
-            await process_message(client, message)
-        except KeyboardInterrupt:
-            break
-        except:
-            logger.exception('exception when processing MQTT message')
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
+    client.loop_forever(retry_first_connection=True)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(mqtt_task())
+    loop.run_until_complete(loop.run_in_executor(None, mqtt_client()))

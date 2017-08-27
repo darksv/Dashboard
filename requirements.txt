@@ -1,4 +1,4 @@
-hbmqtt
+paho-mqtt
 uwsgi
 sqlalchemy
 Flask==0.10.1
