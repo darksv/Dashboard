@@ -5,6 +5,8 @@ import asyncio
 import logging
 import json
 import math
+import websockets
+from asyncio.queues import Queue
 from typing import Optional
 from collections import defaultdict
 from datetime import datetime
@@ -28,6 +30,8 @@ def parse_value(val: str) -> Optional[float]:
     if not math.isnan(result) and not math.isinf(result):
         return result
 
+
+client_queue = dict()
 
 calculators = defaultdict(lambda: AverageCalculator(
     period=config.MEASUREMENT_AVERAGING_PERIOD,
@@ -55,16 +59,31 @@ def process_message(client, topic, payload):
         update_channel(db, channel.id, value=value, value_updated=datetime.now())
         logger.debug('updated channel %d', channel.id)
 
+        item = json.dumps([
+            'channel_updated',
+            dict(
+                channel_uuid=channel_uuid,
+                timestamp=datetime.now().isoformat(),
+                value=value
+            )
+        ])
+        for queue in client_queue.values():
+            queue.put_nowait(item)
+
         calculator = calculators[channel.id]
         calculator.push_value(value)
         if channel.logging_enabled and calculator.has_average:
             value, timestamp = calculator.pop_average()
             log_channel_value(db, channel.id, value, timestamp, ignore_duplicates=True)
-
-            topic = topic + '/log'
-            payload = json.dumps(dict(value=value, timestamp=timestamp.isoformat())).encode('ascii')
-            client.publish(topic, payload, qos=2)
-            logger.info('published message at %s with %s (QOS=2)', topic, payload)
+            for queue in client_queue.values():
+                queue.put_nowait(json.dumps([
+                    'channel_logged',
+                    dict(
+                        channel_uuid=channel_uuid,
+                        timestamp=timestamp.isoformat(),
+                        value=value
+                    )
+                ]))
 
 
 def mqtt_client():
@@ -80,8 +99,46 @@ def mqtt_client():
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
-    client.loop_forever(retry_first_connection=True)
+    client.loop_start()
+
+
+async def consumer_handler(websocket):
+    while True:
+        await websocket.recv()
+
+
+async def producer_handler(websocket):
+    queue = Queue()
+    client_queue[websocket] = queue
+    while True:
+        try:
+            item = queue.get_nowait()
+            await websocket.send(item)
+        except asyncio.QueueEmpty:
+            continue
+
+
+async def websocket_handler(websocket, path):
+    try:
+        done, pending = await asyncio.wait(
+            [
+                consumer_handler(websocket),
+                producer_handler(websocket)
+            ],
+            return_when=asyncio.FIRST_COMPLETED
+        )
+        for task in pending:
+            task.cancel()
+    except websockets.ConnectionClosed:
+        pass
+    finally:
+        del client_queue[websocket]
+
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(loop.run_in_executor(None, mqtt_client()))
+    start_server = websockets.serve(websocket_handler, '127.0.0.1', 8080)
+    start_mqtt = loop.run_in_executor(None, mqtt_client)
+    loop.run_until_complete(start_mqtt)
+    loop.run_until_complete(start_server)
+    loop.run_forever()

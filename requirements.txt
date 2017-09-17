@@ -9,3 +9,4 @@ tzlocal
 pymysql
 requests
 marshmallow
+websockets
