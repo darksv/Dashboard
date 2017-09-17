@@ -5,6 +5,10 @@ const CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+var babelOptions = {
+    presets: ['es2015']
+};
+
 module.exports = {
     entry: {
         'vendor': ['vue', 'vue-router', 'vuedraggable', 'axios', 'chart.js', 'mqtt', 'tinycolor2'],
@@ -18,10 +22,24 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.js$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                    loader: 'babel-loader',
+                    options: babelOptions
+                }
+            },
+            {
                 test: /\.vue$/,
                 loader: 'vue-loader',
                 options: {
-                    extractCSS: true
+                    extractCSS: true,
+                    loaders: {
+                        js: {
+                           loader: 'babel-loader',
+                           options: babelOptions
+                        },
+                    }
                 }
             },
             {
