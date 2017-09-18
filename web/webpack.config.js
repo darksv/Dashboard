@@ -5,13 +5,13 @@ const CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-var babelOptions = {
+let babelOptions = {
     presets: ['es2015']
 };
 
 module.exports = {
     entry: {
-        'vendor': ['vue', 'vue-router', 'vuedraggable', 'axios', 'chart.js', 'mqtt', 'tinycolor2'],
+        'vendor': ['vue', 'vue-router', 'vuedraggable', 'axios', 'chart.js', 'tinycolor2'],
         'app': ['./src/index.js', './src/styles.scss']
     },
     devtool: 'source-map',
@@ -56,15 +56,15 @@ module.exports = {
 			names: ['vendor'],
 			minChunks: Infinity
 		}),
-        new DefinePlugin({
-            'process.env': {
-                NODE_ENV: '"production"'
-            }
-        }),
-        new UglifyJSPlugin({
-            include: /\.min\.js$/,
-            minimize: true
-        }),
+        // new DefinePlugin({
+        //     'process.env': {
+        //         NODE_ENV: '"production"'
+        //     }
+        // }),
+        // new UglifyJSPlugin({
+        //     include: /\.js$/,
+        //     minimize: true
+        // }),
         new ExtractTextPlugin('styles.css')
     ]
 };
