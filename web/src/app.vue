@@ -6,12 +6,12 @@
         <footer>
             <span v-if="connected" class="fa fa-check-circle text-success" title="Connected with server"></span>
             <span v-if="!connected" class="fa fa-times-circle text-danger" title="Not connected"></span>
-            <a v-if="isLogged" href="/logout">
+            <router-link v-if="isLogged" to="/logout">
                 <span class="fa fa-user text-success" :title="'Logged as ' + user.name"></span>
-            </a>
-            <a v-if="!isLogged" href="/login">
+            </router-link>
+            <router-link v-if="!isLogged" to="/login">
                 <span class="fa fa-user text-danger" title="Not logged in"></span>
-            </a>
+            </router-link>
         </footer>
     </div>
 </template>
