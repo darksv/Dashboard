@@ -8,6 +8,7 @@
 <script>
     import tinycolor from 'tinycolor2';
     import { clamp } from '../math-utils.js';
+    import { generatePaletteForHue } from '../hue-palette.js';
 
     function hsvToRgb(h, s, v) {
         // Based on hsvToRgb function from tinycolor (original does not work for some specified colors
@@ -26,36 +27,6 @@
             b = [p, p, t, v, v, q][mod];
 
         return [r * 255, g * 255, b * 255];
-    }
-
-    function generatePaletteForHue(hue, width, height) {
-        // Based on hsvToRgb function from tinycolor (optimized for our use case)
-        var buffer = new Uint8ClampedArray(width * height * 4);
-
-        hue /= 60;
-        var integerHue = Math.floor(hue),
-            fractionHue = hue - integerHue;
-
-        for (var y = 0; y < height; y++) {
-            var v = 1 - y / height,
-                z = y * width;
-
-            for (var x = 0; x < width; x++) {
-                var s = x / width,
-                    i = (z + x) << 2,
-                    p = v * (1 - s),
-                    q = v * (1 - fractionHue * s),
-                    t = v * (1 - (1 - fractionHue) * s),
-                    u = integerHue % 6;
-
-                buffer[i]     = [v, q, p, p, t, v][u] * 255;
-                buffer[i + 1] = [t, v, v, q, p, p][u] * 255;
-                buffer[i + 2] = [p, p, t, v, v, q][u] * 255;
-                buffer[i + 3] = 255;
-            }
-        }
-
-        return new ImageData(buffer, width, height);
     }
 
     export default {
