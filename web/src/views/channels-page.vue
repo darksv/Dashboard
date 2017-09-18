@@ -33,12 +33,9 @@
                 if (!this.enableSort) {
                     return;
                 }
-
-                var newOrder = items.map(function (x) {
-                    return x.id;
+                ApiClient.post('/order', {
+                    ids: items.map(x => x.id)
                 });
-
-                ApiClient.post('/order?order=' + newOrder.join(','));
             }
         },
         components: {

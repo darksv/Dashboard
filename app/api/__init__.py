@@ -5,7 +5,7 @@ from flask_mail import Mail
 from werkzeug.debug import get_current_traceback
 from werkzeug.routing import Rule
 import config
-from flask import Flask, jsonify, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, request, redirect, url_for, g
 from core import DB
 from core.services.users import get_user_by_username, get_user_by_id
 
@@ -14,23 +14,20 @@ app.secret_key = config.SECRET_KEY
 app.url_map.add(Rule('/api/<path:path>', endpoint='nonexistent_api_endpoint'))
 login_manager = LoginManager(app)
 mail = Mail(app)
-api_user = None
 
 
 @app.before_request
 def before_api_request():
     with DB.connect() as db:
-        global api_user
-
         auth = request.headers.get('Authorization', None)
         if not auth:
-            api_user = None
+            g.api_user = None
             return
 
         auth_type, data = auth.split(' ')
         username, password = b64decode(data).decode('utf-8').split(':')
-        api_user = get_user_by_username(db, username)
-        if not api_user:
+        g.api_user = get_user_by_username(db, username)
+        if not g.api_user:
             return error('Authorization failed, invalid username and/or password', 401)
 
 
@@ -53,11 +50,9 @@ def internal_error():
 def api_auth_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if not api_user:
+        if not g.api_user:
             return error('Authorization required', 401)
-
         return func(*args, **kwargs)
-
     return decorated_view
 
 

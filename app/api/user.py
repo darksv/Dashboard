@@ -1,10 +1,11 @@
 import flask_login
-from flask import render_template, redirect, url_for, request, jsonify
+from flask import render_template, redirect, url_for, request, jsonify, g
+from api.schemas.channels_order import ChannelsOrderSchema
 from api.schemas.user import UserSchema
 from core import DB
 from core.services.channels import update_channels_order
 from core.services.users import get_user_by_username
-from . import app, api_auth_required, api_user
+from . import app, api_auth_required
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -44,7 +45,9 @@ def session():
 @app.route('/api/order', methods=['POST'])
 @api_auth_required
 def api_update_order():
+    data, errors = ChannelsOrderSchema().load(request.get_json() or request.args)
+    if errors:
+        return jsonify(errors=errors), 400
     with DB.connect() as db:
-        ids = list(map(int, request.args.get('order', '').split(',')))
-        update_channels_order(db, api_user.id, ids)
-        return jsonify()
+        update_channels_order(db, g.api_user.id, data['ids'])
+    return jsonify()
