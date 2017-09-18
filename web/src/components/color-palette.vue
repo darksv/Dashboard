@@ -115,8 +115,8 @@
                 this.update(e.offsetX, e.offsetY);
             },
             update: function(offsetX, offsetY) {
-                this.$emit('update:saturation', parseInt(clamp(0, 100, offsetX / this.canvas.width * 100)));
-                this.$emit('update:value', parseInt(clamp(0, 100, (1 - offsetY / this.canvas.height) * 100)));
+                this.$emit('update:saturation', clamp(0, 100, offsetX / this.canvas.width * 100));
+                this.$emit('update:value', clamp(0, 100, (1 - offsetY / this.canvas.height) * 100));
             },
             redraw: function() {
                 var width = this.canvas.width,
