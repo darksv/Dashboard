@@ -48,20 +48,20 @@
             var self = this;
             this.width = this.$el.clientWidth;
             this.mouseDown = function(e) {
-                e.preventDefault();
                 if (e.button === 0 && (e.target === self.$el || e.target === self.$el.querySelector('.knob'))) {
+                    e.preventDefault();
                     self.isMouseDown = true;
                 }
             };
             this.mouseUp = function(e) {
-                e.preventDefault();
                 if (e.button === 0) {
+                    e.preventDefault();
                     self.isMouseDown = false;
                 }
             };
             this.mouseMove = function(e) {
-                e.preventDefault();
                 if (e.button === 0 && self.isMouseDown) {
+                    e.preventDefault();
                     self.updateHue(e.x - self.$el.getBoundingClientRect().left);
                 }
             };
