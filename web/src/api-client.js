@@ -5,7 +5,8 @@ const CLIENT_ID = '';
 
 function createClient(method, token) {
     var config = {
-        baseURL: (URL === null ? window.location.origin : URL) + '/api'
+        baseURL: (URL === null ? window.location.origin : URL) + '/api',
+        headers: {}
     };
     if (method && token) {
         config.headers['Authorization'] = method + ' ' + token;
