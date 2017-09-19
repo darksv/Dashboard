@@ -4,7 +4,7 @@
             <router-view class="view" :channels="channels" :user="user" :client="client"></router-view>
         </transition>
         <footer>
-            <span v-if="connected" class="fa fa-check-circle text-success" title="Connected with server"></span>
+            <span v-if="connected" class="fa fa-check-circle text-success" title="Connected"></span>
             <span v-if="!connected" class="fa fa-times-circle text-danger" title="Not connected"></span>
             <router-link v-if="isLogged" to="/logout">
                 <span class="fa fa-user text-success" :title="'Logged as ' + user.name"></span>
