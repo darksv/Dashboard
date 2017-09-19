@@ -1,6 +1,8 @@
 class SocketClient {
     constructor(url, app) {
-        let socket = new WebSocket(url);
+        this._handlers = {};
+        let self = this,
+            socket = new WebSocket(url);
         socket.onopen = e => app.connected = true;
         socket.onclose = e => app.connected = false;
         socket.onerror = e => console.log(e);
@@ -10,8 +12,7 @@ class SocketClient {
                 data = message[1];
 
             switch (name) {
-                case 'channel_updated':
-                {
+                case 'channel_updated': {
                     let channel = app.getChannelByUuid(data.channel_uuid);
                     if (channel === undefined) {
                         return;
@@ -23,18 +24,39 @@ class SocketClient {
                     channel.change = Math.sign(newValue - oldValue);
                     break;
                 }
-                case 'channel_logged':
-                {
+                case 'channel_logged': {
                     let channel = app.getChannelByUuid(data.channel_uuid);
                     if (channel === undefined) {
                         return;
                     }
                     let label = new Date(data.timestamp).toHourMinute();
                     channel.items.push([label, data.value]);
+                    break;
+                }
+                default: {
+                    if (name in self._handlers) {
+                        for (let handler of self._handlers[name]) {
+                            handler(data);
+                        }
+                    }
                 }
             }
         };
         this._socket = socket;
+    }
+    addEventListener(event, handler) {
+        if (!(event in this._handlers)) {
+            this._handlers[event] = [];
+        }
+        this._handlers[event].push(handler);
+    }
+    removeEventListener(event, handler) {
+        if (!(event in this._handlers)) {
+            return;
+        }
+        let handlers = this._handlers[event],
+            index = handlers.indexOf(handler);
+        this._handlers[event] = handlers.splice(index, 1);
     }
     send(action, data) {
         this._socket.send(JSON.stringify([action, data]));
