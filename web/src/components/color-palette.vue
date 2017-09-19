@@ -9,25 +9,7 @@
     import tinycolor from 'tinycolor2';
     import { clamp } from '../math-utils.js';
     import { generatePaletteForHue } from '../hue-palette.js';
-
-    function hsvToRgb(h, s, v) {
-        // Based on hsvToRgb function from tinycolor (original does not work for some specified colors
-        h = h / 60;
-        s = s / 100;
-        v = v / 100;
-
-        var i = Math.floor(h),
-            f = h - i,
-            p = v * (1 - s),
-            q = v * (1 - f * s),
-            t = v * (1 - (1 - f) * s),
-            mod = i % 6,
-            r = [v, q, p, p, t, v][mod],
-            g = [t, v, v, q, p, p][mod],
-            b = [p, p, t, v, v, q][mod];
-
-        return [r * 255, g * 255, b * 255];
-    }
+    import { hsvToRgb } from '../colors.js';
 
     export default {
         props: {

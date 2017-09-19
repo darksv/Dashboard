@@ -1,13 +1,14 @@
 <template>
     <div :style="{ color: d, background: c, height: '100%', margin: '2em'}">
-        <span style="margin: 1em">{{ c }}</span>
-        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
+        <hue-ring :size="200" :hue.sync="h"></hue-ring>
+        <hue-ring :size="200" :hue.sync="h"></hue-ring>
         <hue-slider :hue.sync="h"></hue-slider>
         <color-palette :hue.sync="h" :saturation.sync="s" :value.sync="v"></color-palette>
+        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
+        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
     </div>
 </template>
 
@@ -16,6 +17,7 @@
     import HueSlider from '../components/hue-slider.vue';
     import ColorPalette from '../components/color-palette.vue';
     import ScheduleEditor from '../components/schedule-editor.vue';
+    import HueRing from '../components/hue-ring.vue';
 
     export default {
         data: function() {
@@ -36,9 +38,10 @@
             }
         },
         components: {
-            HueSlider: HueSlider,
-            ColorPalette: ColorPalette,
-            ScheduleEditor: ScheduleEditor
+            HueSlider,
+            ColorPalette,
+            ScheduleEditor,
+            HueRing
         }
     }
 </script>
