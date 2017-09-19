@@ -21,6 +21,34 @@
     import HueRing from '../components/hue-ring.vue';
     import SocketClient from "../socket-client";
 
+    class Synchronizer {
+        constructor(client, eventName, updater) {
+            this._client = client;
+            this._eventName = eventName;
+            this._lastUpdate = 0;
+            let self = this;
+            this._listener = data => {
+                if (data.timestamp > self._lastUpdate) {
+                    updater(data.value);
+                }
+            };
+        }
+        change(value) {
+            let timestamp = Date.now();
+            this._client.send(this._eventName, {
+                value: value,
+                timestamp: timestamp
+            });
+            this._lastUpdate = timestamp;
+        }
+        attach() {
+            this._client.addEventListener(this._eventName, this._listener);
+        }
+        detach() {
+            this._client.removeEventListener(this._eventName, this._listener);
+        }
+    }
+
     export default {
         props: {
             client: {
@@ -33,22 +61,29 @@
                 h: 0x90,
                 s: 0x00,
                 v: 0x30,
-                selection: {}
+                selection: {},
+                synchronizer: null
             }
         },
         watch: {
-            h() {
-                this.client.send('test', this.h);
+            h(value) {
+                this.synchronizer.change(value);
             }
         },
         computed: {
-            c: function() {
+            c() {
                 return tinycolor({h: this.h, s: this.s, v: this.v}).toRgbString();
             },
-            d: function() {
-                var color = tinycolor({h: this.h, s: this.s, v: this.v});
-                return color.isDark() ? '#ffffff' : '#000000';
+            d() {
+                return tinycolor({h: this.h, s: this.s, v: this.v}).isDark() ? '#ffffff' : '#000000';
             }
+        },
+        created() {
+            this.synchronizer = new Synchronizer(this.client, 'hue', hue => this.h = hue);
+            this.synchronizer.attach();
+        },
+        destroyed() {
+            this.synchronizer.detach();
         },
         components: {
             HueSlider,
