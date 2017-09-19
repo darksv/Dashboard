@@ -6,7 +6,7 @@ Vue.use(VueRouter);
 
 import ChannelsPage from './views/channels-page.vue';
 import LoginPage from './views/login-page.vue';
-import TestPage from './views/test-page.vue';
+import ExperimentsPage from './views/experiments-page.vue';
 import ChannelPage from './views/channel-page.vue';
 import ChannelEditPage from './views/channel-edit-page.vue';
 import ChannelRecentPage from './views/channel-recent-page.vue';
@@ -16,7 +16,7 @@ const router = new VueRouter({
     routes: [
         { path: '/', component: ChannelsPage, name: 'home' },
         { path: '/login', component: LoginPage, name: 'login' },
-        { path: '/test', component: TestPage, name: 'test' },
+        { path: '/experiments', component: ExperimentsPage, name: 'experiments' },
         {
             path: '/channel/:channelId',
             component: ChannelPage,
