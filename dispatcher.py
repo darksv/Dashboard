@@ -104,18 +104,18 @@ def mqtt_client():
 
 async def consumer_handler(websocket):
     while True:
-        await websocket.recv()
+        data = await websocket.recv()
+        for other, queue in client_queue.items():
+            if other != websocket:
+                await queue.put(data)
 
 
 async def producer_handler(websocket):
     queue = Queue()
     client_queue[websocket] = queue
     while True:
-        try:
-            item = queue.get_nowait()
-            await websocket.send(item)
-        except asyncio.QueueEmpty:
-            continue
+        item = await queue.get()
+        await websocket.send(item)
 
 
 async def websocket_handler(websocket, path):
