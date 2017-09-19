@@ -4,33 +4,37 @@ import App from './app.vue';
 
 Vue.use(VueRouter);
 
-function view(name) {
-    return require('./views/' + name + '-page.vue').default;
-}
+import ChannelsPage from './views/channels-page.vue';
+import LoginPage from './views/login-page.vue';
+import TestPage from './views/test-page.vue';
+import ChannelPage from './views/channel-page.vue';
+import ChannelEditPage from './views/channel-edit-page.vue';
+import ChannelRecentPage from './views/channel-recent-page.vue';
+import ChannelCustomPage from './views/channel-custom-page.vue';
 
 const router = new VueRouter({
     routes: [
-        { path: '/', component: view('channels'), name: 'home' },
-        { path: '/login', component: view('login'), name: 'login' },
-        { path: '/test', component: view('test'), name: 'test' },
+        { path: '/', component: ChannelsPage, name: 'home' },
+        { path: '/login', component: LoginPage, name: 'login' },
+        { path: '/test', component: TestPage, name: 'test' },
         {
             path: '/channel/:channelId',
-            component: view('channel'),
+            component: ChannelPage,
             props: true,
             children: [
                 {
                     path: 'edit',
-                    component: view('channel-edit'),
+                    component: ChannelEditPage,
                     name: 'channel_edit'
                 },
                 {
                     path: 'recent',
-                    component: view('channel-recent'),
+                    component: ChannelRecentPage,
                     name: 'channel_recent'
                 },
                 {
                     path: 'custom',
-                    component: view('channel-custom'),
+                    component: ChannelCustomPage,
                     name: 'channel_custom'
                 }
             ]
@@ -39,8 +43,6 @@ const router = new VueRouter({
 });
 
 new Vue({
-    router: router,
-    render: function(h) {
-        return h(App);
-    }
+    router,
+    render: h => h(App)
 }).$mount('#app');
