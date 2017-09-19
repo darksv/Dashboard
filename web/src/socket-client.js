@@ -11,35 +11,12 @@ class SocketClient {
                 name = message[0],
                 data = message[1];
 
-            switch (name) {
-                case 'channel_updated': {
-                    let channel = app.getChannelByUuid(data.channel_uuid);
-                    if (channel === undefined) {
-                        return;
-                    }
-                    let newValue = data.value;
-                    let oldValue = channel.value;
-                    channel.value = newValue;
-                    channel.value_updated = data.timestamp;
-                    channel.change = Math.sign(newValue - oldValue);
-                    break;
+            if (name in self._handlers) {
+                for (let handler of self._handlers[name]) {
+                    handler(data);
                 }
-                case 'channel_logged': {
-                    let channel = app.getChannelByUuid(data.channel_uuid);
-                    if (channel === undefined) {
-                        return;
-                    }
-                    let label = new Date(data.timestamp).toHourMinute();
-                    channel.items.push([label, data.value]);
-                    break;
-                }
-                default: {
-                    if (name in self._handlers) {
-                        for (let handler of self._handlers[name]) {
-                            handler(data);
-                        }
-                    }
-                }
+            } else {
+               console.log('unhandled', name);
             }
         };
         this._socket = socket;

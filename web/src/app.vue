@@ -20,6 +20,7 @@
     import { client as ApiClient } from './api-client.js';
     import SocketClient from './socket-client.js';
     import guid from './guid';
+    import { zip } from './functional';
 
     String.prototype.zfill = function(width) {
         if (width > this.length) {
@@ -59,23 +60,53 @@
             };
         },
         created: function() {
-            var self = this;
-            ApiClient.get('channels').then(function (response) {
-                self.channels = response.data.channels.map(function(channel) {
-                    channel.items = [];
-                    if (channel.enabled && channel.logging_enabled) {
-                        ApiClient.get('/channel/' + channel.id + '/stats?type=recent').then(function (response) {
-                            channel.items = response.data.values.map(function (x, i) {
-                                return [response.data.labels[i], x];
-                            });
-                        });
-                    }
-                    return channel;
-                });
+            let app = this;
+
+            app.client.addEventListener('channel_updated', data => {
+                let channel = app.getChannelByUuid(data.channel_uuid);
+                if (channel === undefined) {
+                    return;
+                }
+                let newValue = data.value;
+                let oldValue = channel.value;
+                channel.value = newValue;
+                channel.value_updated = data.timestamp;
+                channel.change = Math.sign(newValue - oldValue);
             });
-            ApiClient.get('session').then(function (response) {
-               self.user = response.data.user;
+
+            app.client.addEventListener('channel_logged', data => {
+                let channel = app.getChannelByUuid(data.channel_uuid);
+                if (channel === undefined) {
+                    return;
+                }
+                let label = new Date(data.timestamp).toHourMinute();
+                channel.items.push([label, data.value]);
             });
+
+            function hasStats(channel) {
+                if (!channel.enabled || !channel.logging_enabled) {
+                    return false;
+                }
+                return true;
+                // TODO: make some changes to make use of it
+                return (Date.now() - Date.parse(channel.value_updated)) / 1000 <= 60 * 30;
+            }
+
+            function loadStatsWhenPossible(channel) {
+                channel.items = [];
+                if (hasStats(channel)) {
+                    let endpoint = '/channel/' + channel.id + '/stats?type=recent';
+                    ApiClient.get(endpoint).then(response => {
+                        let data = response.data,
+                            labels = data.labels,
+                            values = data.values;
+                        channel.items = zip(labels, values);
+                    });
+                }
+                return channel;
+            }
+
+            ApiClient.get('channels').then(response => app.channels = response.data.channels.map(loadStatsWhenPossible));
         },
         methods: {
             getChannelByUuid(uuid) {
