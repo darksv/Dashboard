@@ -53,11 +53,26 @@
         },
         data: function() {
             return {
-                connected: false,
+                connected: null,
                 channels: [],
                 user: {},
-                client: new SocketClient('wss://' + window.location.host + '/ws', this)
+                client: new SocketClient('wss://' + window.location.host + '/ws', this),
+                originalTitle: document.title
             };
+        },
+        watch: {
+            connected(newValue, oldValue) {
+                console.log(newValue, oldValue);
+                if (oldValue === null) {
+                    return;
+                }
+
+                if (!newValue) {
+                    document.title = '[Offline] ' + this.originalTitle;
+                } else {
+                    document.title = this.originalTitle;
+                }
+            }
         },
         created: function() {
             let app = this;
