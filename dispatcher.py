@@ -39,7 +39,7 @@ calculators = defaultdict(lambda: AverageCalculator(
 ))
 
 
-def process_message(client, topic, payload):
+async def process_message(topic, payload):
     logger.debug('received message topic: %s payload: %s', topic, payload)
 
     device_uuid, channel_uuid = topic.split('/', 2)
@@ -68,7 +68,7 @@ def process_message(client, topic, payload):
             )
         ])
         for queue in client_queue.values():
-            queue.put_nowait(item)
+            await queue.put(item)
 
         calculator = calculators[channel.id]
         calculator.push_value(value)
@@ -76,7 +76,7 @@ def process_message(client, topic, payload):
             value, timestamp = calculator.pop_average()
             log_channel_value(db, channel.id, value, timestamp, ignore_duplicates=True)
             for queue in client_queue.values():
-                queue.put_nowait(json.dumps([
+                await queue.put(json.dumps([
                     'channel_logged',
                     dict(
                         channel_uuid=channel_uuid,
@@ -86,20 +86,26 @@ def process_message(client, topic, payload):
                 ]))
 
 
-def mqtt_client():
+def mqtt_client(loop):
     import paho.mqtt.client as mqtt
 
     def on_connect(client, userdata, flags, rc):
         client.subscribe('+/+')
 
     def on_message(client, userdata, msg):
-        process_message(client, msg.topic, msg.payload.decode('ascii'))
+        topic = msg.topic
+        payload = msg.payload.decode('ascii')
+        loop.call_soon_threadsafe(
+            lambda: asyncio.ensure_future(
+                process_message(topic, payload)
+            )
+        )
 
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(config.MQTT_HOST, config.MQTT_PORT, 60)
-    client.loop_start()
+    client.loop_forever(retry_first_connection=True)
 
 
 async def consumer_handler(websocket):
@@ -135,10 +141,14 @@ async def websocket_handler(websocket, path):
         del client_queue[websocket]
 
 
-if __name__ == '__main__':
+def main():
     loop = asyncio.get_event_loop()
     start_server = websockets.serve(websocket_handler, '127.0.0.1', 8080)
-    start_mqtt = loop.run_in_executor(None, mqtt_client)
-    loop.run_until_complete(start_mqtt)
-    loop.run_until_complete(start_server)
+    start_mqtt = loop.run_in_executor(None, mqtt_client, loop)
+    asyncio.ensure_future(start_mqtt)
+    asyncio.ensure_future(start_server)
     loop.run_forever()
+
+
+if __name__ == '__main__':
+    main()
