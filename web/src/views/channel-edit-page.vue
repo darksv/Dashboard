@@ -21,8 +21,10 @@
                 <a v-if="!saving" @click="$router.go(-1)" target="_parent">Cancel</a>
                 <input type="submit" class="button" value="Save changes" :readonly="saving">
             </div>
+            <input type="hidden" name="color" :value="color" />
         </form>
-
+        <hue-slider :hue.sync="hue"></hue-slider>
+        <!--<color-palette></color-palette>-->
         <div v-if="watchers">
             <h2>Watchers</h2>
             <div class="channel-edit-watchers">
@@ -55,13 +57,22 @@
 <script>
     import { client as ApiClient } from '../api-client.js';
     import ScheduleEditor from '../components/schedule-editor.vue';
+    import HueSlider from '../components/hue-slider.vue';
+    import ColorPalette from '../components/color-palette.vue';
+    import tinycolor from 'tinycolor2';
 
     export default {
         data: function () {
             return {
                 watchers: [],
-                saving: false
+                saving: false,
+                hue: 50
             };
+        },
+        computed: {
+            color: function() {
+                return tinycolor({ h: this.hue, s: 100, v: 100 }).toHexString();
+            }
         },
         props: {
             channel: {
@@ -71,6 +82,9 @@
         watch: {
             channel: function () {
                 this.update();
+            },
+            color: function() {
+                this.channel.color = this.color;
             }
         },
         created: function () {
@@ -107,7 +121,9 @@
             }
         },
         components: {
-            ScheduleEditor: ScheduleEditor
+            ScheduleEditor,
+            ColorPalette,
+            HueSlider
         }
     };
 </script>
