@@ -1,7 +1,7 @@
 <template>
     <div class="main">
         <transition name="fade" mode="out-in" class="page-content">
-            <router-view class="view" :channels="channels" :user="user"></router-view>
+            <router-view class="view" :channels="channels" :user="user" :client="client"></router-view>
         </transition>
         <footer>
             <span v-if="connected" class="fa fa-check-circle text-success" title="Connected with server"></span>
@@ -18,6 +18,7 @@
 
 <script>
     import { client as ApiClient } from './api-client.js';
+    import SocketClient from './socket-client.js';
     import guid from './guid';
 
     String.prototype.zfill = function(width) {
@@ -43,47 +44,6 @@
         return this[this.length - 1];
     };
 
-    function createSocket(app) {
-        try {
-            let socket = new WebSocket('wss://' + window.location.host + '/ws');
-            socket.onopen = e => app.connected = true;
-            socket.onclose = e => app.connected = false;
-            socket.onerror = e => console.log(e);
-            socket.onmessage = e => {
-                let message = JSON.parse(e.data),
-                    name = message[0],
-                    data = message[1];
-
-                switch (name) {
-                    case 'channel_updated':
-                    {
-                        let channel = app.getChannelByUuid(data.channel_uuid);
-                        if (channel === undefined) {
-                            return;
-                        }
-                        let newValue = data.value;
-                        let oldValue = channel.value;
-                        channel.value = newValue;
-                        channel.value_updated = data.timestamp;
-                        channel.change = Math.sign(newValue - oldValue);
-                        break;
-                    }
-                    case 'channel_logged':
-                    {
-                        let channel = app.getChannelByUuid(data.channel_uuid);
-                        if (channel === undefined) {
-                            return;
-                        }
-                        let label = new Date(data.timestamp).toHourMinute();
-                        channel.items.push([label, data.value]);
-                    }
-                }
-            };
-        } catch(e) {
-            console.log(e);
-        }
-    }
-
     export default {
         computed: {
             isLogged: function() {
@@ -94,11 +54,9 @@
             return {
                 connected: false,
                 channels: [],
-                user: {}
+                user: {},
+                client: new SocketClient('wss://' + window.location.host + '/ws', this)
             };
-        },
-        beforeCreate: function () {
-            createSocket(this);
         },
         created: function() {
             var self = this;
