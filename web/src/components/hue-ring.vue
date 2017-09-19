@@ -1,5 +1,5 @@
 <template>
-    <div :style="{ 'background': knobColor }">
+    <div class="hue-ring">
         <canvas :width="size" :height="size" @click="set"></canvas>
         <div :style="{
             'left': left + 'px',
@@ -102,3 +102,8 @@
         }
     }
 </script>
+<style lang="scss">
+    .hue-ring {
+        display: inline-block;
+    }
+</style>
