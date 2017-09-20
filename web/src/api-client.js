@@ -1,26 +1,24 @@
 import axios from 'axios';
-
-const URL = '';
-const CLIENT_ID = '';
+import config from './config';
 
 function createClient(method, token) {
-    var config = {
-        baseURL: (URL === null ? window.location.origin : URL) + '/api',
+    let options = {
+        baseURL: (config.URL === null ? window.location.origin : config.URL) + '/api',
         headers: {}
     };
     if (method && token) {
-        config.headers['Authorization'] = method + ' ' + token;
+        options.headers['Authorization'] = method + ' ' + token;
     }
-    return axios.create(config);
+    return axios.create(options);
 }
 
-var client = createClient();
+let client = createClient(config.TOKEN_TYPE, config.TOKEN_VALUE);
 
 function login(username, password, onSuccess, onError) {
     client.post('/oauth/token', {
         username: username,
         password: password,
-        client_id: CLIENT_ID,
+        client_id: config.CLIENT_ID,
         grant_type: 'password'
     }).then(function (response) {
         if (response.status === 200) {
