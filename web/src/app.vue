@@ -57,17 +57,17 @@
                 channels: [],
                 user: {},
                 client: new SocketClient('wss://' + window.location.host + '/ws', this),
-                originalTitle: document.title
+                originalTitle: ''
             };
         },
         watch: {
             connected(newValue, oldValue) {
-                console.log(newValue, oldValue);
                 if (oldValue === null) {
                     return;
                 }
 
                 if (!newValue) {
+                    this.originalTitle = document.title;
                     document.title = '[Offline] ' + this.originalTitle;
                 } else {
                     document.title = this.originalTitle;
