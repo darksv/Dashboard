@@ -19,6 +19,7 @@
         constructor(client, eventName, updater) {
             this._client = client;
             this._eventName = eventName;
+            this._delayedSendHandle = -1;
             // By default all changes are local
             // unless it is changed by reception
             // of changes from remote server.
@@ -32,12 +33,21 @@
         }
         change(value) {
             if (this._isLocal) {
-                this._client.send(this._eventName, {
-                    value: value,
-                    timestamp: Date.now()
-                });
+                this._sendWithDelay(value, 10);
             }
             this._isLocal = true;
+        }
+        _sendWithDelay(value, delay) {
+            if (this._delayedSendHandle !== null) {
+                clearTimeout(this._delayedSendHandle);
+            }
+            this._delayedSendHandle = setTimeout((self, data) => self._sender(data), delay, this, {
+                value,
+                timestamp: Date.now()
+            });
+        }
+        _sender(data) {
+            this._client.send(this._eventName, data);
         }
         attach() {
             this._client.addEventListener(this._eventName, this._listener);
