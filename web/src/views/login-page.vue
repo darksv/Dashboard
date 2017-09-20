@@ -1,68 +1,64 @@
 <template>
     <div class="login-page">
-        <h1 class="page-header">User authentication</h1>
-        <p v-if="failed" class="error-message">
-            Invalid username and/or password.
-        </p>
-        <form class="login-form" method="POST" @submit.prevent="login">
+        <form v-if="state == 'default'" class="login-form" method="POST" @submit.prevent="login">
             <div>
-                <input type="text" class="text-input" name="username" placeholder="Username" :readonly="logging">
+                <input type="text" class="text-input" name="username" placeholder="Username" required="required">
             </div>
             <div>
-                <input type="password" class="text-input" name="password" placeholder="Password" :readonly="logging">
+                <input type="password" class="text-input" name="password" placeholder="Password" required="required">
             </div>
             <div>
-                <input type="submit" class="button" value="Login" :readonly="logging">
+                <input type="submit" class="button" value="Login">
             </div>
         </form>
+        <loader v-if="state == 'logging'"></loader>
+        <p v-if="state == 'failed'" class="error-message">
+            Wrong username and/or password.<br>
+            Please <a @click="state='default'">try again</a>!
+        </p>
     </div>
 </template>
 <script>
-    import loader from './../components/loader.vue';
+    import Loader from '../components/loader.vue';
     import { client, login } from './../api-client';
 
     export default {
-        template: '#login-page',
-        data: function () {
+        data() {
             return {
                 username: '',
                 password: '',
-                logging: false,
-                failed: false
+                state: 'default'
             };
         },
         methods: {
-            login: function () {
-                if (this.logging) {
+            login() {
+                if (this.state !== 'default') {
                     return;
                 }
-                var self = this;
-                self.logging = true;
-                login(this.username, this.password, function() {
-                    self.logging = false;
-                    self.failed = false;
-                }, function() {
-                    self.logging = false;
-                    self.failed = true;
-                })
+                let self = this;
+                self.state = 'logging';
+                login(this.username, this.password, () => self.state = 'success', () => self.state = 'failed');
             },
-            clear: function() {
+            clear() {
                 this.username = '';
                 this.password = '';
             }
         },
         components: {
-            loader: loader
+            Loader
         }
     }
 </script>
 <style lang="scss">
     .login-page {
-        width: 30%;
-        margin: auto auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
     }
 
     .login-form {
+        max-width: 600px;
         div {
             padding: 0.1em;
             margin: 0.75em 0;
@@ -70,8 +66,7 @@
     }
 
     .error-message {
-        color: #FF0000;
         text-align: center;
-        font-size: 0.85em;
+        font-size: 1.5em;
     }
 </style>

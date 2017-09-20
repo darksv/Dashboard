@@ -124,7 +124,12 @@
 
 <style lang="scss">
     .main {
+        min-height: 100%;
         display: flex;
-        flex-direction: column;
+        justify-content: center;
+    }
+
+    .view {
+        flex: 1;
     }
 </style>

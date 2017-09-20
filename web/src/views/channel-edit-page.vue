@@ -130,7 +130,7 @@
 
 <style lang="scss">
     .channel-edit-page {
-        margin: 0 auto;
+        max-width: 600px;
     }
 
     @media (min-width: 600px) {
