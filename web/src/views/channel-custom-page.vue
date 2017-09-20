@@ -136,9 +136,7 @@
     }
 
     .chart-container {
-        flex: 2;
         margin: 1em 1em 0 1em;
-        height: 100%;
         position: relative;
         user-select: none;
 
