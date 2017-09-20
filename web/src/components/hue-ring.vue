@@ -104,6 +104,7 @@
 </script>
 <style lang="scss">
     .hue-ring {
+        user-select: none;
         display: inline-block;
     }
 </style>
