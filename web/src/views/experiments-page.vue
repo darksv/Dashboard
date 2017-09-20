@@ -1,15 +1,9 @@
 <template>
-    <div :style="{ color: d, background: c, height: '100%', margin: '2em'}">
+    <div style="height: 100%; margin: 2em">
         <hue-ring :size="200" :hue.sync="h"></hue-ring>
         <hue-ring :size="100" :hue.sync="h"></hue-ring>
         <hue-ring :size="50" :hue.sync="h"></hue-ring>
         <hue-slider :hue.sync="h"></hue-slider>
-        <color-palette :hue.sync="h" :saturation.sync="s" :value.sync="v"></color-palette>
-        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="24h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
-        <schedule-editor hourFormat="12h" :selection.sync="selection"></schedule-editor>
     </div>
 </template>
 
@@ -25,21 +19,25 @@
         constructor(client, eventName, updater) {
             this._client = client;
             this._eventName = eventName;
-            this._lastUpdate = 0;
+            // By default all changes are local
+            // unless it is changed by reception
+            // of changes from remote server.
+            this._isLocal = true;
             let self = this;
             this._listener = data => {
-                if (data.timestamp > self._lastUpdate) {
-                    updater(data.value);
-                }
+                self._isLocal = false;
+                updater(data.value);
             };
+            this.attach();
         }
         change(value) {
-            let timestamp = Date.now();
-            this._client.send(this._eventName, {
-                value: value,
-                timestamp: timestamp
-            });
-            this._lastUpdate = timestamp;
+            if (this._isLocal) {
+                this._client.send(this._eventName, {
+                    value: value,
+                    timestamp: Date.now()
+                });
+            }
+            this._isLocal = true;
         }
         attach() {
             this._client.addEventListener(this._eventName, this._listener);
@@ -70,17 +68,8 @@
                 this.synchronizer.change(value);
             }
         },
-        computed: {
-            c() {
-                return tinycolor({h: this.h, s: this.s, v: this.v}).toRgbString();
-            },
-            d() {
-                return tinycolor({h: this.h, s: this.s, v: this.v}).isDark() ? '#ffffff' : '#000000';
-            }
-        },
         created() {
             this.synchronizer = new Synchronizer(this.client, 'hue', hue => this.h = hue);
-            this.synchronizer.attach();
         },
         destroyed() {
             this.synchronizer.detach();
