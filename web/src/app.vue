@@ -3,16 +3,6 @@
         <transition name="fade" mode="out-in" class="page-content">
             <router-view class="view" :channels="channels" :user="user" :client="client"></router-view>
         </transition>
-        <footer>
-            <span v-if="connected" class="fa fa-check-circle text-success" title="Connected"></span>
-            <span v-if="!connected" class="fa fa-times-circle text-danger" title="Not connected"></span>
-            <router-link v-if="isLogged" to="/logout">
-                <span class="fa fa-user text-success" :title="'Logged as ' + user.name"></span>
-            </router-link>
-            <router-link v-if="!isLogged" to="/login">
-                <span class="fa fa-user text-danger" title="Not logged in"></span>
-            </router-link>
-        </footer>
     </div>
 </template>
 
@@ -62,6 +52,7 @@
         },
         watch: {
             connected(newValue, oldValue) {
+                console.log(newValue, oldValue);
                 if (oldValue === null) {
                     return;
                 }
@@ -135,15 +126,5 @@
     .main {
         display: flex;
         flex-direction: column;
-
-    & > footer {
-        flex: 0 1;
-        text-align: center;
-        display: block;
-        width: 100%;
-        bottom: 0;
-        padding: 0;
-        margin: 0 0 0.25em 0;
     }
-}
 </style>
