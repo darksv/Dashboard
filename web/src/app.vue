@@ -89,12 +89,7 @@
             });
 
             function hasStats(channel) {
-                if (!channel.enabled || !channel.logging_enabled) {
-                    return false;
-                }
-                return true;
-                // TODO: make some changes to make use of it
-                return (Date.now() - Date.parse(channel.value_updated)) / 1000 <= 60 * 30;
+                return channel.enabled && channel.logging_enabled;
             }
 
             function loadStatsWhenPossible(channel) {

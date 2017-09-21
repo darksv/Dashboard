@@ -55,6 +55,16 @@
         justify-content: center;
         cursor: default;
 
+        &:hover {
+            .action, .indicator, .value {
+                display: none;
+            }
+
+            .chart {
+                display: block !important;
+            }
+        }
+
         .chart {
             z-index: 1;
             position: absolute;
@@ -109,22 +119,6 @@
             content: attr(data-unit);
             margin-left: 5px;
             font-size: 0.75em;
-        }
-
-        .sorting-enabled & {
-            cursor: move !important;
-        }
-
-        .sorting-disabled & {
-            &:hover {
-                .action, .indicator, .value{
-                    display: none
-                }
-
-                .chart {
-                    display: block !important;
-                }
-            }
         }
     }
 </style>

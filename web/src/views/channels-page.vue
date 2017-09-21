@@ -1,7 +1,7 @@
 <template>
     <div class="channel-list">
         <h1 class="page-header">Measuring channels</h1>
-        <draggable :list="channels" :options="{ disabled: !enableSort }" :class="{ 'sorting-enabled': enableSort, 'sorting-disabled': !enableSort }" class="tile-container">
+        <draggable :list="channels" :options="{ disabled: !canSort }" class="tile-container">
             <tile v-for="channel in channels" :key="channel.id" v-if="channel.enabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showRecent(channel)"></tile>
         </draggable>
     </div>
@@ -19,18 +19,19 @@
                 type: Array
             },
             user: {
-                required: true
+                required: true,
+                type: Object
             }
         },
-        data: function() {
+        data() {
             return {
-                enableSort: false,
+                canSort: true,
                 showDisabled: false
             }
         },
         watch: {
-            channels: function (items) {
-                if (!this.enableSort) {
+            channels(items) {
+                if (!this.canSort) {
                     return;
                 }
                 ApiClient.post('/order', {
@@ -38,13 +39,9 @@
                 });
             }
         },
-        components: {
-            draggable: Draggable,
-            tile: Tile
-        },
         methods: {
-            showRecent: function(channel) {
-                if (!channel) {
+            showRecent(channel) {
+                if (!channel || (Date.now() - Date.parse(channel.value_updated)) / 1000 > 60 * 30) {
                     return;
                 }
 
@@ -55,6 +52,10 @@
                     }
                 });
             }
+        },
+        components: {
+            Draggable,
+            Tile
         }
     };
 </script>
