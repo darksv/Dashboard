@@ -9,7 +9,6 @@
 <script>
     import { client as ApiClient } from './api-client.js';
     import SocketClient from './socket-client.js';
-    import guid from './guid';
     import { zip } from './functional';
 
     String.prototype.zfill = function(width) {
