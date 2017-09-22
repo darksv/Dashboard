@@ -1,6 +1,6 @@
 <template>
     <div class="hue-ring">
-        <canvas :width="size" :height="size" @click="click" @mousedown="mouseDown"></canvas>
+        <canvas :width="size" :height="size" @click="click" @mousedown="mouseDown" @touchstart="touchStart"></canvas>
         <div :style="{
             'left': left + 'px',
             'top': top + 'px',
@@ -42,7 +42,9 @@
         data() {
             return {
                 onMouseUp: null,
-                onMouseMove: null
+                onMouseMove: null,
+                onTouchEnd: null,
+                onTouchMove: null
             }
         },
         computed: {
@@ -111,6 +113,19 @@
                 document.removeEventListener('mousemove', this.onMouseMove);
                 document.removeEventListener('mouseup', this.onMouseUp);
             };
+
+            this.onTouchMove = e => {
+                let rect = this.$el.querySelector('canvas').getBoundingClientRect(),
+                    x = e.changedTouches[0].clientX - (rect.left + rect.width / 2),
+                    y = e.changedTouches[0].clientY - (rect.top + rect.height / 2),
+                    hue = pointToAngle(Math.atan2(y, x));
+                this.$emit('update:hue', hue);
+            };
+
+            this.onTouchEnd = () => {
+                document.removeEventListener('touchmove', this.onTouchMove);
+                document.removeEventListener('touchend', this.onTouchEnd);
+            };
         },
         methods: {
             setByPoint(pointX, pointY) {
@@ -125,6 +140,10 @@
             mouseDown() {
                 document.addEventListener('mouseup', this.onMouseUp);
                 document.addEventListener('mousemove', this.onMouseMove);
+            },
+            touchStart() {
+                document.addEventListener('touchend', this.onTouchEnd);
+                document.addEventListener('touchmove', this.onTouchMove);
             }
         }
     }
@@ -132,6 +151,7 @@
 <style lang="scss">
     .hue-ring {
         user-select: none;
+        touch-action: none;
         display: inline-block;
     }
 </style>
