@@ -35,32 +35,23 @@
     };
 
     export default {
-        computed: {
-            isLogged() {
-                return this.user.name !== undefined;
-            }
-        },
         data() {
             return {
                 connected: null,
                 channels: [],
                 user: {},
                 client: new SocketClient('wss://' + window.location.host + '/ws', this),
-                originalTitle: ''
+                originalTitle: document.title
             };
         },
         watch: {
-            connected(newValue, oldValue) {
-                console.log(newValue, oldValue);
-                if (oldValue === null) {
-                    return;
-                }
+            connected(newValue) {
+                let prefix = newValue === true ? '' : '[Offline] ';
+                document.title = prefix + this.originalTitle;
 
-                if (!newValue) {
-                    this.originalTitle = document.title;
-                    document.title = '[Offline] ' + this.originalTitle;
-                } else {
-                    document.title = this.originalTitle;
+                if (newValue === true) {
+                    // Update after initiated/recovered connection
+                    this.updateChannels();
                 }
             }
         },
@@ -70,8 +61,8 @@
                 if (channel === undefined) {
                     return;
                 }
-                let newValue = data.value;
-                let oldValue = channel.value;
+                let newValue = data.value,
+                    oldValue = channel.value;
                 channel.value = newValue;
                 channel.value_updated = data.timestamp;
                 channel.change = Math.sign(newValue - oldValue);
@@ -83,10 +74,10 @@
                     return;
                 }
                 let label = new Date(data.timestamp).toHourMinute();
-                channel.items.push([label, data.value]);
+                if (label !== channel.items.last()) {
+                    channel.items.push([label, data.value]);
+                }
             });
-
-            this.updateChannels();
         },
         methods: {
             getChannelByUuid(uuid) {
