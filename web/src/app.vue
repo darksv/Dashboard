@@ -64,7 +64,7 @@
                 }
             }
         },
-        beforeCreate() {
+        created() {
             this.client.on('channel_updated', data => {
                 let channel = this.getChannelByUuid(data.channel_uuid);
                 if (channel === undefined) {
@@ -85,8 +85,7 @@
                 let label = new Date(data.timestamp).toHourMinute();
                 channel.items.push([label, data.value]);
             });
-        },
-        created() {
+
             this.updateChannels();
         },
         methods: {
