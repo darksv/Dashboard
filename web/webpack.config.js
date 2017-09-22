@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const DefinePlugin = webpack.DefinePlugin;
 const CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
@@ -52,6 +53,10 @@ module.exports = {
         ]
     },
     plugins: [
+        new CopyWebpackPlugin([
+            { from: './src/index.html' },
+            { from: './src/favicon.png' }
+        ]),
         new CommonsChunkPlugin({
 			names: ['vendor'],
 			minChunks: Infinity
