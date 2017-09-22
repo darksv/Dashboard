@@ -1,6 +1,7 @@
 <template>
     <div class="main">
-        <transition name="fade" mode="out-in" class="page-content">
+        <loader v-if="isLoading"></loader>
+        <transition v-else name="fade" mode="out-in" class="page-content">
             <router-view class="view" :channels="channels" :user="user" :client="client"></router-view>
         </transition>
     </div>
@@ -9,6 +10,7 @@
 <script>
     import { client as ApiClient } from './api-client.js';
     import SocketClient from './socket-client.js';
+    import Loader from './components/loader.vue';
     import { zip } from './functional';
 
     String.prototype.zfill = function(width) {
@@ -41,7 +43,8 @@
                 channels: [],
                 user: {},
                 client: new SocketClient('wss://' + window.location.host + '/ws', this),
-                originalTitle: document.title
+                originalTitle: document.title,
+                isLoading: true
             };
         },
         watch: {
@@ -101,9 +104,15 @@
                     }
                     return channel;
                 }
-
-                ApiClient.get('channels').then(response => this.channels = response.data.channels.map(loadStatsWhenPossible));
+                this.isLoading = true;
+                ApiClient.get('channels').then(response => {
+                    this.isLoading = false;
+                    this.channels = response.data.channels.map(loadStatsWhenPossible);
+                });
             }
+        },
+        components: {
+            Loader
         }
     };
 </script>
