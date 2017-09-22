@@ -53,7 +53,7 @@
             this._client.addEventListener(this._eventName, this._listener);
         }
         detach() {
-            this._client.removeEventListener(this._eventName, this._listener);
+            this._client.off(this._eventName, this._listener);
         }
     }
 

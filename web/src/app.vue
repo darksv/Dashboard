@@ -65,7 +65,7 @@
             }
         },
         beforeCreate() {
-            this.client.addEventListener('channel_updated', data => {
+            this.client.on('channel_updated', data => {
                 let channel = this.getChannelByUuid(data.channel_uuid);
                 if (channel === undefined) {
                     return;
@@ -77,7 +77,7 @@
                 channel.change = Math.sign(newValue - oldValue);
             });
 
-            this.client.addEventListener('channel_logged', data => {
+            this.client.on('channel_logged', data => {
                 let channel = this.getChannelByUuid(data.channel_uuid);
                 if (channel === undefined) {
                     return;

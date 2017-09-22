@@ -24,10 +24,10 @@ class SocketClient {
         let self = this,
             socket = new WebSocket(this._url);
 
-        socket.addEventListener('open', e => self._onConnected());
-        socket.addEventListener('close', e => self._onDisconnected());
-        socket.addEventListener('error', e => console.error(e));
-        socket.addEventListener('message', e => {
+        socket.on('open', e => self._onConnected());
+        socket.on('close', e => self._onDisconnected());
+        socket.on('error', e => console.error(e));
+        socket.on('message', e => {
             let message = JSON.parse(e.data),
                 name = message[0],
                 data = message[1];
@@ -43,14 +43,14 @@ class SocketClient {
         this._socket = socket;
     }
 
-    addEventListener(event, handler) {
+    on(event, handler) {
         if (!(event in this._handlers)) {
             this._handlers[event] = [];
         }
         this._handlers[event].push(handler);
     }
 
-    removeEventListener(event, handler) {
+    off(event, handler) {
         if (!(event in this._handlers)) {
             return;
         }
