@@ -1,5 +1,5 @@
 <template>
-    <div class="chart-container">
+    <div class="channel-custom-page">
         <div class="chart-toolbar">
             <div class="chart-toolbar-fields" v-if="fieldsShown">
                 <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="isLoading">
@@ -8,8 +8,8 @@
             </div>
             <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
         </div>
-        <chart :responsive="true" :points="points" :title="title" :unit="unit" v-if="!isLoading"></chart>
         <loader v-if="isLoading"></loader>
+        <chart :responsive="true" :points="points" :title="title" :unit="unit" v-else></chart>
     </div>
 </template>
 
@@ -131,21 +131,17 @@
 </script>
 
 <style lang="scss">
-    .chart-options {
-        margin: 0.5em;
-    }
-
-    .chart-container {
-        margin: 1em 1em 0 1em;
-        position: relative;
-        user-select: none;
+    .channel-custom-page {
+        flex: 1;
+        display: flex;
 
         .loader {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
+            flex: 1;
         }
+    }
+
+    .chart-options {
+        margin: 0.5em;
     }
 
     .chart-toolbar {

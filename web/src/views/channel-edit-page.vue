@@ -1,7 +1,7 @@
 <template>
     <div class="channel-edit-page">
         <h1>Channel editing</h1>
-        <form v-on:submit.prevent="save" class="channel-edit-form">
+        <form v-on:submit.prevent="submit" class="channel-edit-form">
             <div>
                  <input type="text" class="text-input" v-model="channel.name" placeholder="Name" :readonly="saving">
             </div>
@@ -23,8 +23,9 @@
             </div>
             <input type="hidden" name="color" :value="color" />
         </form>
+
         <hue-slider :hue.sync="hue"></hue-slider>
-        <!--<color-palette></color-palette>-->
+
         <div v-if="watchers">
             <h2>Watchers</h2>
             <div class="channel-edit-watchers">
@@ -62,7 +63,7 @@
     import tinycolor from 'tinycolor2';
 
     export default {
-        data: function () {
+        data() {
             return {
                 watchers: [],
                 saving: false,
@@ -70,7 +71,7 @@
             };
         },
         computed: {
-            color: function() {
+            color() {
                 return tinycolor({ h: this.hue, s: 100, v: 100 }).toHexString();
             }
         },
@@ -80,44 +81,30 @@
             }
         },
         watch: {
-            channel: function () {
-                this.update();
-            },
-            color: function() {
+            color() {
                 this.channel.color = this.color;
             }
         },
-        created: function () {
-            this.update();
+        created() {
+            ApiClient.get('/channel/' + this.channel.id + '/watchers').then(response => {
+                this.watchers = response.data.watchers.map(watcher => {
+                    watcher.mail = Math.random() < 0.5;
+                    watcher.sms = Math.random() < 0.5;
+                    watcher.push = Math.random() < 0.5;
+                    return watcher;
+                });
+            });
         },
         methods: {
-            update: function() {
-                var self = this;
-                if (!this.channel.id) {
-                    return;
-                }
-
-                ApiClient.get('/channel/' + this.channel.id + '/watchers').then(function (response) {
-                    self.watchers = response.data.watchers.map(function(watcher) {
-                        watcher.mail = Math.random() < 0.5;
-                        watcher.sms = Math.random() < 0.5;
-                        watcher.push = Math.random() < 0.5;
-                        return watcher;
-                    });
-                });
-            },
-            save: function () {
+            submit() {
                 if (this.saving) {
                     return;
                 }
 
-                var self = this;
-                self.saving = true;
-                ApiClient.post('/channel/' + this.channel.id, this.channel).then(function () {
-                    self.saving = false;
-                }).catch(function () {
-                    self.saving = false;
-                });
+                this.saving = true;
+                ApiClient.post('/channel/' + this.channel.id, this.channel)
+                    .then(() => this.saving = false)
+                    .catch(() => this.saving = false);
             }
         },
         components: {
@@ -130,13 +117,8 @@
 
 <style lang="scss">
     .channel-edit-page {
+        flex: 1;
         max-width: 600px;
-    }
-
-    @media (min-width: 600px) {
-        .channel-edit-page {
-            width: 600px;
-        }
     }
 
     .channel-edit-form {
