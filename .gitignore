@@ -144,4 +144,4 @@ fabric.properties
 config.py
 config.js
 
-web/node_modules/*
+/web/node_modules/
