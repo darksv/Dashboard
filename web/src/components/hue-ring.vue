@@ -1,6 +1,6 @@
 <template>
     <div class="hue-ring">
-        <canvas :width="size" :height="size" @click="set"></canvas>
+        <canvas :width="size" :height="size" @click="click" @mousedown="mouseDown"></canvas>
         <div :style="{
             'left': left + 'px',
             'top': top + 'px',
@@ -10,7 +10,8 @@
             'border': '1px solid #FFFFFF',
             'box-sizing': 'borderbox',
             'background': knobColor,
-            'transform': 'translate(' + (-(outerRadius - innerRadius) / 2) + 'px, -1px) rotateZ(' + hue + 'deg)'
+            'transform': 'translate(' + (-(outerRadius - innerRadius) / 2) + 'px, -1px) rotateZ(' + hue + 'deg)',
+            'cursor': 'pointer'
         }"></div>
     </div>
 </template>
@@ -36,6 +37,12 @@
                 required: false,
                 type: Number,
                 default: 0.75
+            }
+        },
+        data() {
+            return {
+                onMouseUp: null,
+                onMouseMove: null
             }
         },
         computed: {
@@ -91,13 +98,33 @@
 
             context.clearRect(0, 0, width, height);
             context.putImageData(imageData, 0, 0);
-        },
-        methods: {
-            set(e) {
-                let x = e.offsetX - this.size / 2,
-                    y = e.offsetY - this.size / 2,
+
+            this.onMouseMove = e => {
+                let rect = this.$el.querySelector('canvas').getBoundingClientRect(),
+                    x = e.clientX - (rect.left + rect.width / 2),
+                    y = e.clientY - (rect.top + rect.height / 2),
                     hue = pointToAngle(Math.atan2(y, x));
                 this.$emit('update:hue', hue);
+            };
+
+            this.onMouseUp = () => {
+                document.removeEventListener('mousemove', this.onMouseMove);
+                document.removeEventListener('mouseup', this.onMouseUp);
+            };
+        },
+        methods: {
+            setByPoint(pointX, pointY) {
+                let x = pointX - this.size / 2,
+                    y = pointY - this.size / 2,
+                    hue = pointToAngle(Math.atan2(y, x));
+                this.$emit('update:hue', hue);
+            },
+            click(e) {
+                this.setByPoint(e.clientX, e.clientY);
+            },
+            mouseDown() {
+                document.addEventListener('mouseup', this.onMouseUp);
+                document.addEventListener('mousemove', this.onMouseMove);
             }
         }
     }
