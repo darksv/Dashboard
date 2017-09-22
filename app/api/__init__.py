@@ -1,18 +1,16 @@
 from base64 import b64decode
 from functools import wraps
-from flask_login import LoginManager
 from flask_mail import Mail
 from werkzeug.debug import get_current_traceback
 from werkzeug.routing import Rule
 import config
-from flask import Flask, jsonify, render_template, request, redirect, url_for, g
+from flask import Flask, jsonify, request, g
 from core import DB
-from core.services.users import get_user_by_username, get_user_by_id
+from core.services.users import get_user_by_username
 
-app = Flask('dashboard', static_folder='frontend/dist', template_folder='app/templates')
+app = Flask('dashboard')
 app.secret_key = config.SECRET_KEY
 app.url_map.add(Rule('/api/<path:path>', endpoint='nonexistent_api_endpoint'))
-login_manager = LoginManager(app)
 mail = Mail(app)
 
 
@@ -54,22 +52,6 @@ def api_auth_required(func):
             return error('Authorization required', 401)
         return func(*args, **kwargs)
     return decorated_view
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-@login_manager.unauthorized_handler
-def unauthorized():
-    return redirect(url_for('login', next=request.path))
-
-
-@login_manager.user_loader
-def user_loader(user_id):
-    with DB.connect() as c:
-        return get_user_by_id(c, user_id)
 
 
 @app.endpoint('nonexistent_api_endpoint')
