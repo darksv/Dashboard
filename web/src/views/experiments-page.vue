@@ -1,9 +1,6 @@
 <template>
-    <div style="height: 100%; margin: 2em">
+    <div style="display: flex; justify-content: center; align-items: center">
         <hue-ring :size="200" :hue.sync="h"></hue-ring>
-        <hue-ring :size="100" :hue.sync="h"></hue-ring>
-        <hue-ring :size="50" :hue.sync="h"></hue-ring>
-        <hue-slider :hue.sync="h"></hue-slider>
     </div>
 </template>
 
@@ -14,6 +11,7 @@
     import ScheduleEditor from '../components/schedule-editor.vue';
     import HueRing from '../components/hue-ring.vue';
     import SocketClient from "../socket-client";
+    import { hsvToRgb } from '../colors';
 
     class Synchronizer {
         constructor(client, eventName, updater) {
@@ -76,6 +74,8 @@
         watch: {
             h(value) {
                 this.synchronizer.change(value);
+                let rgb = hsvToRgb(this.h, 100, 100).map(x => parseInt(x)).map(x => x.toString()).join(', ');
+                document.querySelector('.main').style.backgroundColor = 'rgb(' + rgb + ')';
             }
         },
         created() {
