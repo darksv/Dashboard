@@ -12,6 +12,7 @@ import ChannelCustomPage from './views/channel-custom-page.vue';
 Vue.use(VueRouter);
 
 const router = new VueRouter({
+    mode: 'history',
     routes: [
         {
             path: '/',
