@@ -36,11 +36,11 @@
 
     export default {
         computed: {
-            isLogged: function() {
+            isLogged() {
                 return this.user.name !== undefined;
             }
         },
-        data: function() {
+        data() {
             return {
                 connected: null,
                 channels: [],
@@ -64,11 +64,9 @@
                 }
             }
         },
-        created: function() {
-            let app = this;
-
-            app.client.addEventListener('channel_updated', data => {
-                let channel = app.getChannelByUuid(data.channel_uuid);
+        beforeCreate() {
+            this.client.addEventListener('channel_updated', data => {
+                let channel = this.getChannelByUuid(data.channel_uuid);
                 if (channel === undefined) {
                     return;
                 }
@@ -79,38 +77,42 @@
                 channel.change = Math.sign(newValue - oldValue);
             });
 
-            app.client.addEventListener('channel_logged', data => {
-                let channel = app.getChannelByUuid(data.channel_uuid);
+            this.client.addEventListener('channel_logged', data => {
+                let channel = this.getChannelByUuid(data.channel_uuid);
                 if (channel === undefined) {
                     return;
                 }
                 let label = new Date(data.timestamp).toHourMinute();
                 channel.items.push([label, data.value]);
             });
-
-            function hasStats(channel) {
-                return channel.enabled && channel.logging_enabled;
-            }
-
-            function loadStatsWhenPossible(channel) {
-                channel.items = [];
-                if (hasStats(channel)) {
-                    let endpoint = '/channel/' + channel.id + '/stats?type=recent';
-                    ApiClient.get(endpoint).then(response => {
-                        let data = response.data,
-                            labels = data.labels,
-                            values = data.values;
-                        channel.items = zip(labels, values);
-                    });
-                }
-                return channel;
-            }
-
-            ApiClient.get('channels').then(response => app.channels = response.data.channels.map(loadStatsWhenPossible));
+        },
+        created() {
+            this.updateChannels();
         },
         methods: {
             getChannelByUuid(uuid) {
                 return this.channels.find(channel => uuid === channel.uuid);
+            },
+            updateChannels() {
+                function hasStats(channel) {
+                    return channel.enabled && channel.logging_enabled;
+                }
+
+                function loadStatsWhenPossible(channel) {
+                    channel.items = [];
+                    if (hasStats(channel)) {
+                        let endpoint = '/channel/' + channel.id + '/stats?type=recent';
+                        ApiClient.get(endpoint).then(response => {
+                            let data = response.data,
+                                labels = data.labels,
+                                values = data.values;
+                            channel.items = zip(labels, values);
+                        });
+                    }
+                    return channel;
+                }
+
+                ApiClient.get('channels').then(response => this.channels = response.data.channels.map(loadStatsWhenPossible));
             }
         }
     };
