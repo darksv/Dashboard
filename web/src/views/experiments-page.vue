@@ -50,7 +50,7 @@
             this._client.send(this._eventName, data);
         }
         attach() {
-            this._client.addEventListener(this._eventName, this._listener);
+            this._client.on(this._eventName, this._listener);
         }
         detach() {
             this._client.off(this._eventName, this._listener);
