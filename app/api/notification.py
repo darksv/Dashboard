@@ -13,10 +13,10 @@ def new_notification():
             return jsonify(errors=errors)
 
         user_id = data['user_id']
-        watcher_id = data['watcher_id']
+        trigger_id = data['trigger_id']
         message = data['message']
 
-        notification_id = create_notification(db, user_id, message, watcher_id)
+        notification_id = create_notification(db, user_id, message, trigger_id)
         if not notification_id:
             return internal_error()
 

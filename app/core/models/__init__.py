@@ -41,7 +41,7 @@ USERS = Table('users', meta,
     Column('hash', String(100))
 )
 
-WATCHERS = Table('watchers', meta,
+TRIGGERS = Table('triggers', meta,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
     Column('channel_id', Integer, ForeignKey('channels.id'), nullable=False),
@@ -53,7 +53,7 @@ WATCHERS = Table('watchers', meta,
 NOTIFICATIONS = Table('notifications', meta,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
-    Column('watcher_id', Integer, ForeignKey('watchers.id'), nullable=True),
+    Column('trigger_id', Integer, ForeignKey('triggers.id'), nullable=True),
     Column('created', DateTime(timezone=True)),
     Column('received', DateTime(timezone=True), nullable=True),
     Column('message', String(100))

@@ -1,4 +1,4 @@
-class Watcher:
+class Trigger:
     def __init__(self, id: int = None, user_id: int = None, channel_id: int = None,
                  condition: str = None, message: str = None, renew_time: int = None):
         self._id = id

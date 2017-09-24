@@ -8,13 +8,13 @@ from core.models.notification import Notification
 from core.utils import map_object
 
 
-def create_notification(db: Connection, user_id: int, message: str, watcher_id: int = None) -> Optional[int]:
+def create_notification(db: Connection, user_id: int, message: str, trigger_id: int = None) -> Optional[int]:
     """
     Create new notification.
     """
     query = insert(NOTIFICATIONS).values(
         user_id=user_id,
-        watcher_id=watcher_id,
+        trigger_id=trigger_id,
         message=message,
         created=datetime.now()
     )

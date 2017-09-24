@@ -26,27 +26,27 @@
 
         <hue-slider :hue.sync="hue"></hue-slider>
 
-        <div v-if="watchers">
-            <h2>Watchers</h2>
-            <div class="channel-edit-watchers">
-                <div v-for="watcher in watchers" :key="watcher.id">
-                    <div class="info">{{watcher.message}}</div>
+        <div v-if="triggers">
+            <h2>Triggers</h2>
+            <div class="channel-edit-triggers">
+                <div v-for="trigger in triggers" :key="trigger.id">
+                    <div class="info">{{trigger.message}}</div>
                     <div class="extra">
-                        <span class="condition">{{watcher.condition}}</span>
+                        <span class="condition">{{trigger.condition}}</span>
                         <span class="interval">500s</span>
                         <span class="notifications">
                             <span class="fa"
-                                  :title="(watcher.mail ? 'Disable' : 'Enable') + ' mail notifications'"
-                                  :class="{ 'fa-envelope': watcher.mail, 'fa-envelope-o': !watcher.mail }"
-                                  @click="watcher.mail = !watcher.mail"></span>
+                                  :title="(trigger.mail ? 'Disable' : 'Enable') + ' mail notifications'"
+                                  :class="{ 'fa-envelope': trigger.mail, 'fa-envelope-o': !trigger.mail }"
+                                  @click="trigger.mail = !trigger.mail"></span>
                             <span class="fa"
-                                  :title="(watcher.sms ? 'Disable' : 'Enable') + ' SMS notifications'"
-                                  :class="{ 'fa-comment': watcher.sms, 'fa-comment-o': !watcher.sms }"
-                                  @click="watcher.sms = !watcher.sms"></span>
+                                  :title="(trigger.sms ? 'Disable' : 'Enable') + ' SMS notifications'"
+                                  :class="{ 'fa-comment': trigger.sms, 'fa-comment-o': !trigger.sms }"
+                                  @click="trigger.sms = !trigger.sms"></span>
                             <span class="fa"
-                                  :title="(watcher.push ? 'Disable' : 'Enable') + ' push notifications'"
-                                  :class="{ 'fa-bell': watcher.push, 'fa-bell-o': !watcher.push }"
-                                  @click="watcher.push = !watcher.push"></span>
+                                  :title="(trigger.push ? 'Disable' : 'Enable') + ' push notifications'"
+                                  :class="{ 'fa-bell': trigger.push, 'fa-bell-o': !trigger.push }"
+                                  @click="trigger.push = !trigger.push"></span>
                         </span>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
     export default {
         data() {
             return {
-                watchers: [],
+                triggers: [],
                 saving: false,
                 hue: 50
             };
@@ -86,12 +86,12 @@
             }
         },
         created() {
-            ApiClient.get('/channel/' + this.channel.id + '/watchers').then(response => {
-                this.watchers = response.data.watchers.map(watcher => {
-                    watcher.mail = Math.random() < 0.5;
-                    watcher.sms = Math.random() < 0.5;
-                    watcher.push = Math.random() < 0.5;
-                    return watcher;
+            ApiClient.get('/channel/' + this.channel.id + '/triggers').then(response => {
+                this.triggers = response.data.triggers.map(trigger => {
+                    trigger.mail = Math.random() < 0.5;
+                    trigger.sms = Math.random() < 0.5;
+                    trigger.push = Math.random() < 0.5;
+                    return trigger;
                 });
             });
         },
@@ -142,7 +142,7 @@
         }
     }
 
-    .channel-edit-watchers {
+    .channel-edit-triggers {
         margin: 0.5em;
 
         div {

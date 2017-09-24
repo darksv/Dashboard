@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields
 
 
-class WatcherSchema(Schema):
+class TriggerSchema(Schema):
     id = fields.Integer()
     user_id = fields.Integer()
     channel_id = fields.Integer()

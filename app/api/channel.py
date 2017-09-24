@@ -2,10 +2,10 @@ from datetime import timedelta, datetime
 from flask import jsonify, request
 from api import error, api_auth_required, internal_error, app
 from api.schemas.channel import ChannelSchema
-from api.schemas.watcher import WatcherSchema
+from api.schemas.trigger import TriggerSchema
 from core import DB, utils
 from core.services.channels import get_channel, update_channel, get_recent_channel_stats, get_channel_stats
-from core.services.watchers import get_watchers
+from core.services.triggers import get_triggers
 
 
 @app.route('/api/channel/<int:channel_id>/stats')
@@ -28,11 +28,12 @@ def api_channel_stats(channel_id: int):
             try:
                 period_start = utils.parse_datetime(request.args.get('from'))
                 period_end = utils.parse_datetime(request.args.get('to'))
+                period_average = int(request.args.get('average', 60))
             except ValueError:
                 return error('Bad request', 400)
             else:
                 if (period_end - period_start).total_seconds() > 0:
-                    labels, values = zip(*get_channel_stats(db, channel_id, period_start, period_end))
+                    labels, values = zip(*get_channel_stats(db, channel_id, period_start, period_end, period_average))
 
         title = channel.name
         unit = channel.unit
@@ -40,12 +41,12 @@ def api_channel_stats(channel_id: int):
         return jsonify(title=title, unit=unit, labels=labels, values=values)
 
 
-@app.route('/api/channel/<int:channel_id>/watchers', methods=['GET'])
-def api_channel_watchers(channel_id: int):
+@app.route('/api/channel/<int:channel_id>/triggers', methods=['GET'])
+def api_channel_triggers(channel_id: int):
     with DB.connect() as db:
-        watchers = get_watchers(db, channel_id)
-        data, errors = WatcherSchema().dump(watchers, many=True)
-        return jsonify(watchers=data) if not errors else internal_error()
+        triggers = get_triggers(db, channel_id)
+        data, errors = TriggerSchema().dump(triggers, many=True)
+        return jsonify(triggers=data) if not errors else internal_error()
 
 
 @app.route('/api/channel/<int:channel_id>', methods=['GET'])

@@ -2,11 +2,11 @@ from datetime import datetime
 
 
 class Notification:
-    def __init__(self, id: int = None, user_id: int = None, watcher_id: int = None,
+    def __init__(self, id: int = None, user_id: int = None, trigger_id: int = None,
                  created: datetime = None, received: datetime = None, message: str = None):
         self._id = id
         self._user_id = user_id
-        self._watcher_id = watcher_id
+        self._trigger_id = trigger_id
         self._created = created
         self._received = received
         self._message = message
@@ -20,8 +20,8 @@ class Notification:
         return self._user_id
 
     @property
-    def watcher_id(self):
-        return self._watcher_id
+    def trigger_id(self):
+        return self._trigger_id
 
     @property
     def created(self):

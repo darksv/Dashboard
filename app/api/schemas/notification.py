@@ -9,7 +9,7 @@ from core.services.users import get_user_by_id
 class NotificationSchema(Schema):
     id = fields.Integer(dump_only=True)
     user_id = fields.Integer(required=True)
-    watcher_id = fields.Integer(default=None, missing=None)
+    trigger_id = fields.Integer(default=None, missing=None)
     created = fields.DateTime(dump_only=True)
     received = fields.DateTime(default=None)
     message = fields.String(required=True, validate=Length(1, 100))
