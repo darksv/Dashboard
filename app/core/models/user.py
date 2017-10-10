@@ -1,8 +1,7 @@
-from flask_login import UserMixin
 import werkzeug.security as ws
 
 
-class User(UserMixin):
+class User:
     def __init__(self, id: int = None, name: str = None, hash: str = None):
         self._id = id
         self._name = name
