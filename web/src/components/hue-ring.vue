@@ -1,5 +1,5 @@
 <template>
-    <div class="hue-ring">
+    <div class="hue-ring" @keydown="keyDown" tabindex="0">
         <canvas :width="size" :height="size" @click="click" @mousedown="mouseDown" @touchstart="touchStart"></canvas>
         <div class="knob" :style="{
             'left': left + 'px',
@@ -11,8 +11,9 @@
     </div>
 </template>
 <script>
-    import { hsvToRgb } from '../colors.js';
     import tinycolor from 'tinycolor2';
+    import { hsvToRgb } from '../colors.js';
+    import { clamp } from '../math-utils.js';
 
     function radToDeg(x) {
         return (x > 0 ? x : (2 * Math.PI + x)) * 360 / (2 * Math.PI)
@@ -144,6 +145,20 @@
             touchStart() {
                 document.addEventListener('touchend', this.onTouchEnd);
                 document.addEventListener('touchmove', this.onTouchMove);
+            },
+            keyDown(e) {
+                let dir = 0;
+                if (e.keyCode === 38) {
+                    dir = 1;
+                } else if (e.keyCode === 40) {
+                    dir = -1;
+                } else {
+                    return;
+                }
+
+                let delta = 2,
+                    newHue = (this.hue + dir * delta + 360) % 360;
+                this.$emit('update:hue', newHue);
             }
         }
     }
@@ -153,6 +168,10 @@
         user-select: none;
         touch-action: none;
         display: inline-block;
+
+        &:focus {
+            outline: none;
+        }
 
         .knob {
             position: relative;
