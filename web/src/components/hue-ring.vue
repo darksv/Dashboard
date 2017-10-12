@@ -200,7 +200,7 @@
             height: 2px;
             border: 1px solid #FFFFFF;
             box-sizing: content-box;
-            cursor: pointer;
+            pointer-events: none;
         }
     }
 </style>
