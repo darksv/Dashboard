@@ -58,6 +58,14 @@
         return imageData;
     }
 
+    function getTouchById(touches, touchId) {
+        for (let touch of touches) {
+            if (touch.identifier === touchId) {
+                return touch;
+            }
+        }
+    }
+
     export default {
         props: {
             hue: {
@@ -79,7 +87,8 @@
                 onMouseUp: null,
                 onMouseMove: null,
                 onTouchEnd: null,
-                onTouchMove: null
+                onTouchMove: null,
+                touchId: null
             }
         },
         computed: {
@@ -119,10 +128,18 @@
             };
 
             this.onTouchMove = e => {
-                this.setByClientPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                let touch = getTouchById(e.changedTouches, this.touchId);
+                if (touch !== undefined) {
+                    this.setByClientPoint(touch.clientX, touch.clientY);
+                }
             };
 
-            this.onTouchEnd = () => {
+            this.onTouchEnd = e => {
+                if (getTouchById(e.changedTouches, this.touchId) === undefined) {
+                    return;
+                }
+
+                this.touchId = null;
                 document.removeEventListener('touchmove', this.onTouchMove);
                 document.removeEventListener('touchend', this.onTouchEnd);
             };
@@ -142,7 +159,12 @@
                 document.addEventListener('mouseup', this.onMouseUp);
                 document.addEventListener('mousemove', this.onMouseMove);
             },
-            touchStart() {
+            touchStart(e) {
+                if (this.touchId !== null) {
+                    return;
+                }
+
+                this.touchId = e.changedTouches[0].identifier;
                 document.addEventListener('touchend', this.onTouchEnd);
                 document.addEventListener('touchmove', this.onTouchMove);
             },
