@@ -74,12 +74,12 @@
         watch: {
             h(value) {
                 this.synchronizer.change(value);
-                let rgb = hsvToRgb(this.h, 100, 100).map(x => parseInt(x)).map(x => x.toString()).join(', ');
-                document.querySelector('.main').style.backgroundColor = 'rgb(' + rgb + ')';
+                this.updateHue();
             }
         },
         created() {
             this.synchronizer = new Synchronizer(this.client, 'hue', hue => this.h = hue);
+            this.updateHue();
         },
         destroyed() {
             this.synchronizer.detach();
@@ -89,6 +89,12 @@
             ColorPalette,
             ScheduleEditor,
             HueRing
+        },
+        methods: {
+            updateHue() {
+                let rgb = hsvToRgb(this.h, 100, 100).map(x => parseInt(x)).map(x => x.toString()).join(', ');
+                document.querySelector('.main').style.backgroundColor = 'rgb(' + rgb + ')';
+            }
         }
     }
 </script>

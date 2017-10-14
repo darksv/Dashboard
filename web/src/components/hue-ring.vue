@@ -1,6 +1,6 @@
 <template>
     <div class="hue-ring" @keydown="keyDown" tabindex="0">
-        <canvas :width="size" :height="size" @click="click" @mousedown="mouseDown" @touchstart="touchStart"></canvas>
+        <canvas :width="size" :height="size" @click="click" @mousedown="mouseDown" @touchstart="touchStart" @mousewheel="mouseWheel"></canvas>
         <div class="knob" :style="{
             'left': left + 'px',
             'top': top + 'px',
@@ -143,6 +143,8 @@
                 document.removeEventListener('touchmove', this.onTouchMove);
                 document.removeEventListener('touchend', this.onTouchEnd);
             };
+
+            this.step(0);
         },
         methods: {
             setByClientPoint(clientX, clientY) {
@@ -168,6 +170,10 @@
                 document.addEventListener('touchend', this.onTouchEnd);
                 document.addEventListener('touchmove', this.onTouchMove);
             },
+            step(delta) {
+                let newHue = (this.hue + delta + 360) % 360;
+                this.$emit('update:hue', newHue);
+            },
             keyDown(e) {
                 let dir = 0;
                 if (e.keyCode === 38) {
@@ -178,9 +184,10 @@
                     return;
                 }
 
-                let delta = 2,
-                    newHue = (this.hue + dir * delta + 360) % 360;
-                this.$emit('update:hue', newHue);
+                this.step(2 * dir);
+            },
+            mouseWheel(e) {
+                this.step(5 * Math.sign(e.deltaY));
             }
         }
     }
