@@ -2,9 +2,9 @@ werkzeug
 paho-mqtt
 uwsgi
 sqlalchemy
-Flask==0.10.1
+Flask
 flask-mail
-iso8601==0.1.11
+iso8601
 tzlocal
 pymysql
 requests

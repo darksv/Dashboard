@@ -1,15 +1,11 @@
-from flask import Flask, render_template
+from flask import Flask
 
-app = Flask(__name__, static_folder='web/dist', static_url_path='', template_folder='app/templates')
-
-
-@app.route('/')
-def index():
-    return render_template('web/dist/index.html')
+app = Flask(__name__, static_folder='web/dist')
 
 
+@app.route('/', defaults=dict(p='index.html'))
 @app.route('/<path:p>')
-def _static(p):
+def serve_static(p):
     return app.send_static_file(p)
 
 
