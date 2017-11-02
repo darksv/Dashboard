@@ -7,7 +7,7 @@ from core.models import meta
 
 class Database:
     def __init__(self, db_uri: str):
-        self._engine = create_engine(db_uri, echo=False)
+        self._engine = create_engine(db_uri, echo=False, pool_recycle=600)
         self._lock = RLock()
 
         self.create()
@@ -20,5 +20,6 @@ class Database:
         conn = self._engine.connect()
         yield conn
         conn.close()
+
 
 DB = Database(config.DATABASE_URL)

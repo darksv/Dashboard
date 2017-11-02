@@ -6,8 +6,7 @@ import LoginPage from './views/login-page.vue';
 import ExperimentsPage from './views/experiments-page.vue';
 import ChannelPage from './views/channel-page.vue';
 import ChannelEditPage from './views/channel-edit-page.vue';
-import ChannelRecentPage from './views/channel-recent-page.vue';
-import ChannelCustomPage from './views/channel-custom-page.vue';
+import ChannelHistoryPage from './views/channel-history-page.vue';
 
 Vue.use(VueRouter);
 
@@ -40,14 +39,9 @@ const router = new VueRouter({
                     name: 'channel_edit'
                 },
                 {
-                    path: 'recent',
-                    component: ChannelRecentPage,
-                    name: 'channel_recent'
-                },
-                {
-                    path: 'custom',
-                    component: ChannelCustomPage,
-                    name: 'channel_custom'
+                    path: 'history',
+                    component: ChannelHistoryPage,
+                    name: 'channel_history'
                 }
             ]
         }

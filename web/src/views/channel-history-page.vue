@@ -105,7 +105,7 @@
                 }
 
                 this.$router.push({
-                    name: 'channel_custom',
+                    name: 'channel_history',
                     query: {
                         from: this.from,
                         to: this.to

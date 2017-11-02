@@ -2,7 +2,7 @@
     <div class="channel-list">
         <h1 class="page-header">Measuring channels</h1>
         <draggable :list="channels" :options="{ disabled: !canSort }" class="tile-container">
-            <tile v-for="channel in channels" :key="channel.id" v-if="channel.enabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showRecent(channel)"></tile>
+            <tile v-for="channel in channels" :key="channel.id" v-if="channel.enabled || showDisabled" :channel="channel" :user="user" v-on:click.native="showHistory(channel)"></tile>
         </draggable>
     </div>
 </template>
@@ -40,13 +40,13 @@
             }
         },
         methods: {
-            showRecent(channel) {
-                if (!channel || (Date.now() - Date.parse(channel.value_updated)) / 1000 > 60 * 30) {
+            showHistory(channel) {
+                if (!channel) {
                     return;
                 }
 
                 this.$router.push({
-                    name: 'channel_recent',
+                    name: 'channel_history',
                     params: {
                         channelId: channel.id
                     }

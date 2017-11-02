@@ -144,19 +144,12 @@ def datetimes_between(start: datetime, end: datetime, interval: int):
     """
     Generates datetimes between two other with given interval in seconds.
     """
-    if interval not in (60, 3600):
-        raise ValueError('Unsupported interval {0}'.format(interval))
-
-    parts_to_replace = {'microsecond': 0}
-    if 0 < interval <= 60:
-        parts_to_replace['second'] = 0
-    if 60 < interval <= 3600:
-        parts_to_replace['minute'] = 0
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
 
     delta = end - start
-    for seconds in range(0, int(delta.total_seconds()), interval):
-        date = start + timedelta(seconds=seconds)
-        yield date.replace(**parts_to_replace)
+    for seconds in range(0, int(delta.total_seconds()) + 1, interval):
+        yield start + timedelta(seconds=seconds)
 
 
 def map_object(cls, dct):
