@@ -46,9 +46,9 @@
                 }
 
                 this.$router.push({
-                    name: 'channel_history',
-                    params: {
-                        channelId: channel.id
+                    name: 'history',
+                    query: {
+                        ids: channel.id.toString()
                     }
                 });
             }

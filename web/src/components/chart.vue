@@ -5,14 +5,18 @@
 <script>
     import Chart from 'chart.js';
     import tinycolor from 'tinycolor2';
-    import { clampArray } from '../utils.js';
+    import {clampArray} from '../utils.js';
 
     Chart.defaults.global.defaultFontColor = 'rgba(255, 255, 255, 0.75)';
 
     export default {
         props: {
+            sets: {
+                required: false,
+                type: Array
+            },
             points: {
-                required: true,
+                required: false,
                 type: Array
             },
             title: {
@@ -54,37 +58,48 @@
                 required: false,
                 type: Boolean,
                 default: false
+            },
+            displayLegend: {
+                required: false,
+                type: Boolean,
+                default: false
             }
         },
-        data: function() {
+        data() {
             return {
                 chart: null
             };
         },
         computed: {
-            config: function () {
+            config() {
+                let datasets = [];
+                let labels = [];
+                for (let set of this.sets) {
+                    datasets.push({
+                        fill: false,
+                        lineTension: 0.3,
+                        pointRadius: 0,
+                        data: set.values,
+                        borderWidth: 2.5,
+                        borderColor: set.color,
+                        label: set.title
+                    });
+
+                    labels = set.labels;
+                }
+
                 return {
                     type: 'line',
                     data: {
-                        labels: this.labels,
-                        datasets: [
-                            {
-                                fill: false,
-                                lineTension: 0.3,
-                                pointRadius: 0,
-                                data: this.values,
-                                borderWidth: 2.5,
-                                borderColor: this.color,
-                                label: ''
-                            }
-                        ]
+                        labels,
+                        datasets
                     },
                     options: {
                         animation: false,
                         responsive: this.responsive,
                         maintainAspectRatio: false,
                         legend: {
-                            display: false
+                            display: this.displayLegend
                         },
                         scales: {
                             xAxes: [{
@@ -111,25 +126,23 @@
                     }
                 };
             },
-            labels: function() {
-                return clampArray(this.points, this.maxPoints).map(function(point) {
-                    return point[0];
-                });
-            },
-            values: function() {
-                return clampArray(this.points, this.maxPoints).map(function(point) {
-                    return point[1];
-                });
-            }
         },
         watch: {
-            config: function (config) {
-                this.chart.config.data = config.data;
-                this.chart.config.options = config.options;
+            sets() {
+                this.refresh();
+            },
+            config() {
+                this.refresh();
+            }
+        },
+        methods: {
+            refresh() {
+                this.chart.config.data = this.config.data;
+                this.chart.config.options = this.config.options;
                 this.chart.update();
             }
         },
-        mounted: function () {
+        mounted() {
             this.chart = new Chart(this.$el, this.config);
         }
     };

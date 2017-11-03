@@ -1,9 +1,11 @@
 <template>
     <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor }">
-        <chart v-if="hasValues" class="chart" :color="fontColor" :points="channel.items" :xAxisDisplay="false" :yAxisDisplay="false" :maxPoints="60"></chart>
+        <chart v-if="hasValues" class="chart" :color="fontColor" :sets="sets" :xAxisDisplay="false"
+               :yAxisDisplay="false" :maxPoints="60"></chart>
         <loader v-if="!ready" :color="fontColor"></loader>
         <span v-if="ready && !hasValues" class="status fa fa-exclamation-triangle"></span>
-        <span v-if="ready && hasValues" class="value" :data-unit="channel.unit" :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
+        <span v-if="ready && hasValues" class="value" :data-unit="channel.unit"
+              :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
     </div>
 </template>
 
@@ -22,17 +24,24 @@
             }
         },
         computed: {
-            backColor: function() {
+            backColor() {
                 return this.channel.color || '#000000';
             },
-            fontColor: function () {
+            fontColor() {
                 return tinycolor(this.backColor).isDark() ? '#FFFFFF' : '#000000';
             },
-            hasValues: function() {
-                return this.channel.items.filter(function(x) { return x[1] !== null; }).length > 0;
+            hasValues() {
+                return this.channel.items.filter(i => i[1] !== null).length > 0;
             },
-            ready: function() {
+            ready() {
                 return this.channel.items.length !== 0;
+            },
+            sets() {
+                return [{
+                    labels: this.channel.items.map(i => i[0]),
+                    values: this.channel.items.map(i => i[1]),
+                    color: this.fontColor
+                }];
             }
         },
         components: {
