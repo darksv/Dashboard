@@ -1,13 +1,23 @@
 <template>
     <div class="channel-custom-page">
         <div class="chart-toolbar">
-            <div class="chart-toolbar-fields" v-if="fieldsShown">
+            <div class="chart-toolbar-fields" v-if="optionsVisible">
                 <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="isLoading"
                        title="Start">
-                -
+                —
                 <input type="date" class="input" v-model="to" v-on:keyup.enter="show" :readonly="isLoading" title="End">
             </div>
-            <span class="fa fa-calendar chart-toolbar-button" role="button" v-on:click.prevent="toggleFields"></span>
+            <span class="fa fa-cog chart-toolbar-button" role="button" title="Show options"
+                  v-on:click.prevent="toggleFields"></span>
+            <ul v-if="optionsVisible" class="chart-visible-channels">
+                <li v-for="channel in channels" :key="channel.id" v-if="channel.enabled" class="channel">
+                    <label class="channel-label">
+                        <input type="checkbox" :checked="isVisible(channel.id)" @change="toggleVisibility(channel.id)"
+                               class="channel-selector"/>
+                        <span>{{ channel.name || channel.uuid }} – {{ channel.unit }}</span>
+                    </label>
+                </li>
+            </ul>
         </div>
         <loader v-if="isLoading"></loader>
         <chart :responsive="true" :sets="sets" :displayLegend="true" v-else></chart>
@@ -44,7 +54,7 @@
                 ids: [],
                 from: (new Date).addDays(-30).toShort(),
                 to: (new Date).toShort(),
-                fieldsShown: false,
+                optionsVisible: false,
                 isLoading: true,
                 sets: [],
             };
@@ -63,6 +73,10 @@
             },
             to() {
                 this.periodChanged = true;
+            },
+            ids() {
+                this.idsChanged = true;
+                this.show(false);
             }
         },
         created() {
@@ -74,6 +88,7 @@
             }
 
             this.periodChanged = true;
+            this.idsChanged = true;
             this.show(true);
         },
         methods: {
@@ -116,7 +131,7 @@
                 }).catch(() => this.isLoading = false);
             },
             show(replaceLocation) {
-                if (this.periodChanged !== true) {
+                if (this.periodChanged !== true && this.idsChanged !== true) {
                     return;
                 }
 
@@ -136,13 +151,24 @@
                 }
 
                 this.periodChanged = false;
+                this.idsChanged = false;
                 this.update();
             },
             toggleFields() {
-                this.fieldsShown = !this.fieldsShown;
-
-                if (!this.fieldsShown) {
+                this.optionsVisible = !this.optionsVisible;
+                if (!this.optionsVisible) {
                     this.show();
+                }
+            },
+            isVisible(channelId) {
+                return this.ids.indexOf(channelId) !== -1;
+            },
+            toggleVisibility(channelId) {
+                let index = this.ids.indexOf(channelId);
+                if (index === -1) {
+                    this.ids.push(channelId);
+                } else {
+                    this.ids.splice(index, 1);
                 }
             }
         },
@@ -187,6 +213,28 @@
         display: inline-block;
         cursor: pointer;
         vertical-align: middle;
-        margin: 0 0 0 0.25em;
+        margin: 0.3em;
+    }
+
+    .chart-visible-channels {
+        background: #000000;
+        user-select: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.8em;
+
+        .channel {
+            cursor: default;
+            list-style: none;
+
+            .channel-label {
+                cursor: inherit;
+                display: block;
+            }
+
+            .channel-selector {
+                margin: 4px;
+            }
+        }
     }
 </style>
