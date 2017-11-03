@@ -55,7 +55,7 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin([
             { from: './src/index.html' },
-            { from: './src/favicon.png' }
+            { from: './src/favicon.ico' }
         ]),
         new CommonsChunkPlugin({
 			names: ['vendor'],
