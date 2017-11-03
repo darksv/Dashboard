@@ -81,7 +81,11 @@
         },
         created() {
             let query = this.$route.query;
-            this.ids = (query.ids || '').split(',').map(id => parseInt(id));
+            this.ids = (query.ids || '')
+                .split(',')
+                .map(id => parseInt(id))
+                .filter(id => !isNaN(id));
+
             if (isValidDate(query.from) && isValidDate(query.to)) {
                 this.from = new Date(query.from).toShort();
                 this.to = new Date(query.to).toShort();
