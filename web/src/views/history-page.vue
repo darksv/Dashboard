@@ -1,5 +1,5 @@
 <template>
-    <div class="channel-custom-page">
+    <div class="history-page">
         <div class="chart-toolbar">
             <div class="chart-toolbar-fields" v-if="optionsVisible">
                 <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="isLoading"
@@ -14,13 +14,18 @@
                     <label class="channel-label">
                         <input type="checkbox" :checked="isVisible(channel.id)" @change="toggleVisibility(channel.id)"
                                class="channel-selector"/>
-                        <span>{{ channel.name || channel.uuid }} – {{ channel.unit }}</span>
+                        <span>{{ channel.name || channel.uuid }}</span>
                     </label>
                 </li>
             </ul>
         </div>
         <loader v-if="isLoading"></loader>
-        <chart :responsive="true" :sets="sets" :displayLegend="true" v-else></chart>
+        <chart :responsive="true" :sets="sets" :displayLegend="true" v-else-if="anyVisible"></chart>
+        <div class="history-page-info" v-else>
+            <p class="history-page-info-content">
+                Select at least one channel using the <span class="fa fa-cog"></span> button in the top right corner.
+            </p>
+        </div>
     </div>
 </template>
 
@@ -65,6 +70,9 @@
             },
             toForUrl() {
                 return this.to.replace(/-/g, '') + '2359';
+            },
+            anyVisible() {
+                return this.ids.length > 0;
             }
         },
         watch: {
@@ -76,7 +84,7 @@
             },
             ids() {
                 this.idsChanged = true;
-                this.show(false);
+                this.show(true);
             }
         },
         created() {
@@ -184,7 +192,7 @@
 </script>
 
 <style lang="scss">
-    .channel-custom-page {
+    .history-page {
         flex: 1;
         display: flex;
 
@@ -239,6 +247,21 @@
             .channel-selector {
                 margin: 4px;
             }
+        }
+    }
+
+    .history-page-info {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+
+        .history-page-info-content {
+            font-style: italic;
+            color: #bbb;
+            user-select: none;
+            text-align: center;
+            width: 100%
         }
     }
 </style>
