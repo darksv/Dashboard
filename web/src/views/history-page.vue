@@ -8,7 +8,7 @@
                 <input type="date" class="input" v-model="to" v-on:keyup.enter="show" :readonly="isLoading" title="End">
             </div>
             <span class="fa fa-cog chart-toolbar-button" role="button" title="Show options"
-                  v-on:click.prevent="toggleFields"></span>
+                  v-on:click.prevent="toggleOptions"></span>
             <ul v-if="optionsVisible" class="chart-visible-channels">
                 <li v-for="channel in channels" :key="channel.id" v-if="channel.enabled" class="channel">
                     <label class="channel-label">
@@ -62,6 +62,7 @@
                 optionsVisible: false,
                 isLoading: true,
                 sets: [],
+                cache: {}
             };
         },
         computed: {
@@ -166,7 +167,7 @@
                 this.idsChanged = false;
                 this.update();
             },
-            toggleFields() {
+            toggleOptions() {
                 this.optionsVisible = !this.optionsVisible;
                 if (!this.optionsVisible) {
                     this.show();
