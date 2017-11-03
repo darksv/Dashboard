@@ -99,7 +99,10 @@
                         responsive: this.responsive,
                         maintainAspectRatio: false,
                         legend: {
-                            display: this.displayLegend
+                            display: this.displayLegend,
+                            onClick() {
+
+                            }
                         },
                         scales: {
                             xAxes: [{
