@@ -110,14 +110,26 @@
                                 scaleLabel: {
                                     display: !!this.xTitle,
                                     labelString: this.xTitle
-                                }
+                                },
+                                gridLines: {
+                                    color: 'white',
+                                    lineWidth: 0.5,
+                                    borderDash: [2, 5],
+                                },
                             }],
                             yAxes: [{
                                 display: this.yAxisDisplay,
                                 scaleLabel: {
                                     display: !!this.yTitle,
                                     labelString: this.yTitle
-                                }
+                                },
+                                gridLines: {
+                                    color: 'white',
+                                    lineWidth: 0.5,
+                                    borderDash: [2, 5],
+                                    zeroLineColor: 'white',
+                                    zeroLineWidth: 0.5,
+                                },
                             }]
                         },
                         title: {
