@@ -110,7 +110,7 @@
                     params: {
                         from: this.fromForUrl,
                         to: this.toForUrl,
-                        average: 1440
+                        average: 60 // in minutes
                     }
                 };
 
