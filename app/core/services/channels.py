@@ -119,16 +119,20 @@ def get_recent_channel_stats(db: Connection, channel_id: int, period_start: date
 
     result = db.execute(query)
 
-    all_datetimes = OrderedDict.fromkeys(minutes_between_dates(period_start, period_end))
+    period_start = period_start.replace(second=0, microsecond=0)
+    period_end = period_end.replace(second=0, microsecond=0)
+    datetimes = minutes_between_dates(period_start, period_end)
+    average_by_datetime = OrderedDict.fromkeys(datetimes)
+
     for time, value in result:
-        dt = time.replace(second=0)
-        all_datetimes[dt] = round(value, 2)
+        dt = time.replace(second=0, microsecond=0)
+        average_by_datetime[dt] = value
 
-    return [(time.strftime('%H:%M'), value) for time, value in all_datetimes.items()]
+    return average_by_datetime.items()
 
 
-def get_channel_stats(db: Connection, channel_id: int, period_start: datetime, period_end: datetime,
-                      average_interval: int = 60) -> List:
+def get_custom_channel_stats(db: Connection, channel_id: int, period_start: datetime, period_end: datetime,
+                             average_interval: int = 60) -> List:
     """
     Get channel's stats for specified period.
     """
@@ -143,12 +147,21 @@ def get_channel_stats(db: Connection, channel_id: int, period_start: datetime, p
 
     result = db.execute(query)
 
-    all_datetimes = OrderedDict.fromkeys(datetimes_between(period_start, period_end, average_interval * 60))
+    datetimes = datetimes_between(period_start, period_end, average_interval * 60)
+    average_by_datetime = OrderedDict.fromkeys(datetimes)
     for time, value in result:
         dt = time.replace(minute=0, second=0)
-        all_datetimes[dt] = round(value, 2)
+        average_by_datetime[dt] = value
 
-    return [(time.strftime('%d.%m.%Y %H:00'), value) for time, value in all_datetimes.items()]
+    return average_by_datetime.items()
+
+
+def get_channel_stats(db: Connection, channel_id: int, period_start: datetime, period_end: datetime,
+                      average_interval: int) -> List:
+    if average_interval == 1:
+        return get_recent_channel_stats(db, channel_id, period_start, period_end)
+    else:
+        return get_custom_channel_stats(db, channel_id, period_start, period_end, average_interval)
 
 
 def update_channels_order(db: Connection, user_id: int, channels: List[int]) -> None:

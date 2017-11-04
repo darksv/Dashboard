@@ -108,7 +108,6 @@
             update() {
                 let options = {
                     params: {
-                        type: 'custom',
                         from: this.fromForUrl,
                         to: this.toForUrl,
                         average: 1440
@@ -118,8 +117,8 @@
                 this.isLoading = true;
 
                 let workers = this.ids.map(channelId => {
-                    let url = '/channel/' + channelId + '/stats';
-                    return ApiClient.get(url, options);
+                    let endpoint = '/channel/' + channelId + '/stats';
+                    return ApiClient.get(endpoint, options);
                 });
 
                 axios.all(workers).then(responses => {

@@ -147,8 +147,8 @@ def datetimes_between(start: datetime, end: datetime, interval: int):
     start = start.replace(microsecond=0)
     end = end.replace(microsecond=0)
 
-    delta = end - start
-    for seconds in range(0, int(delta.total_seconds()) + 1, interval):
+    delta = int((end - start).total_seconds())
+    for seconds in range(0, delta + 1, interval):
         yield start + timedelta(seconds=seconds)
 
 

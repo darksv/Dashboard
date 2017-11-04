@@ -94,8 +94,13 @@
                 function loadStatsWhenPossible(channel) {
                     channel.items = [];
                     if (hasStats(channel)) {
-                        let endpoint = '/channel/' + channel.id + '/stats?type=recent';
-                        ApiClient.get(endpoint).then(response => {
+                        let endpoint = '/channel/' + channel.id + '/stats',
+                            options = {
+                                params: {
+                                    average: 1
+                                }
+                            };
+                        ApiClient.get(endpoint, options).then(response => {
                             let data = response.data,
                                 labels = data.labels,
                                 values = data.values;
