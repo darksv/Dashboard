@@ -182,6 +182,44 @@
                 } else {
                     this.ids.splice(index, 1);
                 }
+            },
+            /*
+                Converts shorthand symbols for time span into number of days,
+                eg. 2w = 2 weeks = 2 * 7 days
+             */
+            convertShorthandIntoDays(shorthand) {
+                let periods = {
+                    'd': 1,
+                    'w': 7,
+                    'm': 30,
+                    'y': 365
+                };
+
+                let allowedSymbols = Object.keys(periods).join(''),
+                    regex = new RegExp('^(\\d+)([' + allowedSymbols + '])$'),
+                    match = regex.exec(shorthand);
+                if (match === null) {
+                    return null;
+                }
+
+                let numberOfPeriods = parseInt(match[1]),
+                    periodType = match[2];
+
+                return periods[periodType] * numberOfPeriods;
+            },
+            createRouteForPeriod(period) {
+                let numberOfDays = this.convertShorthandIntoDays(period),
+                    periodEnd = new Date(),
+                    periodStart = periodEnd.addDays(-numberOfDays);
+
+                return {
+                    name: 'history',
+                    query: {
+                        from: periodStart.toShort(),
+                        to: periodEnd.toShort(),
+                        ids: this.ids.join(',')
+                    }
+                };
             }
         },
         components: {
