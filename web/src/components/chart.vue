@@ -79,13 +79,13 @@
                         fill: false,
                         lineTension: 0.3,
                         pointRadius: 0,
-                        data: set.values,
+                        data: clampArray(set.values, this.maxPoints),
                         borderWidth: 2.5,
                         borderColor: set.color,
                         label: set.title
                     });
 
-                    labels = set.labels;
+                    labels = clampArray(set.labels, this.maxPoints);
                 }
 
                 return {
