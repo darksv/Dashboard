@@ -1,8 +1,18 @@
 import sys
+import logging
+
 sys.path.append('app')
+main_logger = logging.getLogger()
+main_logger.setLevel(logging.DEBUG)
+stream_handler = logging.StreamHandler(stream=sys.stderr)
+stream_handler.setLevel(logging.DEBUG)
+stream_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+main_logger.addHandler(stream_handler)
+logger = logging.getLogger(__name__)
+
+
 import config
 import asyncio
-import logging
 import json
 import math
 import websockets
@@ -16,19 +26,15 @@ from core.services.channels import get_or_create_channel, update_channel, log_ch
 from core.services.devices import get_or_create_device
 from bus import Bus
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
 
 def parse_value(val: str) -> Optional[float]:
-    result = float(val)
-    if not math.isnan(result) and not math.isinf(result):
-        return result
+    try:
+        result = float(val)
+    except ValueError:
+        return None
+    else:
+        if not math.isnan(result) and not math.isinf(result):
+            return result
 
 
 bus = Bus()
@@ -48,29 +54,23 @@ async def channel_event(event, data):
 
 
 @bus.on('mqtt_message')
-async def process_message(event, data):
-    topic, payload = data
-    logger.debug('received message topic: %s payload: %s', topic, payload)
-
-    device_uuid, channel_uuid = topic.split('/', 2)
+async def process_message(_event, data):
+    device_uuid, channel_uuid = data['topic'].split('/', 2)
+    payload = data['payload']
     value = parse_value(payload)
     if value is None:
-        logger.warning('invalid payload %s', payload)
+        logger.warning('invalid payload: {}'.format(payload))
         return
 
     with DB.connect() as db:
         device = get_or_create_device(db, device_uuid)
         channel = get_or_create_channel(db, channel_uuid, device_id=device.id)
-
         update_channel(db, channel.id, value=value, value_updated=datetime.now())
-        logger.debug('updated channel %d', channel.id)
-
         await bus.emit('channel_updated', dict(
             channel_uuid=channel_uuid,
             timestamp=datetime.now().isoformat(),
             value=value
         ))
-
         calculator = calculators[channel.id]
         calculator.push_value(value)
         if channel.logging_enabled and calculator.has_average:
@@ -86,15 +86,19 @@ async def process_message(event, data):
 def mqtt_client(loop):
     import paho.mqtt.client as mqtt
 
-    def on_connect(client, userdata, flags, rc):
+    # noinspection PyShadowingNames
+    def on_connect(client, _userdata, _flags, _rc):
         client.subscribe('+/+')
 
-    def on_message(client, userdata, msg):
-        topic = msg.topic
-        payload = msg.payload.decode('ascii')
+    def on_message(_client, _userdata, message):
+        topic = message.topic
+        payload = message.payload.decode('ascii')
         loop.call_soon_threadsafe(
             lambda: asyncio.ensure_future(
-                bus.emit('mqtt_message', (topic, payload))
+                bus.emit('mqtt_message', dict(
+                    topic=topic,
+                    payload=payload
+                ))
             )
         )
 
@@ -121,12 +125,12 @@ async def websocket_sender(websocket):
         await websocket.send(item)
 
 
-async def websocket_handler(websocket, path):
+async def websocket_handler(websocket, _path):
     try:
-        futures = (
+        futures = [
             websocket_receiver(websocket),
             websocket_sender(websocket)
-        )
+        ]
         done, pending = await asyncio.wait(futures, return_when=asyncio.FIRST_COMPLETED)
         for task in pending:
             task.cancel()
