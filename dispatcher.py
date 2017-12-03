@@ -59,10 +59,6 @@ async def process_message(topic, payload):
         logger.warning('invalid payload %s', payload)
         return
 
-    # quick fix for DS18B20 driver error for negative temperatures
-    if value > 4000:
-        value -= 4096
-
     with DB.connect() as db:
         device = get_or_create_device(db, device_uuid)
         channel = get_or_create_channel(db, channel_uuid, device_id=device.id)
