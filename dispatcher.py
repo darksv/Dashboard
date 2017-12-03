@@ -14,6 +14,7 @@ from core import DB
 from core.services.channel_update import AverageCalculator
 from core.services.channels import get_or_create_channel, update_channel, log_channel_value
 from core.services.devices import get_or_create_device
+from bus import Bus
 
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,16 @@ calculators = defaultdict(lambda: AverageCalculator(
 ))
 
 
+bus = Bus()
+
+
+@bus.on('channel_updated')
+@bus.on('channel_logged')
+async def channel_event(event, data):
+    for queue in client_queue.values():
+        await queue.put(json.dumps([event, data]))
+
+
 async def process_message(topic, payload):
     logger.debug('received message topic: %s payload: %s', topic, payload)
 
@@ -59,31 +70,22 @@ async def process_message(topic, payload):
         update_channel(db, channel.id, value=value, value_updated=datetime.now())
         logger.debug('updated channel %d', channel.id)
 
-        item = json.dumps([
-            'channel_updated',
-            dict(
-                channel_uuid=channel_uuid,
-                timestamp=datetime.now().isoformat(),
-                value=value
-            )
-        ])
-        for queue in client_queue.values():
-            await queue.put(item)
+        await bus.emit('channel_updated', dict(
+            channel_uuid=channel_uuid,
+            timestamp=datetime.now().isoformat(),
+            value=value
+        ))
 
         calculator = calculators[channel.id]
         calculator.push_value(value)
         if channel.logging_enabled and calculator.has_average:
             value, timestamp = calculator.pop_average()
             log_channel_value(db, channel.id, value, timestamp, ignore_duplicates=True)
-            for queue in client_queue.values():
-                await queue.put(json.dumps([
-                    'channel_logged',
-                    dict(
-                        channel_uuid=channel_uuid,
-                        timestamp=timestamp.isoformat(),
-                        value=value
-                    )
-                ]))
+            await bus.emit('channel_logged', dict(
+                channel_uuid=channel_uuid,
+                timestamp=timestamp.isoformat(),
+                value=value
+            ))
 
 
 def mqtt_client(loop):
@@ -141,12 +143,19 @@ async def websocket_handler(websocket, path):
         del client_queue[websocket]
 
 
+async def tick_1s():
+    while True:
+        await asyncio.sleep(1.0)
+        await bus.emit('tick')
+
+
 def main():
     loop = asyncio.get_event_loop()
-    start_server = websockets.serve(websocket_handler, '127.0.0.1', 8080)
+    start_server = websockets.serve(websocket_handler, '0.0.0.0', 8080)
     start_mqtt = loop.run_in_executor(None, mqtt_client, loop)
     asyncio.ensure_future(start_mqtt)
     asyncio.ensure_future(start_server)
+    asyncio.ensure_future(tick_1s())
     loop.run_forever()
 
 
