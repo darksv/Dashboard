@@ -16,7 +16,6 @@ from core.services.channels import get_or_create_channel, update_channel, log_ch
 from core.services.devices import get_or_create_device
 from bus import Bus
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
@@ -32,15 +31,13 @@ def parse_value(val: str) -> Optional[float]:
         return result
 
 
+bus = Bus()
 client_queue = dict()
 
 calculators = defaultdict(lambda: AverageCalculator(
     period=config.MEASUREMENT_AVERAGING_PERIOD,
     start_at=datetime.now().replace(second=0, microsecond=0)
 ))
-
-
-bus = Bus()
 
 
 @bus.on('channel_updated')
@@ -50,7 +47,9 @@ async def channel_event(event, data):
         await queue.put(json.dumps([event, data]))
 
 
-async def process_message(topic, payload):
+@bus.on('mqtt_message')
+async def process_message(event, data):
+    topic, payload = data
     logger.debug('received message topic: %s payload: %s', topic, payload)
 
     device_uuid, channel_uuid = topic.split('/', 2)
@@ -95,7 +94,7 @@ def mqtt_client(loop):
         payload = msg.payload.decode('ascii')
         loop.call_soon_threadsafe(
             lambda: asyncio.ensure_future(
-                process_message(topic, payload)
+                bus.emit('mqtt_message', (topic, payload))
             )
         )
 
@@ -106,7 +105,7 @@ def mqtt_client(loop):
     client.loop_forever(retry_first_connection=True)
 
 
-async def consumer_handler(websocket):
+async def websocket_receiver(websocket):
     while True:
         data = await websocket.recv()
         for other, queue in client_queue.items():
@@ -114,7 +113,7 @@ async def consumer_handler(websocket):
                 await queue.put(data)
 
 
-async def producer_handler(websocket):
+async def websocket_sender(websocket):
     queue = Queue()
     client_queue[websocket] = queue
     while True:
@@ -124,13 +123,11 @@ async def producer_handler(websocket):
 
 async def websocket_handler(websocket, path):
     try:
-        done, pending = await asyncio.wait(
-            [
-                consumer_handler(websocket),
-                producer_handler(websocket)
-            ],
-            return_when=asyncio.FIRST_COMPLETED
+        futures = (
+            websocket_receiver(websocket),
+            websocket_sender(websocket)
         )
+        done, pending = await asyncio.wait(futures, return_when=asyncio.FIRST_COMPLETED)
         for task in pending:
             task.cancel()
     except websockets.ConnectionClosed:
