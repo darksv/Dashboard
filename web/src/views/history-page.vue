@@ -18,6 +18,11 @@
                     </label>
                 </li>
             </ul>
+            <router-link v-if="optionsVisible" v-for="period in '1d 1w 1m 1y'.split(' ')"
+                         :key="period"
+                         :to="createRouteForPeriod(period)">
+                {{period}}
+            </router-link>
         </div>
         <loader v-if="isLoading"></loader>
         <chart :responsive="true" :sets="sets" :displayLegend="true" v-else-if="anyVisible"></chart>
@@ -86,6 +91,16 @@
             ids() {
                 this.idsChanged = true;
                 this.show(true);
+            },
+            $route(route) {
+                if (route.name !== 'history') {
+                    return;
+                }
+
+                let query = route.query;
+                this.from = new Date(query.from).toShort();
+                this.to = new Date(query.to).toShort();
+                this.show(false);
             }
         },
         created() {
