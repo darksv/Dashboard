@@ -19,13 +19,14 @@
             </div>
         </div>
         <div class="schedule-editor-toolbar">
-            <span class="fa" :class="{ 'fa-check-circle-o': include, 'fa-times-circle-o': !include }" title="Include hours" @click="include=!include"></span>
+            <span class="fa" :class="{ 'fa-check-circle-o': include, 'fa-times-circle-o': !include }"
+                  title="Include hours" @click="include=!include"></span>
         </div>
     </div>
 </template>
 
 <script>
-    import { clamp } from '../math-utils.js';
+    import {clamp} from '../math-utils.js';
 
     function hasParentWithClass(element, className) {
         while (element = element.parentNode) {
@@ -41,7 +42,7 @@
             hourFormat: {
                 required: false,
                 default: '24h',
-                validator: function(value) {
+                validator(value) {
                     return ['12h', '24h'].indexOf(value) >= 0;
                 }
             },
@@ -50,8 +51,8 @@
                 default: {}
             }
         },
-        data: function() {
-            var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        data() {
+            let days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
                 hours = Array.from(Array(24).keys());
 
             return {
@@ -59,44 +60,42 @@
                 hours: hours,
                 isPressed: false,
                 include: false,
-                selectors: days.map(function() {
-                    return hours.map(function() {
-                        return {
+                selectors: days.map(
+                    () => hours.map(
+                        () => ({
                             isSelected: true,
                             hasPreview: false,
                             needsCommit: false
-                        };
-                    });
-                }),
+                        })
+                    )
+                ),
                 selectionOrigin: null
             };
         },
         computed: {
-            selected: function() {
-                return this.selectors.map(function(day) {
-                    return day.map(function(x, i) {
-                        return {hour: i, isSelected: x.isSelected};
-                    }).filter(function(x) {
-                        return x.isSelected;
-                    }).map(function(x) {
-                        return x.hour;
-                    });
-                });
+            selected() {
+                return this.selectors
+                    .map(
+                        day => day
+                            .map((x, i) => ({hour: i, isSelected: x.isSelected}))
+                            .filter(x => x.isSelected)
+                            .map(x => x.hour)
+                    );
             }
         },
         watch: {
-            selection: function() {
-                for (var day = 0; day < this.days.length; ++day) {
-                    for (var hour = 0; hour < this.hours.length; ++hour) {
+            selection() {
+                for (let day in this.days) {
+                    for (let hour in this.hours) {
                         this.selectors[day][hour].isSelected = this.selection[day].indexOf(hour) !== -1;
                     }
                 }
             }
         },
-        mounted: function() {
-            var self = this;
+        mounted() {
+            let self = this;
 
-            this.mouseUp = function(e) {
+            this.mouseUp = function (e) {
                 e.preventDefault();
                 self.isPressed = false;
                 self.selectionOrigin = null;
@@ -106,7 +105,7 @@
                 document.removeEventListener('mousemove', self.mouseMove);
             };
 
-            this.mouseDown = function(e) {
+            this.mouseDown = function (e) {
                 if (e.target !== null && self.isElementPartOfOtherInstance(e.target)) {
                     return;
                 }
@@ -123,14 +122,14 @@
                 document.addEventListener('mousemove', self.mouseMove);
             };
 
-            this.mouseMove = function(e) {
+            this.mouseMove = function (e) {
                 if (self.isPressed && e.button === 0) {
                     e.preventDefault();
                     self.updateSelection(e.target, e.clientX, e.clientY);
                 }
             };
 
-            this.touchStart = function(e) {
+            this.touchStart = function (e) {
                 if (e.target !== null && self.isElementPartOfOtherInstance(e.target)) {
                     return;
                 }
@@ -146,9 +145,9 @@
                 document.addEventListener('touchend', self.touchEnd);
             };
 
-            this.touchMove = function(e) {
+            this.touchMove = function (e) {
                 if (self.isPressed) {
-                    var clientX = e.changedTouches[0].clientX,
+                    let clientX = e.changedTouches[0].clientX,
                         clientY = e.changedTouches[0].clientY,
                         target = document.elementFromPoint(clientX, clientY);
 
@@ -156,7 +155,7 @@
                 }
             };
 
-            this.touchEnd = function(e) {
+            this.touchEnd = function () {
                 self.isPressed = false;
                 self.selectionOrigin = null;
                 self.commitSelection();
@@ -168,18 +167,18 @@
             document.addEventListener('mousedown', this.mouseDown);
             document.addEventListener('touchstart', this.touchStart);
         },
-        destroy: function() {
+        destroy() {
             document.removeEventListener('mousedown', this.mouseDown);
             document.removeEventListener('touchstart', this.touchStart);
         },
         methods: {
-            getIndexOfDay: function(day) {
+            getIndexOfDay(day) {
                 return this.days.indexOf(day);
             },
-            getSelector: function(day, hour) {
+            getSelector(day, hour) {
                 return this.selectors[this.getIndexOfDay(day)][parseInt(hour)];
             },
-            formatHour: function(hour) {
+            formatHour(hour) {
                 if (this.hourFormat === '24h') {
                     return hour;
                 }
@@ -194,10 +193,10 @@
                     return (hour - 12) + 'pm';
                 }
             },
-            selectRectangle: function(origin, width, height, select) {
-                for (var i = 0; i < width; ++i) {
-                    for (var j = 0; j < height; ++j) {
-                        var selector = this.selectors[origin.day + i][origin.hour + j];
+            selectRectangle(origin, width, height, select) {
+                for (let i = 0; i < width; ++i) {
+                    for (let j = 0; j < height; ++j) {
+                        let selector = this.selectors[origin.day + i][origin.hour + j];
                         selector.hasPreview = true;
                         if (selector.isSelected === select) {
                             selector.needsCommit = false;
@@ -208,10 +207,10 @@
                     }
                 }
             },
-            clearSelection: function() {
-                for (var i = 0; i < this.selectors.length; ++i) {
-                    for (var j = 0; j < this.selectors[i].length; ++j) {
-                        var selector = this.selectors[i][j];
+            clearSelection() {
+                for (let i = 0; i < this.selectors.length; ++i) {
+                    for (let j = 0; j < this.selectors[i].length; ++j) {
+                        let selector = this.selectors[i][j];
                         selector.isSelected = selector.needsCommit
                             ? !selector.isSelected
                             : selector.isSelected;
@@ -220,31 +219,30 @@
                     }
                 }
             },
-            commitSelection: function() {
-                for (var i = 0; i < this.selectors.length; ++i) {
-                    for (var j = 0; j < this.selectors[i].length; ++j) {
-                        var selector = this.selectors[i][j];
+            commitSelection() {
+                for (let i = 0; i < this.selectors.length; ++i) {
+                    for (let j = 0; j < this.selectors[i].length; ++j) {
+                        const selector = this.selectors[i][j];
                         selector.hasPreview = false;
                         selector.needsCommit = false;
                     }
                 }
 
-                this.$emit('update:selection', this.selectors.map(function(x) {
-                    var values = [];
-                    for (var i = 0; i < x.length; ++i) {
-                        if (x[i].isSelected) {
+                this.$emit('update:selection', this.selectors.map(day => {
+                    const values = [];
+                    for (let i = 0; i < day.length; ++i) {
+                        if (day[i].isSelected) {
                             values.push(i);
                         }
                     }
-
                     return values;
                 }));
             },
-            updateSelection: function(target, clientX, clientY) {
-                var day, hour;
+            updateSelection(target, clientX, clientY) {
+                let day, hour;
                 if (target === null || target === document || this.isElementPartOfOtherInstance(target) || target.className.indexOf('hour') === -1) {
                     // Find bounding rectangle of the all selectors based on first and the last selector rectangles.
-                    var selectors = this.$el.querySelectorAll('.hour'),
+                    const selectors = this.$el.querySelectorAll('.hour'),
                         firstSelector = selectors[0],
                         lastSelector = selectors[selectors.length - 1],
                         firstSelectorRect = firstSelector.getBoundingClientRect(),
@@ -261,12 +259,12 @@
                     hour = clamp(0, 23, Math.floor((clientX - selectorsRect.left) / ((selectorsRect.width / this.hours.length))));
                     day = clamp(0, 6, Math.floor((clientY - selectorsRect.top) / ((selectorsRect.height / this.days.length))));
                 } else {
-                    var data = target.dataset;
+                    const data = target.dataset;
                     day = parseInt(data.day);
                     hour = parseInt(data.hour);
                 }
 
-                var start = this.selectionOrigin,
+                const start = this.selectionOrigin,
                     left = Math.min(start.hour, hour),
                     top = Math.min(start.day, day),
                     right = Math.max(start.hour, hour),
@@ -274,7 +272,7 @@
                 this.clearSelection();
                 this.selectRectangle({day: top, hour: left}, bottom - top + 1, right - left + 1, this.include);
             },
-            isElementPartOfOtherInstance: function (element) {
+            isElementPartOfOtherInstance(element) {
                 return hasParentWithClass(element, 'schedule-editor') && !this.$el.contains(element);
             }
         }
