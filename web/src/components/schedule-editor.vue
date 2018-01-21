@@ -3,7 +3,7 @@
         <div class="schedule-editor-widget">
             <div class="day">
                 <div class="label">&nbsp;&nbsp;&nbsp;</div>
-                <div v-for="hour in hours" v-bind:key="hour" class="label">{{formatHour(hour)}}</div>
+                <div v-for="hour in hourLabels" v-bind:key="hour" class="label label-hour">{{hour}}</div>
             </div>
             <div v-for="day in days" v-bind:key="day" class="day">
                 <div class="label">{{ day.substr(0, 3) }}</div>
@@ -16,6 +16,7 @@
                                 ? (getSelector(day, hour).isSelected ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)')
                                 : (getSelector(day, hour).isSelected ? 'rgba(0, 255, 0, 1)' : 'inherit')
                      }"></div>
+                <div class="dummy-hour"></div>
             </div>
         </div>
         <div class="schedule-editor-toolbar">
@@ -81,6 +82,11 @@
                             .filter(x => x.isSelected)
                             .map(x => x.hour)
                     );
+            },
+            hourLabels() {
+                let hours = this.hours.map(x => x);
+                hours.push(24);
+                return hours.map(hour => this.formatHour(hour));
             }
         },
         watch: {
@@ -182,7 +188,7 @@
                 if (this.hourFormat === '24h') {
                     return hour;
                 }
-
+                hour = hour % 24;
                 if (hour === 0) {
                     return '12am';
                 } else if (hour < 12) {
@@ -301,6 +307,10 @@
             text-align: center;
             font-family: monospace;
             flex: 1;
+
+            &.label-hour {
+                transform: translateX(-50%);
+            }
         }
 
         .day > .label:first-child {
@@ -317,13 +327,15 @@
                 border-top: $border;
                 border-left: $border;
 
-                &:last-child {
-                    border-right: $border;
-                }
             }
 
             &.day:last-child .hour {
                 border-bottom: $border;
+            }
+
+            .dummy-hour {
+                flex: 1;
+                border-left: $border;
             }
         }
     }
