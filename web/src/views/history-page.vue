@@ -37,9 +37,7 @@
 <script>
     import Chart from '../components/chart.vue';
     import Loader from '../components/loader.vue';
-    import axios from 'axios';
     import {client as ApiClient} from '../api-client.ts';
-    import {zip} from "../functional.ts";
 
     function isValidDate(str) {
         return !isNaN(Date.parse(str));
@@ -130,32 +128,30 @@
                 };
 
                 this.isLoading = true;
-
-                let workers = this.ids.map(channelId => {
-                    let endpoint = '/channel/' + channelId + '/stats';
-                    return ApiClient.get(endpoint, options);
-                });
-
-                axios.all(workers).then(responses => {
-                    this.sets.length = 0;
-                    responses.forEach(response => {
-                        // WARNING: shitty workaround
-                        // TODO: fix
-                        let channelId = parseInt(response.config.url.split('/')[3]),
-                            channel = this.channels.find(c => c.id === channelId);
-
-                        let data = response.data;
-                        this.sets.push({
-                            labels: data.labels,
-                            values: data.values,
-                            title: data.title,
-                            unit: data.unit,
-                            color: channel.color
+                const requests = this.ids.map(id => {
+                    let endpoint = '/channel/' + id + '/stats';
+                    return ApiClient.get(endpoint, options)
+                        .then(response => {
+                            let channel = this.channels.find(c => c.id === id);
+                            let data = response.data;
+                            return {
+                                labels: data.labels,
+                                values: data.values,
+                                title: data.title,
+                                unit: data.unit,
+                                color: channel.color
+                            };
                         });
-                    });
-
-                    this.isLoading = false;
-                }).catch(() => this.isLoading = false);
+                });
+                Promise
+                    .all(requests)
+                    .then(sets => {
+                        this.sets.length = 0;
+                        for (let set of sets) {
+                            this.sets.push(set);
+                        }
+                        this.isLoading = false;
+                    }, () => this.isLoading = false);
             },
             show(replaceLocation) {
                 if (this.periodChanged !== true && this.idsChanged !== true) {
