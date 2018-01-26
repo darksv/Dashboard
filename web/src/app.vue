@@ -1,6 +1,7 @@
+<!--suppress TypeScriptPreferShortImport -->
 <template>
     <div class="main">
-        <loader v-if="isLoading"/>
+        <loader v-if="isLoading"></loader>
         <transition v-else name="fade" mode="out-in" class="page-content">
             <router-view class="view" :channels="channels" :user="user" :client="client"></router-view>
         </transition>
@@ -8,10 +9,12 @@
 </template>
 
 <script lang="ts">
-    import {client as ApiClient} from './api-client.ts';
-    import SocketClient from './socket-client.ts';
+    import {Component, Vue} from 'vue-property-decorator';
+    import {Channel} from './channel.ts';
+    import {ChannelRepository} from './channel-repository.ts';
+    import {WebSocketClient} from './socket-client.ts';
+    import {PageTitleChanger} from './page-title-changer.ts';
     import Loader from './components/loader.vue';
-    import {zip} from './functional.ts';
 
     function zfill(string: string, width: number): string {
         if (width > string.length) {
@@ -24,90 +27,81 @@
         return zfill(date.getHours().toString(), 2) + ':' + zfill(date.getMinutes().toString(), 2);
     }
 
-    export default {
-        data: function () {
-            return {
-                connected: null,
-                channels: [],
-                user: {},
-                client: new SocketClient(
-                    'wss://' + window.location.host + '/ws',
-                    connected => this.connected = connected
-                ),
-                originalTitle: document.title,
-                isLoading: true
-            };
-        },
-        watch: {
-            connected(newValue: boolean) {
-                let prefix = newValue === true ? '' : '[Offline] ';
-                document.title = prefix + this.originalTitle;
-                if (newValue === true) {
-                    // Update after initiated/recovered connection
-                    this.updateChannels();
-                }
-            }
-        },
-        created() {
-            this.client.on('channel_updated', data => {
-                let channel = this.getChannelByUuid(data.channel_uuid);
-                if (channel === undefined) {
-                    return;
-                }
-                channel.value = data.value;
-                channel.value_updated = data.timestamp;
-            });
+    function lastItem<T>(items: Array<T>): T | undefined {
+        return items.length > 0 ? items[items.length - 1] : undefined;
+    }
 
-            this.client.on('channel_logged', data => {
-                let channel = this.getChannelByUuid(data.channel_uuid);
-                if (channel === undefined) {
-                    return;
-                }
-                let label = toHourMinute(new Date(data.timestamp));
-                if (label !== channel.items.last()) {
-                    channel.items.push([label, data.value]);
-                }
-            });
-        },
-        methods: {
-            getChannelByUuid(uuid) {
-                return this.channels.find(channel => uuid === channel.uuid);
-            },
-            updateChannels() {
-                function hasStats(channel) {
-                    return channel.enabled && channel.logging_enabled;
-                }
+    @Component({components: {Loader}})
+    export default class App extends Vue {
+        connected: boolean = false;
+        channels: Array<Channel> = [];
+        user: object = {};
+        client: WebSocketClient = new WebSocketClient(
+            'wss://' + window.location.host + '/ws',
+            connected => this.onConnectionUpdated(connected)
+        );
+        isLoading: boolean = true;
+        channelRepository: ChannelRepository = new ChannelRepository();
+        pageTitleChanger: PageTitleChanger = new PageTitleChanger();
 
-                function loadStatsWhenPossible(channel) {
-                    channel.items = [];
-                    if (hasStats(channel)) {
-                        let endpoint = '/channel/' + channel.id + '/stats',
-                            options = {
-                                params: {
-                                    average: 1
-                                }
-                            };
-                        ApiClient.get(endpoint, options).then(response => {
-                            let data = response.data,
-                                labels = data.labels,
-                                values = data.values;
-                            channel.items = zip(labels, values);
-                        });
-                    }
-                    return channel;
-                }
-
-                this.isLoading = true;
-                ApiClient.get('channels').then(response => {
-                    this.isLoading = false;
-                    this.channels = response.data.channels.map(loadStatsWhenPossible);
-                });
-            }
-        },
-        components: {
-            Loader
+        // noinspection JSUnusedLocalSymbols
+        private created() {
+            this.client.on('channel_updated', this.onChannelUpdated);
+            this.client.on('channel_logged', this.onChannelLogged);
         }
-    };
+
+        // noinspection JSUnusedLocalSymbols
+        private destroyed() {
+            this.client.off('channel_updated', this.onChannelUpdated);
+            this.client.off('channel_logged', this.onChannelLogged);
+        }
+
+        private onConnectionUpdated(isConnected: boolean) {
+            if (isConnected) {
+                this.pageTitleChanger.clearPrefix();
+                this.updateChannels();
+            } else {
+                this.pageTitleChanger.setPrefix('[Offline] ');
+            }
+            this.connected = isConnected;
+        }
+
+        private onChannelUpdated(data: { channel_uuid, value, timestamp }) {
+            let channel = this.getChannelByUuid(data.channel_uuid);
+            if (channel === undefined) {
+                return;
+            }
+            channel.value = data.value;
+            channel.value_updated = data.timestamp;
+        }
+
+        private onChannelLogged(data: { channel_uuid, value, timestamp }) {
+            let channel = this.getChannelByUuid(data.channel_uuid);
+            if (channel === undefined) {
+                return;
+            }
+            let label = toHourMinute(new Date(data.timestamp));
+            if (label !== lastItem(channel.items)[0]) {
+                channel.items.push([label, data.value]);
+            }
+        }
+
+        private getChannelByUuid(uuid: string): Channel | undefined {
+            return this.channels.find(channel => uuid === channel.uuid);
+        }
+
+        private updateChannels() {
+            this.isLoading = true;
+            this.channelRepository
+                .getChannels()
+                .then(channels => {
+                    this.channels = channels;
+                    this.isLoading = false;
+                }, () => {
+                    this.isLoading = false;
+                });
+        }
+    }
 </script>
 
 <style lang="scss">

@@ -1,20 +1,19 @@
-import axios from 'axios';
-import config from './config';
+import axios, {AxiosInstance} from 'axios';
+import config from './config.ts';
 
-function createClient(method, token) {
+function createClient(method: string, token: string): AxiosInstance {
     let options = {
         baseURL: (config.URL === null ? window.location.origin : config.URL) + '/api',
-        headers: {}
+        headers: method && token
+            ? {'Authorization': method + ' ' + token}
+            : {}
     };
-    if (method && token) {
-        options.headers['Authorization'] = method + ' ' + token;
-    }
     return axios.create(options);
 }
 
 let client = createClient(config.TOKEN_TYPE, config.TOKEN_VALUE);
 
-function login(username, password, onSuccess, onError) {
+function login(username: string, password: string, onSuccess: () => void, onError: () => void) {
     client.post('/oauth/token', {
         username: username,
         password: password,

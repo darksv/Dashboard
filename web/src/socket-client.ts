@@ -1,4 +1,10 @@
-class SocketClient {
+interface SocketClient {
+    send(eventName: string, data: any);
+    on(eventName: string, handler: (any) => any);
+    off(eventName: string, handler: (any) => any);
+}
+
+class WebSocketClient implements SocketClient {
     private url: string;
     private handlers: object = {};
     private socket: WebSocket;
@@ -43,7 +49,7 @@ class SocketClient {
                     handler(data);
                 }
             } else {
-                console.warn('unhandled', name);
+                console.warn(`unhandled '${name}': ${JSON.stringify(data)}`);
             }
         });
         this.socket = socket;
@@ -65,9 +71,12 @@ class SocketClient {
         this.handlers[event] = handlers.splice(index, 1);
     }
 
-    send(action, data) {
+    send(action: string, data: any) {
         this.socket.send(JSON.stringify([action, data]));
     }
 }
 
-export default SocketClient;
+export {
+    WebSocketClient,
+    SocketClient
+};

@@ -1,15 +1,15 @@
 <template>
     <div class="channel-tile" :title="channel.name" :style="{ backgroundColor: backColor, color: fontColor }">
         <chart v-if="hasValues" class="chart" :color="fontColor" :sets="sets" :xAxisDisplay="false"
-               :yAxisDisplay="false" :maxPoints="60"></chart>
-        <loader v-if="!ready" :color="fontColor"></loader>
+               :yAxisDisplay="false" :maxPoints="60"/>
+        <loader v-if="!ready" :color="fontColor"/>
         <span v-if="ready && !hasValues" class="status fa fa-exclamation-triangle"></span>
         <span v-if="ready && hasValues" class="value" :data-unit="channel.unit"
               :title="channel.value_updated">{{ channel.value.toFixed(2) }}</span>
     </div>
 </template>
 
-<script>
+<script lang="ts">
     import Chart from './chart.vue';
     import Loader from './loader.vue';
     import tinycolor from 'tinycolor2';
@@ -38,8 +38,8 @@
             },
             sets() {
                 return [{
-                    labels: this.channel.items.map(i => i[0]),
-                    values: this.channel.items.map(i => i[1]),
+                    labels: this.channel.items.map(([label,]) => label),
+                    values: this.channel.items.map(([,value]) => value),
                     color: this.fontColor
                 }];
             }

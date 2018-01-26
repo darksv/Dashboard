@@ -1,4 +1,4 @@
-interface Channel {
+export interface Channel {
     color: string;
     deviceId: number;
     enabled: boolean;
@@ -10,4 +10,5 @@ interface Channel {
     uuid: string;
     value: number;
     value_updated: Date;
+    items: Array<[string, number]>;
 }

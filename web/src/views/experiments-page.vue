@@ -1,68 +1,76 @@
 <template>
     <div style="display: flex; justify-content: center; align-items: center">
-        <hue-ring :size="200" :hue.sync="h"></hue-ring>
+        <hue-ring :size="200" :hue.sync="h"/>
     </div>
 </template>
 
-<script>
-    import tinycolor from 'tinycolor2';
+<script lang="ts">
     import HueSlider from '../components/hue-slider.vue';
     import ColorPalette from '../components/color-palette.vue';
     import ScheduleEditor from '../components/schedule-editor.vue';
     import HueRing from '../components/hue-ring.vue';
-    import SocketClient from "../socket-client.ts";
-    import { hsvToRgb } from '../colors.ts';
+    import {SocketClient, WebSocketClient} from "../socket-client.ts";
+    import {hsvToRgb} from '../colors.ts';
 
-    class Synchronizer {
-        constructor(client, eventName, updater) {
-            this._client = client;
-            this._eventName = eventName;
-            this._delayedSendHandle = -1;
+    class Synchronizer<TValue> {
+        private client: SocketClient;
+        private eventName: string;
+        private delayedSendHandle?: number;
+        private listener: (object) => void;
+        private isLocal: boolean;
+
+        constructor(client: SocketClient, eventName: string, updater: (TValue) => any) {
+            this.client = client;
+            this.eventName = eventName;
+            this.delayedSendHandle = null;
             // By default all changes are local
             // unless it is changed by reception
             // of changes from remote server.
-            this._isLocal = true;
-            let self = this;
-            this._listener = data => {
-                self._isLocal = false;
+            this.isLocal = true;
+            this.listener = data => {
+                this.isLocal = false;
                 updater(data.value);
             };
             this.attach();
         }
-        change(value) {
-            if (this._isLocal) {
-                this._sendWithDelay(value, 10);
+
+        change(value: TValue) {
+            if (this.isLocal) {
+                this.sendWithDelay(value, 10);
             }
-            this._isLocal = true;
+            this.isLocal = true;
         }
-        _sendWithDelay(value, delay) {
-            if (this._delayedSendHandle !== null) {
-                clearTimeout(this._delayedSendHandle);
+
+        private sendWithDelay(value: TValue, delay: number) {
+            if (this.delayedSendHandle !== null) {
+                clearTimeout(this.delayedSendHandle);
             }
-            this._delayedSendHandle = setTimeout((self, data) => self._sender(data), delay, this, {
+            this.delayedSendHandle = setTimeout((self, data) => self.sender(data), delay, this, {
                 value,
                 timestamp: Date.now()
             });
         }
-        _sender(data) {
-            this._client.send(this._eventName, data);
+
+        private sender(data: any) {
+            this.client.send(this.eventName, data);
         }
+
         attach() {
-            this._client.on(this._eventName, this._listener);
+            this.client.on(this.eventName, this.listener);
         }
+
         detach() {
-            this._client.off(this._eventName, this._listener);
+            this.client.off(this.eventName, this.listener);
         }
     }
 
     export default {
         props: {
             client: {
-                required: true,
-                type: SocketClient
+                required: true
             }
         },
-        data: function() {
+        data: function () {
             return {
                 h: 0x90,
                 s: 0x00,
@@ -78,7 +86,7 @@
             }
         },
         created() {
-            this.synchronizer = new Synchronizer(this.client, 'hue', hue => this.h = hue);
+            this.synchronizer = new Synchronizer<number>(this.client, 'hue', hue => this.h = hue);
             this.updateHue();
         },
         destroyed() {
@@ -92,8 +100,11 @@
         },
         methods: {
             updateHue() {
-                let rgb = hsvToRgb(this.h, 100, 100).map(x => parseInt(x)).map(x => x.toString()).join(', ');
-                document.querySelector('.main').style.backgroundColor = 'rgb(' + rgb + ')';
+                const rgb = hsvToRgb(this.h, 100, 100)
+                    .map(x => Math.floor(x).toString())
+                    .join(', ');
+                const element = <HTMLElement> document.querySelector('.main');
+                element.style.backgroundColor = 'rgb(' + rgb + ')';
             }
         }
     }

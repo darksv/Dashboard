@@ -16,6 +16,7 @@
     "webpack": "^3.1.0"
   },
   "devDependencies": {
+    "@types/tinycolor2": "^1.4.0",
     "axios": "github:mzabriskie/axios#master",
     "chart.js": "^2.6.0",
     "copy-webpack-plugin": "^4.0.1",
@@ -26,7 +27,9 @@
     "typescript": "^2.6.2",
     "uglifyjs-webpack-plugin": "latest",
     "vue": "^2.3.4",
+    "vue-class-component": "^6.1.2",
     "vue-loader": "^13.7.0",
+    "vue-property-decorator": "^6.0.0",
     "vue-router": "^3.0.1",
     "vuedraggable": "^2.14.1",
     "webpack": "^3.10.0"
