@@ -10,8 +10,8 @@
     import ColorPalette from '../components/color-palette.vue';
     import ScheduleEditor from '../components/schedule-editor.vue';
     import HueRing from '../components/hue-ring.vue';
-    import SocketClient from "../socket-client";
-    import { hsvToRgb } from '../colors';
+    import SocketClient from "../socket-client.ts";
+    import { hsvToRgb } from '../colors.ts';
 
     class Synchronizer {
         constructor(client, eventName, updater) {

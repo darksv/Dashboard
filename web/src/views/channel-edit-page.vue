@@ -56,7 +56,7 @@
 </template>
 
 <script>
-    import { client as ApiClient } from '../api-client.js';
+    import { client as ApiClient } from '../api-client.ts';
     import ScheduleEditor from '../components/schedule-editor.vue';
     import HueSlider from '../components/hue-slider.vue';
     import ColorPalette from '../components/color-palette.vue';

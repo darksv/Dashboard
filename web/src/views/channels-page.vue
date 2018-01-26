@@ -10,7 +10,7 @@
 <script>
     import Draggable from 'vuedraggable';
     import Tile from '../components/tile.vue';
-    import { client as ApiClient} from '../api-client.js';
+    import { client as ApiClient} from '../api-client.ts';
 
     export default {
         props: {

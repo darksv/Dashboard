@@ -12,8 +12,8 @@
 </template>
 <script>
     import tinycolor from 'tinycolor2';
-    import { hsvToRgb } from '../colors.js';
-    import { clamp } from '../math-utils.js';
+    import { hsvToRgb } from '../colors.ts';
+    import { clamp } from '../math-utils.ts';
 
     function radToDeg(x) {
         return (x > 0 ? x : (2 * Math.PI + x)) * 360 / (2 * Math.PI)

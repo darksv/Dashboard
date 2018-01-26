@@ -13,7 +13,7 @@ let babelOptions = {
 module.exports = {
     entry: {
         'vendor': ['vue', 'vue-router', 'vuedraggable', 'axios', 'chart.js', 'tinycolor2'],
-        'app': ['./src/index.js', './src/styles.scss']
+        'app': ['./src/index.ts', './src/styles.scss']
     },
     devtool: 'source-map',
     output: {
@@ -24,10 +24,20 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
+                exclude: /(node_modules)/,
                 use: {
                     loader: 'babel-loader',
                     options: babelOptions
+                }
+            },
+            {
+                test: /\.ts$/,
+                exclude: /(node_modules)/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        appendTsSuffixTo: [/\.vue$/]
+                    }
                 }
             },
             {
@@ -37,8 +47,8 @@ module.exports = {
                     extractCSS: true,
                     loaders: {
                         js: {
-                           loader: 'babel-loader',
-                           options: babelOptions
+                            loader: 'babel-loader',
+                            options: babelOptions
                         },
                     }
                 }
@@ -54,13 +64,13 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            { from: './src/index.html' },
-            { from: './src/favicon.ico' }
+            {from: './src/index.html'},
+            {from: './src/favicon.ico'}
         ]),
         new CommonsChunkPlugin({
-			names: ['vendor'],
-			minChunks: Infinity
-		}),
+            names: ['vendor'],
+            minChunks: Infinity
+        }),
         // new DefinePlugin({
         //     'process.env': {
         //         NODE_ENV: '"production"'

@@ -7,9 +7,9 @@
 
 <script>
     import tinycolor from 'tinycolor2';
-    import { clamp } from '../math-utils.js';
-    import { generatePaletteForHue } from '../hue-palette.js';
-    import { hsvToRgb } from '../colors.js';
+    import { clamp } from '../math-utils.ts';
+    import { generatePaletteForHue } from '../hue-palette.ts';
+    import { hsvToRgb } from '../colors.ts';
 
     export default {
         props: {

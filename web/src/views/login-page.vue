@@ -24,7 +24,7 @@
 </template>
 <script>
     import Loader from '../components/loader.vue';
-    import { client, login } from './../api-client';
+    import { client, login } from '../api-client.ts';
 
     export default {
         data() {

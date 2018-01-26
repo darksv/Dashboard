@@ -96,7 +96,6 @@ function fill3(buffer, width, height, fractionHue) {
 }
 
 function fill4(buffer, width, height, fractionHue) {
-    "use strict";
     for (let y = 0; y < height; ++y) {
         let v = 1 - y / height,
             z = y * width;
@@ -116,7 +115,6 @@ function fill4(buffer, width, height, fractionHue) {
 }
 
 function fill5(buffer, width, height, fractionHue) {
-    "use strict";
     for (let y = 0; y < height; ++y) {
         let v = 1 - y / height,
             z = y * width;

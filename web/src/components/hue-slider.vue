@@ -6,7 +6,7 @@
 
 <script>
     import tinycolor from 'tinycolor2';
-    import { clamp } from '../math-utils.js';
+    import { clamp } from '../math-utils.ts';
 
     export default {
         props: {
@@ -40,7 +40,7 @@
                 }
             },
             updateHue: function(offset) {
-                var hue = parseInt(clamp(0, 360, offset / this.width * 360));
+                var hue = Math.floor(clamp(0, 360, offset / this.width * 360));
                 this.$emit('update:hue', hue);
             }
         },

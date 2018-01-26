@@ -27,7 +27,7 @@
 </template>
 
 <script>
-    import {clamp} from '../math-utils.js';
+    import {clamp} from '../math-utils.ts';
 
     function hasParentWithClass(element, className) {
         while (element = element.parentNode) {

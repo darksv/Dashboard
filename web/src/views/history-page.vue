@@ -38,8 +38,8 @@
     import Chart from '../components/chart.vue';
     import Loader from '../components/loader.vue';
     import axios from 'axios';
-    import {client as ApiClient} from '../api-client.js';
-    import {zip} from "../functional";
+    import {client as ApiClient} from '../api-client.ts';
+    import {zip} from "../functional.ts";
 
     function isValidDate(str) {
         return !isNaN(Date.parse(str));

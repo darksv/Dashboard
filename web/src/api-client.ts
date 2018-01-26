@@ -20,13 +20,13 @@ function login(username, password, onSuccess, onError) {
         password: password,
         client_id: config.CLIENT_ID,
         grant_type: 'password'
-    }).then(function (response) {
+    }).then(response => {
         if (response.status === 200) {
             onSuccess();
         } else {
             onError();
         }
-    }).catch(function (error) {
+    }).catch(() => {
         onError();
     });
 }

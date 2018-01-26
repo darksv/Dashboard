@@ -1,10 +1,10 @@
-function hsvToRgb(h, s, v) {
+function hsvToRgb(h: number, s: number, v: number): Array<number> {
     // Based on hsvToRgb function from tinycolor (original does not work for some specified colors
     h = h / 60;
     s = s / 100;
     v = v / 100;
 
-    var i = Math.floor(h),
+    const i = Math.floor(h),
         f = h - i,
         p = v * (1 - s),
         q = v * (1 - f * s),

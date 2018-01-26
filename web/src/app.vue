@@ -1,57 +1,47 @@
 <template>
     <div class="main">
-        <loader v-if="isLoading"></loader>
+        <loader v-if="isLoading"/>
         <transition v-else name="fade" mode="out-in" class="page-content">
             <router-view class="view" :channels="channels" :user="user" :client="client"></router-view>
         </transition>
     </div>
 </template>
 
-<script>
-    import { client as ApiClient } from './api-client.js';
-    import SocketClient from './socket-client.js';
+<script lang="ts">
+    import {client as ApiClient} from './api-client.ts';
+    import SocketClient from './socket-client.ts';
     import Loader from './components/loader.vue';
-    import { zip } from './functional';
+    import {zip} from './functional.ts';
 
-    String.prototype.zfill = function(width) {
-        if (width > this.length) {
-            return new Array(width - this.length + 1).join('0') + this;
+    function zfill(string: string, width: number): string {
+        if (width > string.length) {
+            return new Array(width - string.length + 1).join('0') + string;
         }
-        return this;
-    };
+        return string;
+    }
 
-    Number.prototype.zfill = function(width) {
-        return this.toString().zfill(width);
-    };
-
-    Date.prototype.addDays = function(n) {
-        return new Date(this.getTime() + n * 24 * 3600 * 1000);
-    };
-
-    Date.prototype.toHourMinute = function() {
-        return this.getHours().zfill(2) + ':' + this.getMinutes().zfill(2);
-    };
-
-    Array.prototype.last = function() {
-        return this[this.length - 1];
-    };
+    function toHourMinute(date: Date): string {
+        return zfill(date.getHours().toString(), 2) + ':' + zfill(date.getMinutes().toString(), 2);
+    }
 
     export default {
-        data() {
+        data: function () {
             return {
                 connected: null,
                 channels: [],
                 user: {},
-                client: new SocketClient('wss://' + window.location.host + '/ws', this),
+                client: new SocketClient(
+                    'wss://' + window.location.host + '/ws',
+                    connected => this.connected = connected
+                ),
                 originalTitle: document.title,
                 isLoading: true
             };
         },
         watch: {
-            connected(newValue) {
+            connected(newValue: boolean) {
                 let prefix = newValue === true ? '' : '[Offline] ';
                 document.title = prefix + this.originalTitle;
-
                 if (newValue === true) {
                     // Update after initiated/recovered connection
                     this.updateChannels();
@@ -64,11 +54,8 @@
                 if (channel === undefined) {
                     return;
                 }
-                let newValue = data.value,
-                    oldValue = channel.value;
-                channel.value = newValue;
+                channel.value = data.value;
                 channel.value_updated = data.timestamp;
-                channel.change = Math.sign(newValue - oldValue);
             });
 
             this.client.on('channel_logged', data => {
@@ -76,7 +63,7 @@
                 if (channel === undefined) {
                     return;
                 }
-                let label = new Date(data.timestamp).toHourMinute();
+                let label = toHourMinute(new Date(data.timestamp));
                 if (label !== channel.items.last()) {
                     channel.items.push([label, data.value]);
                 }
@@ -109,6 +96,7 @@
                     }
                     return channel;
                 }
+
                 this.isLoading = true;
                 ApiClient.get('channels').then(response => {
                     this.isLoading = false;

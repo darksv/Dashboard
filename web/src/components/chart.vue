@@ -5,7 +5,7 @@
 <script>
     import Chart from 'chart.js';
     import tinycolor from 'tinycolor2';
-    import {clampArray} from '../utils.js';
+    import {clampArray} from '../utils.ts';
 
     Chart.defaults.global.defaultFontColor = 'rgba(255, 255, 255, 0.75)';
 
