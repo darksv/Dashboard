@@ -11,9 +11,12 @@
                   v-on:click.prevent="toggleOptions"></span>
             <ul v-if="optionsVisible" class="chart-visible-channels">
                 <li v-for="channel in channels" :key="channel.id" v-if="channel.enabled" class="channel">
-                    <label class="channel-label">
-                        <input type="checkbox" :checked="isVisible(channel.id)" @change="toggleVisibility(channel.id)"
-                               class="channel-selector"/>
+                    <label class="channel-label" @click="toggleVisibility(channel.id)">
+                        <span class="channel-selector" role="checkbox"
+                              :style="{
+                                    backgroundColor: isVisible(channel.id) ? channel.color : 'transparent',
+                                    border: '1px solid ' + channel.color,
+                              }"></span>
                         <span>{{ channel.name || channel.uuid }}</span>
                     </label>
                 </li>
@@ -287,14 +290,23 @@
         .channel {
             cursor: default;
             list-style: none;
+            margin: 0.1em 0;
 
             .channel-label {
                 cursor: inherit;
-                display: block;
+                display: inline-block;
+
+                & > span:last-child {
+                    margin: 1px;
+                }
             }
 
             .channel-selector {
-                margin: 4px;
+                border: 1px solid;
+                width: 18px;
+                height: 12px;
+                display: inline-block;
+                vertical-align: -2px;
             }
         }
     }
