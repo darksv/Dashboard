@@ -1,5 +1,5 @@
 <template>
-    <div class="history-page">
+    <div class="history-page" @blur.native="alert('a')">
         <div class="chart-toolbar">
             <div class="chart-toolbar-fields" v-if="optionsVisible">
                 <input type="date" class="input" v-model="from" v-on:keyup.enter="show" :readonly="isLoading"
@@ -7,7 +7,7 @@
                 —
                 <input type="date" class="input" v-model="to" v-on:keyup.enter="show" :readonly="isLoading" title="End">
             </div>
-            <span class="fa fa-cog chart-toolbar-button" role="button" title="Show options"
+            <span v-if="!optionsVisible" class="fa fa-cog chart-toolbar-button" role="button" title="Show options"
                   v-on:click.prevent="toggleOptions"></span>
             <ul v-if="optionsVisible" class="chart-visible-channels">
                 <li v-for="channel in channels" :key="channel.id" v-if="channel.enabled" class="channel">
@@ -44,6 +44,13 @@
     import Loader from '../components/loader.vue';
     import {client as ApiClient} from '../api-client.ts';
     import {convertShorthandIntoDays, addDaysTo, shortenedDate, isValidDate} from '../date-utils.ts';
+
+    function contains(rect: ClientRect, x: number, y: number): boolean {
+        return x >= rect.left
+            && x <= rect.left + rect.width
+            && y >= rect.top
+            && y <= rect.top + rect.height
+    }
 
     export default {
         props: {
@@ -97,6 +104,12 @@
             }
         },
         created() {
+            document.addEventListener('click', this.focusLostDetector);
+        },
+        destroyed() {
+            document.removeEventListener('click', this.focusLostDetector)
+        },
+        mounted() {
             let query = this.$route.query;
             this.ids = (query.ids || '')
                 .split(',')
@@ -113,6 +126,12 @@
             this.show(true);
         },
         methods: {
+            focusLostDetector(e: MouseEvent) {
+                const clientRect = this.$el.querySelector('.chart-toolbar').getBoundingClientRect();
+                if (!contains(clientRect, e.clientX, e.clientY)) {
+                    this.optionsVisible = false;
+                }
+            },
             update() {
                 let options = {
                     params: {
@@ -251,7 +270,7 @@
     .chart-visible-channels {
         background: #000000;
         user-select: none;
-        margin: 0;
+        margin: 0.5em 0 0 0.5em;
         padding: 0;
         font-size: 0.8em;
 
