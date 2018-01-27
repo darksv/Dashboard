@@ -21,11 +21,13 @@
                     </label>
                 </li>
             </ul>
-            <router-link v-if="optionsVisible" v-for="period in '1d 1w 1m 1y'.split(' ')"
-                         :key="period"
-                         :to="createRouteForPeriod(period)">
-                {{period}}
-            </router-link>
+            <div class="chart-predefined-periods" v-if="optionsVisible">
+                <router-link v-for="period in periods" :key="period"
+                             :to="createRouteFor(period)"
+                             tag="span" class="period">
+                    {{period}}
+                </router-link>
+            </div>
         </div>
         <loader v-if="isLoading"></loader>
         <chart :responsive="true" :sets="sets" :displayLegend="true" v-else-if="anyVisible"></chart>
@@ -37,22 +39,11 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
     import Chart from '../components/chart.vue';
     import Loader from '../components/loader.vue';
     import {client as ApiClient} from '../api-client.ts';
-
-    function isValidDate(str) {
-        return !isNaN(Date.parse(str));
-    }
-
-    Date.prototype.addDays = function (n) {
-        return new Date(this.getTime() + n * 24 * 3600 * 1000);
-    };
-
-    Date.prototype.toShort = function () {
-        return this.toISOString().substr(0, 10);
-    };
+    import {convertShorthandIntoDays, addDaysTo, shortenedDate, isValidDate} from '../date-utils.ts';
 
     export default {
         props: {
@@ -63,12 +54,13 @@
         data() {
             return {
                 ids: [],
-                from: (new Date).addDays(-30).toShort(),
-                to: (new Date).toShort(),
+                from: shortenedDate(addDaysTo(new Date, -30)),
+                to: shortenedDate(new Date),
                 optionsVisible: false,
                 isLoading: true,
                 sets: [],
-                cache: {}
+                cache: {},
+                periods: '1d 1w 1m 3m 6m 1y'.split(' '),
             };
         },
         computed: {
@@ -99,8 +91,8 @@
                 }
 
                 let query = route.query;
-                this.from = new Date(query.from).toShort();
-                this.to = new Date(query.to).toShort();
+                this.from = shortenedDate(new Date(query.from));
+                this.to = shortenedDate(new Date(query.to));
                 this.show(false);
             }
         },
@@ -112,8 +104,8 @@
                 .filter(id => !isNaN(id));
 
             if (isValidDate(query.from) && isValidDate(query.to)) {
-                this.from = new Date(query.from).toShort();
-                this.to = new Date(query.to).toShort();
+                this.from = shortenedDate(new Date(query.from));
+                this.to = shortenedDate(new Date(query.to));
             }
 
             this.periodChanged = true;
@@ -183,7 +175,7 @@
             toggleOptions() {
                 this.optionsVisible = !this.optionsVisible;
                 if (!this.optionsVisible) {
-                    this.show();
+                    this.show(false);
                 }
             },
             isVisible(channelId) {
@@ -197,40 +189,16 @@
                     this.ids.splice(index, 1);
                 }
             },
-            /*
-                Converts shorthand symbols for time span into number of days,
-                eg. 2w = 2 weeks = 2 * 7 days
-             */
-            convertShorthandIntoDays(shorthand) {
-                let periods = {
-                    'd': 1,
-                    'w': 7,
-                    'm': 30,
-                    'y': 365
-                };
-
-                let allowedSymbols = Object.keys(periods).join(''),
-                    regex = new RegExp('^(\\d+)([' + allowedSymbols + '])$'),
-                    match = regex.exec(shorthand);
-                if (match === null) {
-                    return null;
-                }
-
-                let numberOfPeriods = parseInt(match[1]),
-                    periodType = match[2];
-
-                return periods[periodType] * numberOfPeriods;
-            },
-            createRouteForPeriod(period) {
-                let numberOfDays = this.convertShorthandIntoDays(period),
+            createRouteFor(period: string): object {
+                let numberOfDays = convertShorthandIntoDays(period),
                     periodEnd = new Date(),
-                    periodStart = periodEnd.addDays(-numberOfDays);
+                    periodStart = addDaysTo(periodEnd, -numberOfDays);
 
                 return {
                     name: 'history',
                     query: {
-                        from: periodStart.toShort(),
-                        to: periodEnd.toShort(),
+                        from: shortenedDate(periodStart),
+                        to: shortenedDate(periodEnd),
                         ids: this.ids.join(',')
                     }
                 };
@@ -262,7 +230,7 @@
         top: 0;
         right: 0;
         display: block;
-        height: 32px;
+        background: #000000;
 
         .input {
             font-size: 1em;
@@ -308,6 +276,17 @@
                 display: inline-block;
                 vertical-align: -2px;
             }
+        }
+    }
+
+    .chart-predefined-periods {
+        display: flex;
+
+        & > .period {
+            margin: 0.1em;
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
         }
     }
 
